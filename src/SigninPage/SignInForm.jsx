@@ -70,6 +70,10 @@ export default function SignInForm() {
         headers: { "Content-Type": "application/json" },
         // CapacitorHttp expects a JSON object for data, not a string
         data: { idToken, user_id }, 
+
+        webFetchExtra: {
+          credentials: 'include'
+        }
       };
 
       const res = await CapacitorHttp.post(options);
