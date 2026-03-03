@@ -12,7 +12,7 @@ import './style.css'
 
 function MainPage() {
   return (
-    <div className="sib">
+    <div className="sib pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <Header />
       <Hero />
       <Gallery />
@@ -22,7 +22,6 @@ function MainPage() {
       <Leaders />
       <Contact />
       <Footer />
-
       <Fab />
     </div>
   )
