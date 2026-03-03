@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/ios": "^8.1.0",
     "@tailwindcss/vite": "^4.1.13",
     "clsx": "^2.1.1",
     "firebase": "^12.3.0",
@@ -33,6 +35,7 @@
     "yet-another-react-lightbox": "^3.28.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.1.0",
     "@eslint/js": "^9.35.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
