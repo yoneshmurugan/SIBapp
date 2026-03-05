@@ -1,4 +1,6 @@
 import { initializeApp } from "firebase/app";
+// Import the special auth initializers
+import { initializeAuth, browserLocalPersistence } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_APIKEY,
@@ -11,3 +13,8 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
+
+// THIS IS THE MAGIC FIX: Force Capacitor-safe persistence so it doesn't crash!
+export const auth = initializeAuth(app, {
+  persistence: browserLocalPersistence
+});

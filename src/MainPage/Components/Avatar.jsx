@@ -4,6 +4,14 @@ import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import classNames from "../../utils/classname";
 
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase"; 
+import { Preferences } from "@capacitor/preferences";
+
+// --- ADD THIS IMPORT ---
+import { CapacitorCookies } from '@capacitor/core';
+// -----------------------
+
 export function HeaderAvatar({
   src = "../../../public/assets/19.jpg",
   alt = "User avatar",
@@ -30,16 +38,32 @@ export function HeaderAvatar({
   async function onLogout() {
     try {
       setLoading(true);
-      const response = await fetch(logoutUrl, logoutOptions);
-      const data = await response.json();
 
-      if (data.message === "Logged out") {
-        navigate("/");
-      } else {
-        alert(`Logout failed: ${data.message || "Unknown error"}`);
+      // 1. Tell backend to destroy the session
+      await fetch(logoutUrl, logoutOptions).catch(() => console.log("Backend logout ping failed, continuing local wipe..."));
+
+      // 2. Destroy the Native iOS Bearer Token
+      await Preferences.remove({ key: 'sib_session_token' });
+
+      // 3. Destroy the Web Bearer Token
+      window.localStorage.removeItem('sib_session_token');
+
+      // 4. NUKE THE NATIVE APPLE COOKIE JAR (The missing link!)
+      await CapacitorCookies.clearAllCookies();
+
+      // 5. Destroy the Firebase SDK Session
+      try {
+        await signOut(auth);
+      } catch (fbError) {
+        console.warn("Firebase sign out silent error:", fbError);
       }
+
+      // 6. Force navigate to the main page
+      navigate("/");
+
     } catch (error) {
-      alert(`Error occurred: ${error.message}`);
+      console.error(`Logout Error: ${error.message}`);
+      navigate("/");
     } finally {
       setLoading(false);
     }

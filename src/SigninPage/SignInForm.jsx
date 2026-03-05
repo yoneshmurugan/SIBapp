@@ -4,12 +4,10 @@ import PasswordField from "./components/PasswordField";
 import Alert from "./components/Alert";
 import { validateEmail, validatePassword } from "./utils/validators";
 
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from "../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase"; // <-- Import auth directly!
 import { useNavigate } from "react-router-dom";
 
-// 1. Import Capacitor Plugins
-import { CapacitorHttp } from '@capacitor/core';
 import { NativeBiometric } from "@capgo/capacitor-native-biometric";
 import { Preferences } from "@capacitor/preferences";
 
@@ -20,21 +18,18 @@ export default function SignInForm() {
   const [loading, setLoading] = useState(false);
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
 
-  const auth = getAuth(app);
   const navigate = useNavigate();
 
-  // 2. Check if FaceID/TouchID is available on this iPhone when the component loads
   useEffect(() => {
     const checkBiometrics = async () => {
       try {
         const result = await NativeBiometric.isAvailable();
-        // Only show the Face ID button if the device supports it AND they have saved credentials
         const { value: savedCreds } = await Preferences.get({ key: 'sib_credentials' });
         if (result.isAvailable && savedCreds) {
           setIsBiometricAvailable(true);
         }
       } catch (err) {
-        console.log("Biometrics check failed or not supported on this device.", err);
+        console.log("Biometrics check failed.", err);
       }
     };
     checkBiometrics();
@@ -53,51 +48,54 @@ export default function SignInForm() {
     return !emailErr && !passErr;
   };
 
-  // 3. The main authentication logic (used by both manual login and biometric login)
   const authenticateUser = async (email, password) => {
     setLoading(true);
     setGlobalError("");
 
     try {
-      // Firebase Login
+      console.log("🟢 STEP 1: Sending credentials to Firebase...");
+      
+      // FIREBASE IS NOW FIXED AND WILL NOT CRASH HERE
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user_id = userCredential.user.uid;
       const idToken = await userCredential.user.getIdToken(true);
 
-      // Capacitor Native HTTP Request (Bypasses Safari Cookie Blocking)
-      const options = {
-        url: `${import.meta.env.VITE_BACKEND_SERVER}/auth/sessionLogin`,
+      console.log("🟢 STEP 2: Nuke old tokens...");
+      await Preferences.remove({ key: 'sib_session_token' });
+
+      console.log("🟢 STEP 3: Calling Backend /auth/sessionLogin...");
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/sessionLogin`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        // CapacitorHttp expects a JSON object for data, not a string
-        data: { idToken, user_id }, 
+        credentials: "include",
+        body: JSON.stringify({ idToken, user_id }),
+      });
 
-        webFetchExtra: {
-          credentials: 'include'
-        }
-      };
+      const data = await res.json();
+      console.log("🟢 STEP 4: Backend replied with:", data);
 
-      const res = await CapacitorHttp.post(options);
+      if (!res.ok) throw new Error(data.error || "Login failed on backend");
 
-      // CapacitorHttp returns an object with 'status' and 'data', not a fetch Response
-      if (res.status !== 200 && res.status !== 201) {
-        throw new Error(res.data?.error || "Login failed on backend");
+      if (data.sessionToken) {
+        await Preferences.set({
+          key: 'sib_session_token',
+          value: data.sessionToken
+        });
+        console.log("🚨 TRAP 1 (SUCCESS): Token stored safely in Native Preferences!");
       }
 
-      console.log("Login successful", res.data);
-
-      // Save credentials securely so Face ID can use them next time!
       await Preferences.set({
         key: 'sib_credentials',
         value: JSON.stringify({ email, password })
       });
 
-      if (user_id && res.data.isadmin === true) {
+      if (user_id && data.isadmin === true) {
         navigate("/admin");
       } else {
         navigate("/dashboard");
       }
     } catch (err) {
-      console.error(err);
+      console.error("🔴 CRASH DETECTED:", err);
       setGlobalError(err.message || "Invalid email or password");
     } finally {
       setLoading(false);
@@ -110,7 +108,6 @@ export default function SignInForm() {
     await authenticateUser(values.email, values.password);
   };
 
-  // 4. Biometric Login Handler
   const handleBiometricLogin = async () => {
     try {
       await NativeBiometric.verifyIdentity({
@@ -118,25 +115,18 @@ export default function SignInForm() {
         title: "Log In",
       });
 
-      // If Face ID succeeds, grab the saved credentials and log them in
       const { value } = await Preferences.get({ key: 'sib_credentials' });
       if (value) {
         const { email, password } = JSON.parse(value);
         await authenticateUser(email, password);
       }
     } catch (error) {
-      console.log("User canceled Face ID or it failed", error);
-      // Fails silently so they can just type their password normally
+      console.log("User canceled Face ID", error);
     }
   };
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="space-y-3 text-gray-900 dark:text-gray-100"
-      role="form"
-      aria-describedby={globalError ? "form-alert" : undefined}
-    >
+    <form onSubmit={onSubmit} className="space-y-3 text-gray-900 dark:text-gray-100">
       {globalError && <Alert tone="error" message={globalError} id="form-alert" />}
 
       <TextField
@@ -170,34 +160,18 @@ export default function SignInForm() {
         </a>
       </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-4 w-full rounded-md bg-yellow-500 px-4 py-2 text-gray-900 dark:text-gray-900 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60"
-      >
+      <button type="submit" disabled={loading} className="mt-4 w-full rounded-md bg-yellow-500 px-4 py-2 text-gray-900 dark:text-gray-900 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60">
         {loading ? "Please wait…" : "Sign in"}
       </button>
 
-      {/* 5. Biometric Button - Only shows if FaceID is available and credentials are saved */}
       {isBiometricAvailable && (
-        <button
-          type="button"
-          onClick={handleBiometricLogin}
-          disabled={loading}
-          className="mt-2 w-full flex items-center justify-center gap-2 rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60"
-        >
+        <button type="button" onClick={handleBiometricLogin} disabled={loading} className="mt-2 w-full flex items-center justify-center gap-2 rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 21h4a2 2 0 0 0 2-2v-4M9 8h.01M15 8h.01M9 16c1.5-1.5 4.5-1.5 6 0"/>
           </svg>
           Sign in with Face ID
         </button>
       )}
-
-      <div className="relative my-4">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-        </div>
-      </div>
     </form>
   );
 }

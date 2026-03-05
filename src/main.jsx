@@ -35,6 +35,53 @@ import AdminRoute from './hooks/AdminRoute';
 import ChapterDetails from './Admin/Chapterdetails.jsx';
 import PrivacyPanel from "./Settings/components/PrivacyPanel";
 
+// We must import Preferences here to read the native storage!
+import { Preferences } from "@capacitor/preferences";
+
+// --- THE CAPACITOR-SAFE FETCH OVERRIDE ---
+const originalFetch = window.fetch;
+window.fetch = async (input, init) => {
+  let url = typeof input === 'string' ? input : input.url;
+
+  // 1. If it's NOT our backend (like Firebase), let it run untouched!
+  if (!url || !url.includes('api.senguntharinbusiness.in')) {
+    return originalFetch(input, init);
+  }
+
+  const newInit = init ? { ...init } : {};
+  const plainHeaders = {};
+
+  // 2. SAFELY EXTRACT HEADERS INTO A PLAIN OBJECT (Capacitor hates the Headers class)
+  if (newInit.headers) {
+    if (newInit.headers instanceof Headers) {
+      newInit.headers.forEach((value, key) => {
+        plainHeaders[key] = value;
+      });
+    } else if (Array.isArray(newInit.headers)) {
+      newInit.headers.forEach(([key, value]) => {
+        plainHeaders[key] = value;
+      });
+    } else {
+      Object.assign(plainHeaders, newInit.headers);
+    }
+  }
+
+  // 3. GET THE TOKEN FROM NATIVE STORAGE
+  const { value: token } = await Preferences.get({ key: 'sib_session_token' });
+
+  if (token && token !== "undefined" && token !== "null") {
+    plainHeaders['Authorization'] = `Bearer ${token}`;
+  }
+
+  newInit.headers = plainHeaders;
+  newInit.credentials = 'include';
+
+  console.log("🚨 TRAP 2 (SAFE): Sending Headers ->", plainHeaders);
+
+  return originalFetch(url, newInit);
+};
+// -----------------------------------------
+
 const router = createBrowserRouter([
   {
     path: '/sib', element: <ExistingSession />, errorElement: <ErrorDisplay />
