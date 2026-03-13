@@ -12,7 +12,16 @@ import './style.css'
 
 function MainPage() {
   return (
-    <div className="sib pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+    <div 
+      className="sib"
+      style={{
+        // 1. Pushes content down past the Notch AND the Fixed Header
+        paddingTop: 'calc(env(safe-area-inset-top))',
+        marginTop: '-24px',
+        // 2. Protects your footer from the iOS home bar
+        paddingBottom: 'env(safe-area-inset-bottom)'
+      }}
+    >
       <Header />
       <Hero />
       <Gallery />
@@ -27,4 +36,4 @@ function MainPage() {
   )
 }
 
-export default MainPage
+export default MainPage;

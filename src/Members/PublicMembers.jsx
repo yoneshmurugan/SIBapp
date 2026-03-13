@@ -110,7 +110,7 @@ function PublicMembers() {
   return (
     <div className="flex flex-col items-center w-full min-h-screen">
       <Header isMembers={true} />
-      <main className="mt-[80px] w-full max-w-7xl px-3 sm:px-6 md:px-10">
+      <main className="mt-[120px] w-full max-w-7xl px-3 sm:px-6 md:px-10">
         <h1 className="pb-2 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-5">
           Members Directory
         </h1>

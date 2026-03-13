@@ -34,6 +34,7 @@
   min-height: 100vh;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   padding-bottom: 80px;
+  margin-top: 50px;
 }
 
 /* --- STICKY GLASS HEADER --- */

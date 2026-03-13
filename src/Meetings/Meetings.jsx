@@ -136,11 +136,15 @@ function Meetings() {
   }, [mappedData]);
 
   return (
-    <div className="flex flex-col items-center justify-start w-full min-h-screen transition-colors duration-300">
-      <div className="fixed top-[10px] left-0 w-full z-10 bg-transparent">
+    <div className="flex flex-col items-center justify-start w-full min-h-screen transition-colors duration-300 pb-[calc(env(safe-area-inset-bottom)_+_1rem)]">
+      
+      {/* Set to top-0 since Header.jsx now handles the notch padding internally */}
+      <div className="fixed top-0 left-0 w-full z-50">
         <Header />
       </div>
-      <main className="mt-[80px] w-full max-w-7xl px-3 sm:px-6 md:px-10">
+
+      {/* Added the dynamic calc() to push the main content down below the notch + header height */}
+      <main className="mt-[calc(env(safe-area-inset-top)_+_90px)] w-full max-w-7xl px-3 sm:px-6 md:px-10">
         <h1 className="pb-2 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
           Meetings
         </h1>

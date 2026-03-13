@@ -16,12 +16,15 @@ function PresidentPortal() {
   }
 
   return (
-    <div className="min-h-screen w-full  transition-colors duration-300">
-      <div className="fixed top-2 left-0 right-0 z-50  shadow-md">
+    <div className="min-h-screen w-full transition-colors duration-300 pb-[calc(env(safe-area-inset-bottom)_+_1rem)]">
+      
+      {/* Set to top-0 */}
+      <div className="fixed top-0 left-0 right-0 z-50 shadow-md">
         <Header />
       </div>
 
-      <div className="pt-20 w-full px-4 sm:px-6 lg:px-8 py-8">
+      {/* Replaced pt-20 with our dynamic calc() margin */}
+      <div className="mt-[calc(env(safe-area-inset-top)_+_90px)] w-full px-4 sm:px-6 lg:px-8 pb-8">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="w-full">

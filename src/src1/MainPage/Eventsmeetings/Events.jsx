@@ -158,7 +158,7 @@ const EventsMeetingsPage = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* --- Header Section --- */}
-        <div className="mt-20 flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+        <div className="mt-30 flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
               Schedule <span className="text-zinc-500 font-light">& Activities</span>

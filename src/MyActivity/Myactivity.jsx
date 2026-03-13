@@ -177,11 +177,15 @@ function MyActivity() {
   }, [value, startDate, endDate]);
 
   return (
-    <div className="flex flex-col items-center justify-start w-full min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
-      <div className="fixed top-[10px] left-0 w-full z-10 bg-transparent">
+    <div className="flex flex-col items-center justify-start w-full min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300 pb-[calc(env(safe-area-inset-bottom)_+_1rem)]">
+      
+      {/* Header fixed to the absolute top edge */}
+      <div className="fixed top-0 left-0 w-full z-50">
         <Header />
       </div>
-      <main className="w-full max-w-7xl px-3 sm:px-6 md:px-10 text-gray-900 dark:text-gray-100">
+
+      {/* Main content pushed down dynamically below the header + safe area */}
+      <main className="mt-[calc(env(safe-area-inset-top)_+_10px)] w-full max-w-7xl px-3 sm:px-6 md:px-10 text-gray-900 dark:text-gray-100">
         <section className="mb-6 mr-3">
           <Hero
             value={value}

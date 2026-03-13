@@ -1,6 +1,7 @@
 import { Upload } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { CompletionRing } from "./CompletionRing";
+import { Share } from '@capacitor/share'; // Added Capacitor Share import
 
 const ProfileStrip = ({
   name = "Refresh Page",
@@ -44,22 +45,37 @@ const ProfileStrip = ({
       .toUpperCase();
   }
 
+  // Updated handleShare for Capacitor Native support
   const handleShare = async () => {
     const shareData = {
       title: document.title,
       text: shareText,
       url: url,
+      dialogTitle: 'Share Profile' // Native prompt title
     };
+
     try {
-      if (navigator.share) {
+      // 1. Check if Capacitor Share is available (Native iOS/Android)
+      const canShare = await Share.canShare();
+      
+      if (canShare.value) {
+        await Share.share(shareData);
+      } 
+      // 2. Fallback to standard Web API (if running as PWA/Web)
+      else if (navigator.share) {
         await navigator.share(shareData);
-      } else {
+      } 
+      // 3. Final fallback: Copy to clipboard (Desktop browsers)
+      else {
         await navigator.clipboard.writeText(shareData.url);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
     } catch (err) {
-      console.error("Error sharing:", err);
+      // Ignore errors caused by the user closing the share sheet manually
+      if (err.message !== 'Share canceled') {
+         console.error("Error sharing:", err);
+      }
     }
   };
 

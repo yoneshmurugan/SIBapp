@@ -87,11 +87,14 @@ function Members() {
 
   return (
     <div className="flex flex-col items-center justify-start w-full min-h-screen transition-colors duration-300">
-      <div className="fixed top-[10px] left-0 w-full z-10 bg-transparent">
+      
+      {/* Header wrapper fixed directly to the top edge */}
+      <div className="fixed top-0 left-0 w-full z-50">
         <Header />
       </div>
 
-      <main className="mt-[80px] w-full max-w-7xl px-3 sm:px-6 md:px-10">
+      {/* Main content pushed down dynamically based on the safe area + header height */}
+      <main className="mt-[calc(env(safe-area-inset-top)_+_80px)] w-full max-w-7xl px-3 sm:px-6 md:px-10 pb-[calc(env(safe-area-inset-bottom)_+_1rem)]">
         <h1 className="pb-2 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
           Members Directory
         </h1>

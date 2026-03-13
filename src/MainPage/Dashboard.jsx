@@ -20,7 +20,7 @@ function Dashboard() {
       auto-rows-min
     ">
       {/* Header: Full Width */}
-      <div className="col-span-1 md:col-span-12">
+      <div className="col-span-1 md:col-span-12 ">
         <Header />
       </div>
 

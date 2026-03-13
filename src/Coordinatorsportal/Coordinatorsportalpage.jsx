@@ -14,17 +14,20 @@ function Coordinatorsportal() {
   }
 
   return (
-    <div className="min-h-screen w-full transition-colors duration-300">
-      <div className="fixed top-2 left-0 right-0 z-50 shadow-md">
+    <div className="min-h-screen w-full transition-colors duration-300 pb-[calc(env(safe-area-inset-bottom)_+_1rem)]">
+      
+      {/* Set to top-0 */}
+      <div className="fixed top-0 left-0 right-0 z-50 shadow-md">
         <Header />
       </div>
 
-      <div >
-
-
+      {/* Added dynamic margin to clear the header cleanly */}
+      <div className="mt-[calc(env(safe-area-inset-top)_+_90px)] w-full">
         <MemberActivityReport />
         <AttendanceOverview />
-        <div className="pt-24 px-4 pb-8 max-w-7xl mx-auto space-y-6">
+        
+        {/* Changed pt-24 to pt-6 because the mt above now handles the header height */}
+        <div className="pt-6 px-4 pb-8 max-w-7xl mx-auto space-y-6">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-gray-800">Event Gallery</h2>
