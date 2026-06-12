@@ -1,0 +1,28 @@
+workflows:
+  ios-release:
+    name: Sengunthar iOS Build
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: "Codemagic CI CD" # Make sure this matches the exact name you gave the key in Step 1
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.sibapp.app # Change this if your App ID is different
+      node: latest
+    scripts:
+      - name: Install dependencies
+        script: npm install
+      - name: Build Web App
+        script: npm run build
+      - name: Sync Capacitor iOS
+        script: npx cap sync ios
+      - name: Build iOS native app
+        script: |
+          xcode-project build-ipa \
+            --workspace "ios/App/App.xcworkspace" \
+            --scheme "App"
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        submit_to_testflight: true
