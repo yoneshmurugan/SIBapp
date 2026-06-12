@@ -6,11 +6,12 @@ workflows:
       app_store_connect: "Codemagic CI CD" 
     environment:
       groups:
-        - credentials                      # Links the group you just created in the UI
+        - credentials
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.senguntharinbusiness.app 
       node: latest
+      xcode: latest # Ensures the macOS build tools are fully loaded
     scripts:
       - name: Install dependencies
         script: npm install
@@ -28,19 +29,37 @@ workflows:
         script: npm run build
       - name: Sync Capacitor iOS
         script: npx cap sync ios
-      - name: Force CocoaPods Workspace Generation
+        
+      - name: Override Native Bundle ID
         script: |
-          cd ios/App
-          pod install --repo-update
-      - name: Verify Generated iOS Workspace
+          # Ensures Xcode doesn't compile with a default placeholder ID
+          sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = com.senguntharinbusiness.app;/g' ios/App/App.xcodeproj/project.pbxproj
+          
+      - name: Apply Apple Certificates
         script: |
-          echo "=== Current Contents of ios/App ==="
-          ls -la ios/App
+          # Maps the downloaded Apple profiles directly into the generated workspace
+          xcode-project use-profiles
+          
       - name: Build iOS native app
         script: |
+          # Create the missing export options file manually
+          cat <<EOF > export_options.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+          </dict>
+          </plist>
+          EOF
+          
+          # Compile the final App Store IPA using the new file
           xcode-project build-ipa \
             --workspace "ios/App/App.xcworkspace" \
-            --scheme "App"
+            --scheme "App" \
+            --export-options-plist export_options.plist
+            
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
