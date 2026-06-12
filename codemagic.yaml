@@ -7,7 +7,7 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.sibapp.app # Change this if your App ID is different
+        bundle_identifier: com.senguntharinbusiness.app # Change this if your App ID is different
       node: latest
     scripts:
       - name: Install dependencies
