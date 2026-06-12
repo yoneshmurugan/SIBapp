@@ -10,7 +10,11 @@ const config: CapacitorConfig = {
     },
     CapacitorCookies: {
       enabled: true,
-    }
+    },
+    FirebaseMessaging: {
+      // Show push notification banners on iOS even when app is open
+      presentationOptions: ["badge", "sound", "alert"],
+    },
   }
 };
 

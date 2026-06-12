@@ -2,15 +2,25 @@ import UIKit
 import Capacitor
 import FirebaseCore
 import FirebaseMessaging
+import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Firebase initialization
         FirebaseApp.configure()
+
+        // Set delegates for push notification handling
+        UNUserNotificationCenter.current().delegate = self
+        Messaging.messaging().delegate = self
+
+        // THIS IS THE CRITICAL LINE: Tell iOS to contact Apple's APNs servers
+        // Without this, iOS never requests a device token, and push never works
+        application.registerForRemoteNotifications()
+
         return true
     }
 
@@ -49,12 +59,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
 
+    // MARK: - APNs Token Registration
+
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        // Give the raw APNs token to Firebase so it can map FCM token -> APNs token
         Messaging.messaging().apnsToken = deviceToken
         NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("❌ Failed to register for remote notifications: \(error.localizedDescription)")
         NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
+    }
+
+    // MARK: - UNUserNotificationCenterDelegate (show banners even when app is open)
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        // Show the push notification banner, sound, and badge even when the app is in the foreground
+        completionHandler([.banner, .sound, .badge])
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        // User tapped the notification — let Capacitor's plugin handle routing
+        completionHandler()
+    }
+
+    // MARK: - MessagingDelegate (FCM token refresh)
+
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        // Firebase refreshed the FCM token — log it for debugging
+        if let token = fcmToken {
+            print("🔥 FCM Token refreshed: \(token)")
+        }
     }
 }
