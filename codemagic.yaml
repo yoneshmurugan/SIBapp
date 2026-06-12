@@ -41,6 +41,12 @@ workflows:
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
       - name: Sync Capacitor iOS
         script: npx cap sync ios
+      - name: Set Export Compliance
+        script: |
+          # This tells Apple your app does not use custom/non-exempt encryption.
+          # We delete the key first if it exists, then add it to ensure the build never fails.
+          /usr/libexec/PlistBuddy -c "Delete :ITSAppUsesNonExemptEncryption" ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" ios/App/App/Info.plist
         
       - name: Safely Link Firebase to Xcode
         script: |
