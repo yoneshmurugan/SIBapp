@@ -15,7 +15,9 @@ workflows:
     scripts:
       - name: Install dependencies
         script: npm install
-        
+      - name: Patch Contacts Plugin for Capacitor 8
+        script: |
+          sed -i '' 's/7.0.0..<8.0.0/8.0.0..<9.0.0/g' node_modules/@capacitor-community/contacts/Package.swift
       - name: Generate .env file
         script: |
           echo "VITE_APIKEY=${VITE_APIKEY}" >> .env
