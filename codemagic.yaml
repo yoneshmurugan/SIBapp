@@ -3,11 +3,11 @@ workflows:
     name: Sengunthar iOS Build
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: "Codemagic CI CD" # Make sure this matches the exact name you gave the key in Step 1
+      app_store_connect: "Codemagic CI CD" 
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.senguntharinbusiness.app # Change this if your App ID is different
+        bundle_identifier: com.senguntharinbusiness.app 
       node: latest
     scripts:
       - name: Install dependencies
@@ -25,4 +25,5 @@ workflows:
       - build/ios/ipa/*.ipa
     publishing:
       app_store_connect:
+        auth: integration
         submit_to_testflight: true
