@@ -28,7 +28,14 @@ workflows:
         script: npm run build
       - name: Sync Capacitor iOS
         script: npx cap sync ios
-
+      - name: Force CocoaPods Workspace Generation
+        script: |
+          cd ios/App
+          pod install --repo-update
+      - name: Verify Generated iOS Workspace
+        script: |
+          echo "=== Current Contents of ios/App ==="
+          ls -la ios/App
       - name: Build iOS native app
         script: |
           xcode-project build-ipa \
