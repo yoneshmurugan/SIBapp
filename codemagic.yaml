@@ -11,10 +11,11 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.senguntharinbusiness.app 
       node: latest
-      xcode: latest # Ensures the macOS build tools are fully loaded
+      xcode: latest
     scripts:
       - name: Install dependencies
         script: npm install
+        
       - name: Generate .env file
         script: |
           echo "VITE_APIKEY=${VITE_APIKEY}" >> .env
@@ -25,24 +26,30 @@ workflows:
           echo "VITE_APPID=${VITE_APPID}" >> .env
           echo "VITE_MEASUREMENTID=${VITE_MEASUREMENTID}" >> .env
           echo "VITE_BACKEND_SERVER=${VITE_BACKEND_SERVER}" >> .env
+          
       - name: Build Web App
         script: npm run build
+        
       - name: Sync Capacitor iOS
         script: npx cap sync ios
         
+      # --- THE MISSING LINK: Force the workspace generation ---
+      - name: Install CocoaPods (Generates Workspace)
+        script: |
+          cd ios/App
+          pod install --repo-update
+      # --------------------------------------------------------
+          
       - name: Override Native Bundle ID
         script: |
-          # Ensures Xcode doesn't compile with a default placeholder ID
           sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = com.senguntharinbusiness.app;/g' ios/App/App.xcodeproj/project.pbxproj
           
       - name: Apply Apple Certificates
         script: |
-          # Maps the downloaded Apple profiles directly into the generated workspace
           xcode-project use-profiles
           
       - name: Build iOS native app
         script: |
-          # Create the missing export options file manually
           cat <<EOF > export_options.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -54,7 +61,6 @@ workflows:
           </plist>
           EOF
           
-          # Compile the final App Store IPA using the new file
           xcode-project build-ipa \
             --workspace "ios/App/App.xcworkspace" \
             --scheme "App" \
