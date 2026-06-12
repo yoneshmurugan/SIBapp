@@ -5,6 +5,8 @@ workflows:
     integrations:
       app_store_connect: "Codemagic CI CD" 
     environment:
+      groups:
+        - credentials                      # Links the group you just created in the UI
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.senguntharinbusiness.app 
@@ -12,6 +14,16 @@ workflows:
     scripts:
       - name: Install dependencies
         script: npm install
+      - name: Generate .env file
+        script: |
+          echo "VITE_APIKEY=${VITE_APIKEY}" >> .env
+          echo "VITE_AUTHDOMAIN=${VITE_AUTHDOMAIN}" >> .env
+          echo "VITE_PROJECTID=${VITE_PROJECTID}" >> .env
+          echo "VITE_STORAGEBUCKET=${VITE_STORAGEBUCKET}" >> .env
+          echo "VITE_MESSAGINGSENDERID=${VITE_MESSAGINGSENDERID}" >> .env
+          echo "VITE_APPID=${VITE_APPID}" >> .env
+          echo "VITE_MEASUREMENTID=${VITE_MEASUREMENTID}" >> .env
+          echo "VITE_BACKEND_SERVER=${VITE_BACKEND_SERVER}" >> .env
       - name: Build Web App
         script: npm run build
       - name: Sync Capacitor iOS
