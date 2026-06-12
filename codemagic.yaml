@@ -34,6 +34,11 @@ workflows:
           
       - name: Build Web App
         script: npm run build
+      - name: Update iOS Build Number
+        script: |
+          # Use the Codemagic build ID as the new build number.
+          # This guarantees the number is unique and higher every time you build.
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
         
       - name: Sync Capacitor iOS
         script: npx cap sync ios
