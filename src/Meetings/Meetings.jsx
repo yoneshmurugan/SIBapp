@@ -140,7 +140,7 @@ function Meetings() {
       <div className="fixed top-[10px] left-0 w-full z-10 bg-transparent">
         <Header />
       </div>
-      <main className="mt-[80px] w-full max-w-7xl px-3 sm:px-6 md:px-10">
+      <main className="pt-[calc(120px+env(safe-area-inset-top,0px))] w-full max-w-7xl px-3 sm:px-6 md:px-10">
         <div className="mb-6 flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl shadow-lg shadow-amber-500/20">

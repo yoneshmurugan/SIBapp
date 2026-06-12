@@ -202,7 +202,7 @@ function Hero() {
     }, [stats]); 
 
     return (
-        <section id="home" className="hero" style={{ paddingTop: 'calc(80px + env(safe-area-inset-top, 0px))' }}>
+        <section id="home" className="hero" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px))' }}>
             <div className="hero-bg">
                 <div className="hero-particles"></div>
                 <div className="hero-shapes">

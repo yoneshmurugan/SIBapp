@@ -118,17 +118,10 @@ const GooeyNav = ({
     if (activeIndex !== index) {
         setActiveIndex(index);
         updateEffectPosition(liEl);
-        if (filterRef.current) {
-            const particles = filterRef.current.querySelectorAll('.particle');
-            particles.forEach(p => filterRef.current.removeChild(p));
-        }
         if (textRef.current) {
             textRef.current.classList.remove('active');
             void textRef.current.offsetWidth;
             textRef.current.classList.add('active');
-        }
-        if (filterRef.current) {
-            makeParticles(filterRef.current);
         }
     }
 
@@ -198,14 +191,19 @@ const GooeyNav = ({
             display: grid;
             place-items: center;
             z-index: 1;
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        top 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        width 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           }
           .effect.text {
             color: #f8fafc;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, left 0.4s cubic-bezier(0.4, 0, 0.2, 1), top 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 0.85rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            z-index: 2;
           }
           .effect.text.active {
             color: #002349;
@@ -214,105 +212,14 @@ const GooeyNav = ({
             color: #f8fafc;
           }
           .effect.filter {
-            filter: blur(8px) contrast(20);
-            mix-blend-mode: hard-light;
-          }
-          .effect.filter::before {
-            content: "";
-            position: absolute;
-            inset: -40px;
-            z-index: -2;
-            background: transparent;
-          }
-          .effect.filter::after {
-            content: "";
-            position: absolute;
-            inset: 0;
             background: var(--accent);
-            transform: scale(0);
-            opacity: 0;
-            z-index: -1;
             border-radius: 12px;
-            box-shadow: 0 0 15px var(--accent);
+            z-index: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
           }
-          :root.dark .effect.filter::after {
-            background: rgba(255, 255, 255, 0.1);
-          }
-          .effect.active::after {
-            animation: pill 0.3s ease both;
-          }
-          @keyframes pill {
-            to {
-              transform: scale(1);
-              opacity: 1;
-            }
-          }
-          .particle,
-          .point {
-            display: block;
-            opacity: 0;
-            width: 20px;
-            height: 20px;
-            border-radius: 9999px;
-            transform-origin: center;
-          }
-          .particle {
-            --time: 5s;
-            position: absolute;
-            top: calc(50% - 8px);
-            left: calc(50% - 8px);
-            animation: particle calc(var(--time)) ease 1 -350ms;
-          }
-          .point {
-            background: var(--color);
-            opacity: 1;
-            animation: point calc(var(--time)) ease 1 -350ms;
-          }
-          @keyframes particle {
-            0% {
-              transform: rotate(0deg) translate(calc(var(--start-x)), calc(var(--start-y)));
-              opacity: 1;
-              animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
-            }
-            70% {
-              transform: rotate(calc(var(--rotate) * 0.5)) translate(calc(var(--end-x) * 1.2), calc(var(--end-y) * 1.2));
-              opacity: 1;
-              animation-timing-function: ease;
-            }
-            85% {
-              transform: rotate(calc(var(--rotate) * 0.66)) translate(calc(var(--end-x)), calc(var(--end-y)));
-              opacity: 1;
-            }
-            100% {
-              transform: rotate(calc(var(--rotate) * 1.2)) translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5));
-              opacity: 1;
-            }
-          }
-          @keyframes point {
-            0% {
-              transform: scale(0);
-              opacity: 0;
-              animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
-            }
-            25% {
-              transform: scale(calc(var(--scale) * 0.25));
-            }
-            38% {
-              opacity: 1;
-            }
-            65% {
-              transform: scale(var(--scale));
-              opacity: 1;
-              animation-timing-function: ease;
-            }
-            85% {
-              transform: scale(var(--scale));
-              opacity: 1;
-            }
-            100% {
-              transform: scale(0);
-              opacity: 0;
-            }
+          :root.dark .effect.filter {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: none;
           }
           li.active {
             color: #002349;

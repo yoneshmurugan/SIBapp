@@ -172,9 +172,9 @@ export default function SignInForm() {
       />
 
       <div className="flex items-center justify-end w-full">
-        <a href="/reset-password" className="text-sm text-red-600 hover:underline dark:text-red-400">
+        <button type="button" onClick={() => navigate('/reset-password')} className="text-sm text-red-600 hover:underline dark:text-red-400">
           Forgot password?
-        </a>
+        </button>
       </div>
 
       <button type="submit" disabled={loading} className="mt-4 w-full rounded-md bg-yellow-500 px-4 py-2 text-gray-900 dark:text-gray-900 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60 flex flex-col items-center justify-center">

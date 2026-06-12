@@ -160,7 +160,7 @@ function MyActivity() {
         <Header />
       </div>
 
-      <main className="w-full max-w-5xl px-3 sm:px-6 md:px-10 text-gray-900 dark:text-gray-100 mt-20 sm:mt-24 pb-20">
+      <main className="w-full max-w-5xl px-3 sm:px-6 md:px-10 text-gray-900 dark:text-gray-100 pt-[calc(120px+env(safe-area-inset-top,0px))] pb-20">
 
         {/* Type filter + date range (Hero) */}
         <section className="mb-4 w-full">
