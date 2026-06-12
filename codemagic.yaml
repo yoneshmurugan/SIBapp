@@ -15,9 +15,12 @@ workflows:
     scripts:
       - name: Install dependencies
         script: npm install
+        
       - name: Patch Contacts Plugin for Capacitor 8
         script: |
-          sed -i '' 's/7.0.0..<8.0.0/8.0.0..<9.0.0/g' node_modules/@capacitor-community/contacts/Package.swift
+          # Aggressively replaces any instance of version 7 with version 8
+          sed -i '' 's/7.0.0/8.0.0/g' node_modules/@capacitor-community/contacts/Package.swift
+          
       - name: Generate .env file
         script: |
           echo "VITE_APIKEY=${VITE_APIKEY}" >> .env
@@ -48,6 +51,12 @@ workflows:
           ruby link_firebase.rb
           cd ../..
           
+      - name: Force Clean Dependency Cache
+        script: |
+          cd ios/App
+          rm -rf .swiftpm
+          rm -rf Package.resolved
+          
       - name: Install CocoaPods (Generates Workspace)
         script: |
           cd ios/App
@@ -55,21 +64,35 @@ workflows:
           
       - name: Apply Apple Certificates
         script: xcode-project use-profiles
+          
       - name: Build iOS native app
         script: |
-          # 1. Clean the build folder to ensure a fresh start
+          # 1. Generate the missing Export Options file!
+          cat <<EOF > export_options.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+          </dict>
+          </plist>
+          EOF
+          
+          # 2. Clean the build folder to ensure a fresh start
           xcodebuild clean -workspace ios/App/App.xcworkspace -scheme App
 
-          # 2. Archive the app (This creates the .xcarchive)
+          # 3. Archive the app (This creates the .xcarchive)
           xcodebuild archive -workspace ios/App/App.xcworkspace \
                              -scheme App \
                              -archivePath build/App.xcarchive \
                              -destination 'generic/platform=iOS'
 
-          # 3. Create the IPA from the archive
+          # 4. Create the IPA from the archive
           xcodebuild -exportArchive -archivePath build/App.xcarchive \
                      -exportPath build/ios/ipa \
-                     -exportOptionsPlist export_options.plist            
+                     -exportOptionsPlist export_options.plist
+            
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
