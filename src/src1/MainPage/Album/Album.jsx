@@ -37,7 +37,7 @@ const Lightbox = ({ isOpen, image, onClose, onNext, onPrev, hasNext, hasPrev, m2
   return (
     <div className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm animate-in fade-in duration-200 flex flex-col">
       {/* Top Bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 z-50">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 z-50 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
         <button onClick={onClose} className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors">
           <X size={22} />
         </button>
@@ -304,7 +304,7 @@ const Album = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-neutral-100 font-sans selection:bg-emerald-500/30 transition-colors duration-200 pb-20">
       
       {/* HEADER */}
-      <header className="border-b border-gray-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md sticky top-0 z-40">
+      <header className="border-b border-gray-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md sticky top-0 z-40 pt-[env(safe-area-inset-top,0px)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {/* Back Button */}

@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, initializeAuth, indexedDBLocalPersistence } from "firebase/auth";
+import { Capacitor } from "@capacitor/core";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_APIKEY,
@@ -12,4 +13,20 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+// Fix for Firebase Auth hanging on iOS Capacitor
+let authInstance;
+if (Capacitor.isNativePlatform()) {
+  try {
+    authInstance = initializeAuth(app, {
+      persistence: indexedDBLocalPersistence
+    });
+  } catch (err) {
+    // If initializeAuth fails (e.g. called twice during fast refresh), fallback to getAuth
+    authInstance = getAuth(app);
+  }
+} else {
+  authInstance = getAuth(app);
+}
+
+export const auth = authInstance;

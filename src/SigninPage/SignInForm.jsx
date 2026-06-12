@@ -17,6 +17,7 @@ export default function SignInForm() {
   const [globalError, setGlobalError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
+  const [debugStatus, setDebugStatus] = useState(""); // Track exact step for debugging
 
   const navigate = useNavigate();
 
@@ -51,32 +52,45 @@ export default function SignInForm() {
   const authenticateUser = async (email, password) => {
     setLoading(true);
     setGlobalError("");
+    setDebugStatus("Starting authentication...");
 
     try {
       console.log("🟢 STEP 1: Sending credentials to Firebase...");
+      setDebugStatus("Authenticating with Firebase...");
       
-      // FIREBASE IS NOW FIXED AND WILL NOT CRASH HERE
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // FIREBASE IS NOW FIXED AND WILL NOT CRASH HERE, but we add a timeout just in case it hangs
+      const authPromise = signInWithEmailAndPassword(auth, email, password);
+      const timeoutPromise1 = new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT: Firebase Auth took more than 15 seconds. Please check internet or rebuild app.")), 15000));
+      
+      const userCredential = await Promise.race([authPromise, timeoutPromise1]);
       const user_id = userCredential.user.uid;
       const idToken = await userCredential.user.getIdToken(true);
 
       console.log("🟢 STEP 2: Nuke old tokens...");
+      setDebugStatus("Clearing old native session data...");
       await Preferences.remove({ key: 'sib_session_token' });
 
       console.log("🟢 STEP 3: Calling Backend /auth/sessionLogin...");
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/sessionLogin`, {
+      setDebugStatus("Contacting SIB Backend Server...");
+      
+      const fetchPromise = fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/sessionLogin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ idToken, user_id }),
       });
+      const timeoutPromise2 = new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT: Backend server did not respond within 15 seconds. Ensure API is reachable.")), 15000));
+      
+      const res = await Promise.race([fetchPromise, timeoutPromise2]);
 
+      setDebugStatus("Processing server response...");
       const data = await res.json();
       console.log("🟢 STEP 4: Backend replied with:", data);
 
-      if (!res.ok) throw new Error(data.error || "Login failed on backend");
+      if (!res.ok) throw new Error(data.error || `Login failed on backend with status: ${res.status}`);
 
       if (data.sessionToken) {
+        setDebugStatus("Saving secure native session...");
         await Preferences.set({
           key: 'sib_session_token',
           value: data.sessionToken
@@ -89,6 +103,7 @@ export default function SignInForm() {
         value: JSON.stringify({ email, password })
       });
 
+      setDebugStatus("Login Successful! Redirecting...");
       if (user_id && data.isadmin === true) {
         navigate("/admin");
       } else {
@@ -96,9 +111,11 @@ export default function SignInForm() {
       }
     } catch (err) {
       console.error("🔴 CRASH DETECTED:", err);
-      setGlobalError(err.message || "Invalid email or password");
+      // Capture the exact step where it failed
+      setGlobalError(`[DEBUG: ${debugStatus}] Error: ${err.message || "Invalid email or password"}`);
     } finally {
       setLoading(false);
+      setDebugStatus("");
     }
   };
 
@@ -160,8 +177,11 @@ export default function SignInForm() {
         </a>
       </div>
 
-      <button type="submit" disabled={loading} className="mt-4 w-full rounded-md bg-yellow-500 px-4 py-2 text-gray-900 dark:text-gray-900 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60">
-        {loading ? "Please wait…" : "Sign in"}
+      <button type="submit" disabled={loading} className="mt-4 w-full rounded-md bg-yellow-500 px-4 py-2 text-gray-900 dark:text-gray-900 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60 flex flex-col items-center justify-center">
+        <span className="font-semibold">{loading ? "Please wait…" : "Sign in"}</span>
+        {loading && debugStatus && (
+          <span className="text-[10px] mt-0.5 opacity-70 animate-pulse">{debugStatus}</span>
+        )}
       </button>
 
       {isBiometricAvailable && (

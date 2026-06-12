@@ -8,6 +8,12 @@
     <string>This app requires access to your contacts to help you invite colleagues or share business information with your network.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>This app requires access to your photo library to allow you to upload profile pictures or business documents.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>This app requires camera access to take profile pictures and scan documents.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>This app requires access to save images to your photo library.</string>
+    <key>NSFaceIDUsageDescription</key>
+    <string>This app requires Face ID to securely log you in without a password.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
