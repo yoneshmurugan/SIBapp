@@ -1,6 +1,6 @@
 {
-	"appId": "com.sib.app",
-	"appName": "SIB",
+	"appId": "com.senguntharinbusiness.app",
+	"appName": "SIBapp",
 	"webDir": "dist",
 	"plugins": {
 		"CapacitorHttp": {

@@ -33,14 +33,26 @@ workflows:
       - name: Sync Capacitor iOS
         script: npx cap sync ios
         
+      - name: Safely Link Firebase to Xcode
+        script: |
+          cd ios/App
+          cat <<EOF > link_firebase.rb
+          require 'xcodeproj'
+          project = Xcodeproj::Project.open('App.xcodeproj')
+          file_ref = project.new_file('App/GoogleService-Info.plist')
+          project.targets.first.add_resources([file_ref])
+          project.save
+          EOF
+          ruby link_firebase.rb
+          cd ../..
+          
       - name: Install CocoaPods (Generates Workspace)
         script: |
           cd ios/App
           pod install --repo-update
           
       - name: Apply Apple Certificates
-        script: |
-          xcode-project use-profiles
+        script: xcode-project use-profiles
           
       - name: Build iOS native app
         script: |
