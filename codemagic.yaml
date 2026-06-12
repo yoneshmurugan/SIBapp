@@ -33,16 +33,10 @@ workflows:
       - name: Sync Capacitor iOS
         script: npx cap sync ios
         
-      # --- THE MISSING LINK: Force the workspace generation ---
       - name: Install CocoaPods (Generates Workspace)
         script: |
           cd ios/App
           pod install --repo-update
-      # --------------------------------------------------------
-          
-      - name: Override Native Bundle ID
-        script: |
-          sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = com.senguntharinbusiness.app;/g' ios/App/App.xcodeproj/project.pbxproj
           
       - name: Apply Apple Certificates
         script: |
