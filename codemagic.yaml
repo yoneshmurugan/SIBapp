@@ -28,6 +28,10 @@ workflows:
         script: npm run build
       - name: Sync Capacitor iOS
         script: npx cap sync ios
+      - name: Install CocoaPods (Generates Workspace)
+        script: |
+          cd ios/App
+          pod install --repo-update
       - name: Build iOS native app
         script: |
           xcode-project build-ipa \
