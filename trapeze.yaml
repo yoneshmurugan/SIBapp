@@ -1,0 +1,11 @@
+platforms:
+  ios:
+    targets:
+      App:
+        entitlements:
+          - aps-environment: production
+        plist:
+          replace: false
+          entries:
+            - UIBackgroundModes:
+              - remote-notification

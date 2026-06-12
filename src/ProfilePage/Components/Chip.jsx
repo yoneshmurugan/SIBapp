@@ -88,7 +88,7 @@ const Chip = ({
   return (
     <span
       ref={wrapperRef}
-      className="relative inline-flex items-center rounded-full border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-700 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-gray-200 shadow-sm"
+      className="relative inline-flex items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-[11px] font-bold text-gray-700 dark:text-gray-200 shadow-sm transition-colors"
     >
       {editable ? (
         <>
@@ -101,16 +101,16 @@ const Chip = ({
               setShowDropdown(true);
               onChange && onChange(e.target.value);
             }}
-            className="bg-transparent w-full focus:outline-none"
+            className="bg-transparent w-full focus:outline-none placeholder-gray-400"
             autoComplete="off"
           />
           {isvertical && showDropdown && (
-            <div className="absolute z-20 top-full left-0 w-full bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded mt-0.5 shadow-xl max-h-40 overflow-auto">
+            <div className="absolute z-20 top-full left-0 w-64 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl mt-1 shadow-lg max-h-40 overflow-auto custom-scrollbar">
               {filteredOptions.length > 0 ? (
                 filteredOptions.map((val) => (
                   <div
                     key={val}
-                    className="cursor-pointer px-2 py-1 hover:bg-slate-100 dark:hover:bg-gray-700 text-sm"
+                    className="cursor-pointer px-3 py-2 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-[11px] font-bold text-gray-700 dark:text-gray-300 transition-colors"
                     onMouseDown={e => {
                       e.preventDefault();
                       handleSelect(val);
@@ -120,7 +120,7 @@ const Chip = ({
                   </div>
                 ))
               ) : (
-                <div className="px-2 py-1 text-sm text-gray-500">
+                <div className="px-3 py-2 text-[11px] font-bold text-gray-400">
                   No results found
                 </div>
               )}
@@ -133,7 +133,7 @@ const Chip = ({
       {editable && onDelete && (
         <button
           onClick={onDelete}
-          className="ml-1 text-red-500 hover:text-red-700 font-bold"
+          className="ml-2 text-red-400 hover:text-red-600 transition-colors bg-red-50 dark:bg-red-900/20 rounded-full w-4 h-4 flex items-center justify-center leading-none"
         >
           ×
         </button>

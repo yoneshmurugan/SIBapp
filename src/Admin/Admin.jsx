@@ -31,10 +31,27 @@ export default function Admin() {
   async function onLogout() {
     try {
       setLoading(true);
+
+      const fcmToken = localStorage.getItem('fcmToken');
+      if (fcmToken) {
+        try {
+          await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/remove-fcm-token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ fcmToken })
+          });
+        } catch (e) {
+          console.error('Failed to remove fcm token', e);
+        }
+      }
+
       const response = await fetch(logoutUrl, logoutOptions);
       const data = await response.json();
 
       if (data.message === "Logged out") {
+        localStorage.clear();
+        sessionStorage.clear();
         navigate("/");
       } else {
         alert(`Logout failed: ${data.message || "Unknown error"}`);

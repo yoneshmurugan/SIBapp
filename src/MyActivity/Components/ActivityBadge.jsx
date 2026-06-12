@@ -50,6 +50,7 @@ const colorText800 = {
   fuchsia: "text-fuchsia-800 dark:text-fuchsia-400",
   pink: "text-pink-800 dark:text-pink-400",
   rose: "text-rose-800 dark:text-rose-400",
+  gray: "text-gray-800 dark:text-gray-400",
 };
 
 const colorBg300Half = {
@@ -70,6 +71,7 @@ const colorBg300Half = {
   fuchsia: "bg-fuchsia-300/50 dark:bg-fuchsia-700/30",
   pink: "bg-pink-300/50 dark:bg-pink-700/30",
   rose: "bg-rose-300/50 dark:bg-rose-700/30",
+  gray: "bg-gray-300/50 dark:bg-gray-700/30",
 };
 
 function ActivityBadge({
@@ -84,16 +86,18 @@ function ActivityBadge({
     M2M: ["pink", "pink"],
     TYB: ["green", "green"],
     REFERRAL: ["orange", "orange"],
-    Approved : ["green", "green"] ,
-    Completed : ['blue' , 'blue'] ,
+    Approved : ["green", "green"],
+    Confirmed : ["blue", "blue"],
+    Pending : ["amber", "amber"],
+    Completed : ["blue" , "blue"],
     Present : ["green", "green"],
-    Absent : [ 'red' , 'red']
+    Absent : ["red", "red"]
   }
-  const colors = contentType[content] || ['gray', 'gray'];
+  const colors = contentType[content] || ["gray", "gray"];
   return (
     <button
       className={clsx(
-        "w-[120px] text-nowrap text-center mx-2 overflow-x-hidden rounded-lg p-1 mb-1 border-amber-500 transition-colors duration-300 dark:text-amber-50",
+        "px-2.5 py-1 text-[10px] sm:text-[11px] rounded-full transition-colors duration-300",
         colorText800[colors[1]],
         colorBg300Half[colors[0]],
         fontMap[font],

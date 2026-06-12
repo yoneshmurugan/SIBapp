@@ -97,23 +97,23 @@ const MyBioCard = ({
           {response && !loading && !error && <div className="text-green-600 font-semibold">{response}</div>}
         </div>
       )}
-      <section className="w-full rounded-2xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 shadow-sm">
-        <div className="flex items-start justify-between">
-          <h2 className="text-2xl font-semibold text-slate-900 dark:text-gray-100 p-2 mx-2">My Bio</h2>
+      <section className="w-full rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-black text-gray-900 dark:text-white">My Bio</h2>
           {isEditable && (
             <button
               type="button"
               onClick={handleEditToggle}
               disabled={loading}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-sm font-medium text-amber-600 dark:text-amber-400 shadow-sm hover:bg-amber-50 dark:hover:bg-amber-500/20 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 px-4 py-1.5 text-[11px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 active:scale-95 transition-all"
             >
-              {isEditing ? <Save size={15} /> : <PencilLine size={15} />}
+              {isEditing ? <Save size={13} /> : <PencilLine size={13} />}
               {isEditing ? "Save" : "Edit"}
             </button>
           )}
         </div>
 
-        <div className="p-2 space-y-2">
+        <div className="space-y-3">
           {bioData.map((section, index) => (
             <BioSection
               key={section.title}

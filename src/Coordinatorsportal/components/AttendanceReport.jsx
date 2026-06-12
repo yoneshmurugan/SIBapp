@@ -1,27 +1,22 @@
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { HiX } from 'react-icons/hi';
+import { ArrowLeft, Users, Calendar, Search, Download, ChevronDown, ChevronUp, CheckCircle, XCircle, Bell, Phone, AlertTriangle, Send } from 'lucide-react';
 
-const TABLE_COLUMNS = [
-  { key: 'name', label: '↑↓ MEMBER NAME', sortable: true, width: 'flex-1 min-w-[150px]' },
-  { key: 'attendance', label: '↑↓ ATTENDANCE %', sortable: true, width: 'w-32' },
-  { key: 'presentCount', label: '↑↓ PRESENT', sortable: true, width: 'w-20' },
-  { key: 'totalMeetings', label: '↑↓ TOTAL MEETINGS', sortable: true, width: 'w-28' },
-  { key: 'lastPresent', label: '↑↓ LAST PRESENT DATE', sortable: true, width: 'w-32' },
-  { key: 'contact', label: 'CONTACT', sortable: false, width: 'w-40' },
-  { key: 'actions', label: 'ACTIONS', sortable: false, width: 'w-32' },
-];
-
-const AttendanceOverview = () => {
-  const [members, setMembers] = useState([]);
-  const [sortConfig, setSortConfig] = useState({ key: 'attendance', direction: 'desc' });
+const AttendanceOverview = ({ onBack }) => {
+  const [rawData, setRawData] = useState([]);
+  const [activeTab, setActiveTab] = useState('members'); // 'members', 'meetings', or 'alerts'
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [modalData, setModalData] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Meetings View State
+  const [expandedMeetingId, setExpandedMeetingId] = useState(null);
+  const [meetingSearchTerm, setMeetingSearchTerm] = useState('');
+
+  // Alerts View State
+  const [selectedAlertRows, setSelectedAlertRows] = useState(new Set());
+  const [isAlerting, setIsAlerting] = useState(false);
 
   useEffect(() => {
     async function fetchAttendance() {
@@ -32,9 +27,9 @@ const AttendanceOverview = () => {
         });
         if (!res.ok) throw new Error('Failed to fetch attendance');
         const data = await res.json();
-        processAttendanceData(data);
+        setRawData(data);
       } catch (err) {
-        console.log(err);
+        console.error(err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -43,9 +38,10 @@ const AttendanceOverview = () => {
     fetchAttendance();
   }, []);
 
-  function processAttendanceData(data) {
+  // Process for Members View
+  const processedMembers = useMemo(() => {
     const userMap = {};
-    data.forEach(record => {
+    rawData.forEach(record => {
       const userId = record?.user?._id || "unknown";
       if (!userMap[userId]) {
         userMap[userId] = {
@@ -66,356 +62,464 @@ const AttendanceOverview = () => {
         }
       }
     });
-    const processedMembers = Object.values(userMap).map(user => ({
+
+    return Object.values(userMap).map(user => ({
       ...user,
       attendance: user.totalMeetings > 0 ? Math.round((user.presentCount / user.totalMeetings) * 100) : 0,
       lastPresent: user.lastPresentDate
         ? new Date(user.lastPresentDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
         : 'N/A'
-    }));
-    setMembers(processedMembers);
-  }
-
-  const filteredAndSortedData = useMemo(() => {
-    let result = members.filter(
+    })).filter(
       row =>
         (row.name && row.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (row.contact && row.contact.toString().includes(searchTerm))
-    );
-    result.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
-      let comparison = 0;
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        comparison = aValue.toLowerCase().localeCompare(bValue.toLowerCase());
-      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-        comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      } else {
-        comparison = 0;
+    ).sort((a, b) => b.attendance - a.attendance);
+  }, [rawData, searchTerm]);
+
+  // Process for Meetings View
+  const processedMeetings = useMemo(() => {
+    const meetingMap = {};
+    rawData.forEach(record => {
+      const meetingId = record?.meeting?._id || record?.date || "unknown_meeting";
+      if (!meetingMap[meetingId]) {
+        meetingMap[meetingId] = {
+          id: meetingId,
+          title: record?.meeting?.title || 'Unknown Meeting',
+          date: record?.date ? new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A',
+          timestamp: record?.date ? new Date(record.date).getTime() : 0,
+          present: [],
+          absent: []
+        };
       }
-      return sortConfig.direction === 'asc' ? comparison : -comparison;
+      
+      const userName = record?.user?.username || 'Unknown';
+      if (record?.attendance_status === 'present') {
+        meetingMap[meetingId].present.push(userName);
+      } else {
+        meetingMap[meetingId].absent.push(userName);
+      }
     });
-    return result;
-  }, [members, searchTerm, sortConfig]);
 
-  const paginatedData = useMemo(() => {
-    const startIdx = (currentPage - 1) * itemsPerPage;
-    return filteredAndSortedData.slice(startIdx, startIdx + itemsPerPage);
-  }, [filteredAndSortedData, currentPage, itemsPerPage]);
+    return Object.values(meetingMap)
+      .filter(m => m.title.toLowerCase().includes(searchTerm.toLowerCase()) || m.date.includes(searchTerm))
+      .sort((a, b) => b.timestamp - a.timestamp); // Sort by newest first
+  }, [rawData, searchTerm]);
 
-  const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
+  // Process for Alerts View (< 75% attendance)
+  const lowAttendanceMembers = useMemo(() => {
+    return processedMembers
+      .filter(m => m.attendance < 75)
+      .sort((a, b) => a.attendance - b.attendance); // Lowest attendance first
+  }, [processedMembers]);
 
-  const averageAttendance = members.length > 0
-    ? Math.round(members.reduce((a, b) => a + b.attendance, 0) / members.length)
+  const averageAttendance = processedMembers.length > 0
+    ? Math.round(processedMembers.reduce((a, b) => a + b.attendance, 0) / processedMembers.length)
     : 0;
 
-  const handleSort = columnKey => {
-    setSortConfig(prev => ({
-      key: columnKey,
-      direction: prev.key === columnKey && prev.direction === 'asc' ? 'desc' : 'asc'
-    }));
-    setCurrentPage(1);
-  };
-
-  const handleViewHistory = async userId => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/meeting/attendance/getattendanceofuser/${userId}`, {
-        credentials: 'include'
-      });
-      if (!res.ok) throw new Error('Failed to fetch user attendance');
-      const data = await res.json();
-      setModalData(data);
-      setShowModal(true);
-    } catch (err) {
-        console.log(err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleExport = () => {
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      const csv = [
-        ['MEMBER NAME', 'ATTENDANCE %', 'PRESENT', 'TOTAL MEETINGS', 'LAST PRESENT DATE', 'CONTACT'].join(','),
-        ...filteredAndSortedData.map(row =>
-          [
-            row.name ?? '',
-            row.attendance ?? '',
-            row.presentCount ?? '',
-            row.totalMeetings ?? '',
-            row.lastPresent ?? '',
-            row.contact ?? ''
-          ]
-            .map(v => `"${v}"`)
-            .join(',')
-        )
-      ].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `attendance-overview-${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setSuccess('Attendance data exported successfully');
-      setTimeout(() => setSuccess(null), 2000);
-    } catch (err) {
-      setError('Failed to export data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getAttendanceColor = percentage => {
-    if (percentage >= 75) return 'text-green-600 bg-green-50';
-    if (percentage >= 60) return 'text-orange-600 bg-orange-50';
-    return 'text-red-600 bg-red-50';
+    if (percentage >= 75) return 'text-emerald-600 bg-emerald-50';
+    if (percentage >= 60) return 'text-amber-600 bg-amber-50';
+    return 'text-rose-600 bg-rose-50';
   };
 
-  if (loading && members.length === 0) return <div className="w-full min-h-screen flex items-center justify-center">Loading...</div>;
-  if (error && members.length === 0) return <div className="w-full min-h-screen flex items-center justify-center text-red-600">{error || 'An error occurred.'}</div>;
+  const handleSelectAllAlerts = (checked) => {
+    if (checked) {
+      setSelectedAlertRows(new Set(lowAttendanceMembers.map(m => m.id)));
+    } else {
+      setSelectedAlertRows(new Set());
+    }
+  };
+
+  const handleSelectAlertRow = (id) => {
+    const newSelected = new Set(selectedAlertRows);
+    if (newSelected.has(id)) newSelected.delete(id);
+    else newSelected.add(id);
+    setSelectedAlertRows(newSelected);
+  };
+
+  const handleSendAlert = async (ids = null) => {
+    setIsAlerting(true);
+    try {
+      const targetIds = ids || Array.from(selectedAlertRows);
+      const targetMembers = lowAttendanceMembers.filter(m => targetIds.includes(m.id));
+      for (const member of targetMembers) {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/notification/createnotificationwithoutsender`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            receiverList: [member.id],
+            header: `⚠️ Action Required: Low Attendance Alert`,
+            content: `Hi ${member.name}, we've noticed your attendance is currently at ${member.attendance}%.\n\nYour presence is vital to the chapter's success! Please make sure to attend upcoming meetings to stay active and avoid any penalties. We hope to see you soon!`
+          })
+        });
+        if (!res.ok) throw new Error(`Failed to send alert to ${member.name}`);
+      }
+      
+      setSuccess(`Alert sent to ${targetMembers.length} member(s) successfully.`);
+      setTimeout(() => setSuccess(null), 3000);
+      setSelectedAlertRows(new Set());
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setIsAlerting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen space-y-4 bg-gray-50/50 dark:bg-gray-950">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-gray-500 font-bold text-xs uppercase tracking-widest animate-pulse">Loading Records...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full min-h-screen p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">Attendance Overview</h1>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track attendance details for all members</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold uppercase mb-1">Total Members</p>
-            <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{members.length}</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold uppercase mb-1">Average Attendance</p>
-            <p className="text-3xl font-bold text-green-600 dark:text-green-400">{averageAttendance}%</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold uppercase mb-1">High Attendance (75%+)</p>
-            <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-              {members.filter(m => m.attendance >= 75).length}
-            </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold uppercase mb-1">Low Attendance (&lt;75%)</p>
-            <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-              {members.filter(m => m.attendance < 75).length}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 mb-6 border border-gray-200 dark:border-gray-700">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Search Member or Phone
-              </label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Type member name or phone number..."
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 items-end">
-              <button
-                onClick={handleExport}
-                disabled={loading}
-                className="flex-1 max-h-10 px-6 py-3 rounded-lg font-semibold text-sm bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-gray-300 dark:border-gray-600"
-              >
-                Export Data
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {success && (
-          <div className="mb-4 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
-            <p className="text-sm text-green-700 dark:text-green-200">{success}</p>
-          </div>
-        )}
-
-        <p className="text-gray-900 dark:text-gray-100 text-md mb-2">
-          <span className="font-bold">Note*: </span>Fields with (↑↓) can be sorted in ascending or descending order.
-        </p>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-auto max-h-[600px]">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-900 sticky top-0 dark:bg-black border-b border-white dark:border-gray-700">
-                  {TABLE_COLUMNS.map(col => (
-                    <th
-                      key={col.key}
-                      onClick={() => col.sortable && handleSort(col.key)}
-                      className={`px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wide ${col.width} ${col.sortable ? 'cursor-pointer hover:bg-gray-800' : ''
-                        } transition-colors`}
-                    >
-                      {col.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedData.length > 0 ? (
-                  paginatedData.map((row, idx) => (
-                    <tr
-                      key={row.id}
-                      className={`border-b border-gray-200 dark:border-gray-700 ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'
-                        } hover:bg-gray-100 dark:hover:bg-gray-900/50 transition-colors`}
-                    >
-                      <td className="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-50">{row.name}</td>
-                      <td className="px-4 py-4 text-sm font-bold">
-                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${getAttendanceColor(row.attendance)}`}>
-                          {row.attendance}%
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-50 font-semibold">{row.presentCount}</td>
-                      <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-50 font-semibold">{row.totalMeetings}</td>
-                      <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-50">{row.lastPresent}</td>
-                      <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-50 font-mono">{row.contact}</td>
-                      <td className="px-4 py-4">
-                        <button
-                          onClick={() => handleViewHistory(row.id)}
-                          disabled={loading}
-                          className="px-4 py-2 rounded text-xs font-semibold bg-amber-300 hover:bg-amber-200 text-black disabled:opacity-50 transition-colors"
-                        >
-                          View Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={TABLE_COLUMNS.length} className="px-4 py-8 text-center text-gray-600 dark:text-gray-400 text-sm">
-                      No members found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Showing <span className="font-semibold">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
-            <span className="font-semibold">{Math.min(currentPage * itemsPerPage, filteredAndSortedData.length)}</span> of{' '}
-            <span className="font-semibold">{filteredAndSortedData.length}</span> results
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 items-center w-full sm:w-auto">
-            <select
-              value={itemsPerPage}
-              onChange={e => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500"
+    <div className="w-full pb-28 pt-6 px-3 max-w-lg mx-auto bg-gray-50/50 dark:bg-gray-950 min-h-screen relative">
+      {/* Top Navigation */}
+      <div className="flex items-center gap-3 mb-6 bg-white dark:bg-gray-900 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+        {onBack && (
+            <button 
+                onClick={onBack}
+                className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center active:scale-95 transition-transform"
             >
-              {[5, 10, 25, 50].map(option => (
-                <option key={option} value={option}>
-                  {option} per page
-                </option>
-              ))}
-            </select>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                ← Previous
-              </button>
-              <div className="flex gap-1 items-center">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) pageNum = i + 1;
-                  else if (currentPage <= 3) pageNum = i + 1;
-                  else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-                  else pageNum = currentPage - 2 + i;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-2 rounded text-sm font-medium transition-colors duration-200 ${currentPage === pageNum
-                          ? 'bg-red-500 text-white'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Next →
-              </button>
-            </div>
-          </div>
+                <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+            </button>
+        )}
+        <div>
+            <h1 className="text-lg font-black text-gray-900 dark:text-white leading-tight">
+                Attendance Overview
+            </h1>
+            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Analytics & History</p>
         </div>
       </div>
 
-      {showModal && Array.isArray(modalData) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 bg-opacity-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Attendance Details</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-50">
-                <HiX size={24} />
-              </button>
-            </div>
-            <div className="p-6 space-y-3">
-              {modalData.length > 0 ? (
-                modalData.map((record, idx) => (
-                  <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">Meeting: {record?.meeting?.title ?? 'N/A'}</p>
-                        <p className="text-sm text-gray-900 dark:text-gray-50">Date: {record?.date ? new Date(record.date).toLocaleDateString() : 'N/A'}</p>
-                        <p className="text-sm text-gray-900 dark:text-gray-50">Location: {record?.meeting?.location ?? 'N/A'}</p>
-                      </div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${record?.attendance_status === 'present'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                          }`}
-                      >
-                        {record?.attendance_status === 'present' ? 'Present' : 'Absent'}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center text-gray-600 dark:text-gray-400">No attendance records found.</div>
-              )}
-            </div>
-            <div className="flex gap-2 justify-end p-6 border-t border-gray-200 dark:border-gray-700">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-50 rounded-lg font-semibold hover:bg-gray-400 dark:hover:bg-gray-600 transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+      {error && (
+        <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2">
+          <XCircle className="w-4 h-4 text-rose-500 flex-shrink-0" />
+          <p className="text-xs font-bold text-rose-700">{error}</p>
         </div>
       )}
+      
+      {success && (
+        <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+          <p className="text-xs font-bold text-emerald-700">{success}</p>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="flex bg-white dark:bg-gray-900 p-1.5 rounded-2xl mb-4 shadow-sm border border-gray-100 dark:border-gray-800">
+        <button
+          onClick={() => setActiveTab('members')}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all ${
+            activeTab === 'members' 
+              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm' 
+              : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span className="text-[9px] font-black uppercase tracking-wider">Members</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('meetings')}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all ${
+            activeTab === 'meetings' 
+              ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 shadow-sm' 
+              : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          <span className="text-[9px] font-black uppercase tracking-wider">Meetings</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('alerts')}
+          className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all ${
+            activeTab === 'alerts' 
+              ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 shadow-sm' 
+              : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+          }`}
+        >
+          <div className="relative">
+             <Bell className="w-4 h-4" />
+             {lowAttendanceMembers.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
+             )}
+          </div>
+          <span className="text-[9px] font-black uppercase tracking-wider">Alerts</span>
+        </button>
+      </div>
+
+      {/* Search Bar for Members and Meetings only */}
+      {activeTab !== 'alerts' && (
+        <div className="relative group w-full mb-6">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+                type="text"
+                placeholder={activeTab === 'members' ? "Search members..." : "Search meetings..."}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl text-sm font-medium shadow-sm focus:ring-2 focus:ring-blue-400/30 transition-all dark:text-white"
+            />
+        </div>
+      )}
+
+      {/* Member Tab Content */}
+      {activeTab === 'members' && (
+        <div className="space-y-4 animate-in slide-in-from-left-4 fade-in duration-300">
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Members</p>
+              <p className="text-2xl font-black text-gray-900 dark:text-white">{processedMembers.length}</p>
+            </div>
+            <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Avg Check-in</p>
+              <p className="text-2xl font-black text-emerald-500">{averageAttendance}%</p>
+            </div>
+          </div>
+
+          {processedMembers.length === 0 ? (
+            <p className="text-center text-gray-500 py-10 font-bold text-sm uppercase tracking-widest">No members found</p>
+          ) : (
+            processedMembers.map((member) => (
+              <div key={member.id} className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="text-sm font-black text-gray-900 dark:text-white">{member.name}</h3>
+                    <p className="text-[10px] font-bold text-gray-400 mt-0.5">{member.contact}</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-black ${getAttendanceColor(member.attendance)}`}>
+                    {member.attendance}%
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest border-t border-gray-50 dark:border-gray-800 pt-3 mt-2">
+                  <span>{member.presentCount} / {member.totalMeetings} Meetings</span>
+                  <span>Last: {member.lastPresent}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Meetings Tab Content */}
+      {activeTab === 'meetings' && (
+        <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
+          {processedMeetings.length === 0 ? (
+            <p className="text-center text-gray-500 py-10 font-bold text-sm uppercase tracking-widest">No meetings found</p>
+          ) : (
+            processedMeetings.map((meeting) => {
+              const isExpanded = expandedMeetingId === meeting.id;
+              
+              const filteredPresent = isExpanded && meetingSearchTerm 
+                ? meeting.present.filter(name => name.toLowerCase().includes(meetingSearchTerm.toLowerCase()))
+                : meeting.present;
+                
+              const filteredAbsent = isExpanded && meetingSearchTerm 
+                ? meeting.absent.filter(name => name.toLowerCase().includes(meetingSearchTerm.toLowerCase()))
+                : meeting.absent;
+
+              const presentCount = meeting.present.length;
+              const absentCount = meeting.absent.length;
+
+              return (
+                <div key={meeting.id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden transition-all duration-300">
+                  <div 
+                    onClick={() => {
+                        setExpandedMeetingId(isExpanded ? null : meeting.id);
+                        if (!isExpanded) setMeetingSearchTerm('');
+                    }}
+                    className="p-4 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="pr-4">
+                        <h3 className="text-sm font-black text-gray-900 dark:text-white">{meeting.title}</h3>
+                        <p className="text-[10px] font-bold text-purple-500 uppercase tracking-widest mt-1">{meeting.date}</p>
+                      </div>
+                      {isExpanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                    </div>
+                    
+                    <div className="flex gap-4 mt-4">
+                      <div className="flex items-center gap-1.5 text-[11px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded">
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        {presentCount} Present
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px] font-black text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 px-2 py-1 rounded">
+                        <XCircle className="w-3.5 h-3.5" />
+                        {absentCount} Absent
+                      </div>
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="border-t border-gray-50 dark:border-gray-800 p-4 bg-gray-50/50 dark:bg-gray-800/50 animate-in slide-in-from-top-2">
+                      <div className="relative group w-full mb-4">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search members in this meeting..."
+                            value={meetingSearchTerm}
+                            onChange={(e) => setMeetingSearchTerm(e.target.value)}
+                            className="w-full pl-8 pr-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-purple-400/30 transition-all dark:text-white"
+                        />
+                      </div>
+
+                      <div className="mb-4">
+                        <div className="flex justify-between items-end mb-2 border-b border-emerald-100 dark:border-emerald-900/50 pb-1">
+                          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                            Present List ({filteredPresent.length})
+                          </p>
+                        </div>
+                        {filteredPresent.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5">
+                            {filteredPresent.map((name, i) => (
+                              <span key={i} className="text-[10px] font-bold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-2 py-1 rounded shadow-sm">
+                                {name}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-[10px] text-gray-500 font-medium">No members found.</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-end mb-2 border-b border-rose-100 dark:border-rose-900/50 pb-1">
+                          <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest">
+                            Absent List ({filteredAbsent.length})
+                          </p>
+                        </div>
+                        {filteredAbsent.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5">
+                            {filteredAbsent.map((name, i) => (
+                              <span key={i} className="text-[10px] font-bold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-2 py-1 rounded shadow-sm">
+                                {name}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-[10px] text-gray-500 font-medium">No members found.</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
+      {/* Alerts Tab Content */}
+      {activeTab === 'alerts' && (
+        <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300 pb-16">
+          <div className="flex justify-between items-center bg-rose-50 dark:bg-rose-900/20 p-4 rounded-2xl border border-rose-100 dark:border-rose-800/30">
+             <div>
+                <h3 className="text-sm font-black text-rose-900 dark:text-rose-100">Critical Alerts</h3>
+                <p className="text-[10px] font-bold text-rose-600 uppercase tracking-widest mt-0.5">{lowAttendanceMembers.length} Members &lt; 75%</p>
+             </div>
+             <AlertTriangle className="w-6 h-6 text-rose-500" />
+          </div>
+
+          <div className="flex justify-between items-center px-1">
+             <label className="flex items-center gap-2 cursor-pointer bg-white dark:bg-gray-900 px-3 py-1.5 rounded-full border border-gray-100 dark:border-gray-800 shadow-sm active:scale-95 transition-transform">
+                  <input
+                      type="checkbox"
+                      checked={selectedAlertRows.size > 0 && selectedAlertRows.size === lowAttendanceMembers.length}
+                      onChange={(e) => handleSelectAllAlerts(e.target.checked)}
+                      className="w-4 h-4 rounded text-rose-500 focus:ring-rose-500 border-gray-300"
+                  />
+                  <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Select All</span>
+              </label>
+          </div>
+
+          {lowAttendanceMembers.length === 0 ? (
+             <div className="text-center py-10">
+                 <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto mb-3 opacity-50" />
+                 <p className="text-gray-500 font-bold text-sm uppercase tracking-widest">No critical members!</p>
+             </div>
+          ) : (
+             lowAttendanceMembers.map((member) => {
+                const isSelected = selectedAlertRows.has(member.id);
+                return (
+                   <div key={member.id} className={`bg-white dark:bg-gray-900 p-4 rounded-2xl border-2 transition-all duration-200 shadow-sm flex flex-col gap-3 ${isSelected ? 'border-rose-400 dark:border-rose-500' : 'border-gray-100 dark:border-gray-800'}`}>
+                      <div className="flex items-start gap-3">
+                         <div className="pt-1">
+                            <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleSelectAlertRow(member.id)}
+                                className="w-5 h-5 rounded text-rose-500 focus:ring-rose-500 border-gray-300"
+                            />
+                         </div>
+                         <div className="flex-1">
+                            <div className="flex justify-between items-start">
+                               <div>
+                                  <h3 className="text-sm font-black text-gray-900 dark:text-white">{member.name}</h3>
+                                  <p className="text-[10px] font-bold text-gray-400 mt-0.5">{member.contact}</p>
+                               </div>
+                               <div className="flex flex-col items-end">
+                                  <span className={`px-2 py-1 rounded text-xs font-black ${member.attendance < 60 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>
+                                      {member.attendance}%
+                                  </span>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="flex gap-2 mt-1">
+                         <button 
+                             onClick={() => handleSendAlert([member.id])}
+                             disabled={isAlerting}
+                             className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-50 text-white dark:text-gray-900 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform"
+                         >
+                             <Send className="w-3.5 h-3.5" /> Alert
+                         </button>
+                         <button 
+                             onClick={() => {
+                                const msg = `⚠️ Action Required: Low Attendance Alert\nHi ${member.name}, we've noticed your attendance is currently at ${member.attendance}%. 📉\n\nYour presence is vital to the chapter's success! Please make sure to attend upcoming meetings to stay active and avoid any penalties. We hope to see you soon! 🤝`;
+                                window.open(`https://wa.me/${member.contact}?text=${encodeURIComponent(msg)}`, '_blank');
+                             }}
+                             className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-green-500 text-white text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform"
+                         >
+                             WhatsApp
+                         </button>
+                         <button 
+                             onClick={() => window.location.href = `tel:${member.contact}`}
+                             className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform"
+                         >
+                             <Phone className="w-3.5 h-3.5" /> Call
+                         </button>
+                      </div>
+                   </div>
+                );
+             })
+          )}
+
+          {/* Sticky Bottom Action Bar for Bulk Alerts */}
+          {lowAttendanceMembers.length > 0 && (
+             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-40 pb-6">
+                <div className="max-w-lg mx-auto">
+                   <button
+                       onClick={() => handleSendAlert()}
+                       disabled={selectedAlertRows.size === 0 || isAlerting}
+                       className={`w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 ${
+                           selectedAlertRows.size > 0 
+                               ? 'bg-rose-500 text-white shadow-lg' 
+                               : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                       }`}
+                   >
+                       <Send className="w-4 h-4" />
+                       Send Alert to Selected ({selectedAlertRows.size})
+                   </button>
+                </div>
+             </div>
+          )}
+        </div>
+      )}
+
     </div>
   );
 };

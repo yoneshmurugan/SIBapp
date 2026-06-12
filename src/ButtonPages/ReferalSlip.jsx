@@ -8,7 +8,9 @@ import FilterButton from "../Members/Components/FilterButton";
 import { useEffect, useState } from "react";
 import { getDate } from "../utils/getDate.mjs";
 import { Handshake, X, User, FileText, Phone } from "lucide-react";
+import { Contacts } from '@capacitor-community/contacts';
 import { sanitizeReferralData } from "../utils/slipsSanitization.mjs";
+import ContactPicker from "./ContactPicker";
 
 function ButtonPage({ onClose = () => { } }) {
   const todaysDate = getDate();
@@ -30,6 +32,7 @@ function ButtonPage({ onClose = () => { } }) {
   const [response, setResponse] = useState(null);
   const [username, setUsername] = useState("loading...");
   const [userData, setUserData] = useState(null);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   useEffect(() => {
     if (userData) {
@@ -101,8 +104,8 @@ function ButtonPage({ onClose = () => { } }) {
       const notificationData = {
         receiver: data.referee_username,
         sender: data.referrer_username,
-        header: `New Referral Received from ${data.referrer_username}`,
-        content: `Hello! You’ve been referred by ${data.referrer_username} : ${data.description}`,
+        header: `🚀 Awesome! You received a new Referral from ${data.referrer_username}`,
+        content: `Great news! ${data.referrer_username} has sent a new business referral your way.\n\nDetails: ${data.description}\n\nFollow up quickly and turn this into a win!`,
         read: false,
       };
 
@@ -205,6 +208,7 @@ function ButtonPage({ onClose = () => { } }) {
                <CrossChapterSearch
                 label="To *"
                 placeholder="Search Member Username..."
+                value={to}
                 onChange={setTo}
                 userstate={setUserData}
               />
@@ -266,13 +270,30 @@ function ButtonPage({ onClose = () => { } }) {
               Contact Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              <EntryField
-                type="text"
-                placeholder="Phone Number"
-                label="Telephone *"
-                value={phone}
-                onChange={setPhone}
-              />
+              <div className="flex flex-col gap-1 w-full">
+                <div className="flex justify-between items-center">
+                   <label className="text-sm font-medium text-gray-900 dark:text-gray-200 text-nowrap">
+                     Telephone *
+                   </label>
+                    <button
+                       type="button"
+                       onClick={() => {
+                          console.log("ReferalSlip: Phonebook button clicked");
+                          setIsPickerOpen(true);
+                       }}
+                       className="text-xs flex items-center gap-1 text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded-md transition-colors active:scale-95"
+                    >
+                       <Phone size={12} /> Phonebook
+                    </button>
+                </div>
+                <input
+                  type="tel"
+                  value={phone}
+                  placeholder="Phone Number"
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-yellow-400 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                />
+              </div>
               <EntryField
                 type="email"
                 placeholder="Email Address"
@@ -336,6 +357,18 @@ function ButtonPage({ onClose = () => { } }) {
             />
           </div>
         </div>
+ 
+        <ContactPicker
+           isOpen={isPickerOpen}
+           onClose={() => setIsPickerOpen(false)}
+           onSelect={(contact) => {
+              setPhone(contact.phone.replace(/[^0-9]/g, ''));
+              if (referralType === 'tier2') {
+                 setContactName(contact.name);
+              }
+              setIsPickerOpen(false);
+           }}
+        />
       </div>
     </div>
   );

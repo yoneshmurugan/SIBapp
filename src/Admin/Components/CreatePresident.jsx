@@ -139,8 +139,8 @@ export default function CreatePresidentForm({chapterName = null}) {
 
             const payload = {
                 receiver: form.username,
-                header: "Welcome to SIB Platform!",
-                content: `Hello and welcome to the Sengunthar In Business family! Your account has been created successfully. You can now log in to access all features and participate in chapter activities. If you have any questions or need assistance, feel free to reach out to support.`
+                header: `🎉 Welcome to the SIB Platform, President!`,
+                content: `Welcome to the Sengunthar In Business (SIB) family!\n\nYour Presidential account is ready. Log in to manage your chapter, track growth, and lead your members to success. We're excited to have you on board!`,
             };
 
             try {

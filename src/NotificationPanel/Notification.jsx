@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { Bell } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Bell, Check, CheckCheck, X, ChevronRight, Info } from "lucide-react";
 import useFetch from "../hooks/useFetch";
 import { NavLink } from "react-router-dom";
 
@@ -15,7 +16,7 @@ function formatTime(iso) {
     if (hr < 24) return `${hr}h ago`;
     const day = Math.floor(hr / 24);
     if (day < 7) return `${day}d ago`;
-    return d.toLocaleString();
+    return d.toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
   } catch {
     return "";
   }
@@ -42,7 +43,9 @@ export default function Notification() {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    if (Array.isArray(listData)) setNotifications(listData);
+    if (Array.isArray(listData)) {
+      setNotifications(listData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+    }
   }, [listData]);
 
   const unreadCount = useMemo(
@@ -117,8 +120,25 @@ export default function Notification() {
       if (!res.ok) throw new Error(`Error ${res.status}`);
       await res.json();
     } catch (e) {
-      console.log(e)
+      console.log(e);
       setNotifications(prev);
+    }
+  };
+
+  const handleClearAll = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_SERVER}/notification/deleteallnotifications`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+      if (res.ok) {
+        setNotifications([]);
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -129,7 +149,7 @@ export default function Notification() {
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ read: true , readAt : datetime }),
+        body: JSON.stringify({ read: true, readAt: datetime }),
         credentials: "include",
       }
     );
@@ -140,16 +160,19 @@ export default function Notification() {
   const openDetails = async (n) => {
     setActiveNotif(n);
     setDetailOpen(true);
+    setOpen(false);
 
-    const prev = notifications;
-    setNotifications((prevList) =>
-      prevList.map((x) => (x._id === n._id ? { ...x, read: true } : x))
-    );
+    if (!n.read) {
+      const prev = notifications;
+      setNotifications((prevList) =>
+        prevList.map((x) => (x._id === n._id ? { ...x, read: true } : x))
+      );
 
-    try {
-      await patchReadById(n._id);
-    } catch {
-      setNotifications(prev);
+      try {
+        await patchReadById(n._id);
+      } catch {
+        setNotifications(prev);
+      }
     }
   };
 
@@ -198,12 +221,12 @@ export default function Notification() {
         aria-expanded={open}
         aria-controls="notification-panel"
         onClick={toggle}
-        className="relative inline-flex items-center justify-center rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        className="relative inline-flex items-center justify-center rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-400"
       >
-        <Bell className="text-gray-700 dark:text-gray-200" />
+        <Bell className="w-5 h-5 text-gray-700 dark:text-gray-300" />
         {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-medium text-white">
-            {unreadCount}
+          <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-gray-900 animate-pulse">
+            {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
@@ -215,152 +238,189 @@ export default function Notification() {
           role="dialog"
           aria-label="Notifications"
           aria-modal="true"
-          className="absolute -right-[80px] z-50 mt-2 w-80 origin-top-right rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5 focus:outline-none"
+          className="fixed inset-x-4 top-[70px] sm:absolute sm:inset-auto sm:-right-2 sm:top-14 sm:w-[380px] z-50 origin-top-right rounded-2xl border border-gray-200/60 dark:border-gray-700/60 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl focus:outline-none transform transition-all animate-in fade-in slide-in-from-top-2"
         >
-          <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-3">
-            <h3 className="text-sm font-semibold text-black dark:text-gray-200">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4 py-3 bg-white/50 dark:bg-gray-900/50 rounded-t-2xl">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
               Notifications
+              {unreadCount > 0 && (
+                <span className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-semibold px-2 py-0.5 rounded-full">
+                  {unreadCount} new
+                </span>
+              )}
             </h3>
-            <div className="flex items-center gap-2">
-              {listLoading && (
-                <span className="text-xs text-gray-500 dark:text-gray-300">Loading…</span>
-              )}
-              {listError && (
-                <span className="text-xs text-red-600">Error</span>
-              )}
+            <div className="flex items-center gap-1">
               <button
                 onClick={markAllRead}
-                className="rounded-md px-2 py-1 text-xs text-black dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-600/30 transition-colors disabled:opacity-50"
-                disabled={listLoading || !!listError}
+                title="Mark all as read"
+                className="rounded-full p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={listLoading || !!listError || unreadCount === 0}
               >
-                Mark all read
+                <CheckCheck className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleClearAll}
+                title="Clear all"
+                className="rounded-full p-1.5 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={listLoading || !!listError || notifications.length === 0}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6h18"></path>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                </svg>
               </button>
               <button
                 onClick={close}
+                title="Close"
                 aria-label="Close notifications"
-                className="rounded-md p-1 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors"
+                className="rounded-full p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors sm:hidden"
               >
-                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor" aria-hidden="true">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 8.586l4.95-4.95 1.414 1.414L11.414 10l4.95 4.95-1.414 1.414L10 11.414l-4.95 4.95-1.414-1.414L8.586 10l-4.95-4.95L5.05 3.636 10 8.586z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          <ul className="max-h-80 overflow-y-auto">
+          {/* List */}
+          <ul className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
             {listLoading && (
-              <li className="px-4 py-6 text-sm text-gray-600 dark:text-gray-300">
-                Loading notifications…
+              <li className="flex flex-col items-center justify-center py-10 px-4 text-center">
+                <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Fetching notifications...</p>
               </li>
             )}
+            
             {listError && (
-              <li className="px-4 py-6 text-sm text-red-600">
-                Failed to load. Try again.
+              <li className="px-4 py-8 text-center">
+                <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Info className="w-5 h-5" />
+                </div>
+                <p className="text-sm font-medium text-red-600 dark:text-red-400">Failed to load</p>
+                <p className="text-xs text-gray-500 mt-1">Please try again later.</p>
               </li>
             )}
+            
             {!listLoading && !listError && notifications.length === 0 && (
-              <li className="px-4 py-6 text-sm text-black dark:text-gray-200">
-                No notifications
+              <li className="px-4 py-10 text-center">
+                <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Bell className="w-6 h-6" />
+                </div>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">You're all caught up!</p>
+                <p className="text-xs text-gray-500 mt-1">No new notifications at the moment.</p>
               </li>
             )}
 
-            {!listLoading && !listError && notifications.map((n, idx) => (
-              <li key={n._id}>
+            {!listLoading && !listError && notifications.slice(0, 10).map((n) => (
+              <li key={n._id} className="relative group">
                 <button
-                  className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${!n.read ? "bg-indigo-50/60 dark:bg-indigo-900/30" : "bg-white dark:bg-gray-800"
-                    }`}
+                  className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/80 ${
+                    !n.read 
+                      ? "bg-amber-50/30 dark:bg-amber-900/10" 
+                      : "bg-white dark:bg-transparent"
+                  }`}
                   onClick={() => openDetails(n)}
                 >
-                  <span
-                    className={`mt-1 h-2 w-2 flex-none rounded-full ${!n.read ? "bg-red-500" : "bg-gray-400 dark:bg-gray-500"
-                      }`}
-                    aria-hidden="true"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-200">
+                  <div className="mt-1 flex-shrink-0">
+                    {!n.read ? (
+                      <span className="flex h-2.5 w-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span>
+                    ) : (
+                      <span className="flex h-2.5 w-2.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm mb-0.5 truncate pr-2 ${!n.read ? "font-semibold text-gray-900 dark:text-white" : "font-medium text-gray-700 dark:text-gray-300"}`}>
                       {n.header}
                     </p>
-                    <p className="mt-0.5 line-clamp-2 text-xs text-gray-600 dark:text-gray-300">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
                       {n.content}
                     </p>
-                    <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-400">
+                    <p className="mt-1.5 text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide">
                       {formatTime(n.createdAt)}
                     </p>
                   </div>
                 </button>
-                {idx < notifications.length - 1 && (
-                  <div className="h-px bg-gray-200 dark:bg-gray-700" />
-                )}
+                <div className="absolute bottom-0 left-12 right-4 h-px bg-gray-100 dark:bg-gray-800/60 group-last:hidden"></div>
               </li>
             ))}
           </ul>
 
-          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-2">
-            <NavLink
-              to='/allnotifications'
-              className="w-full rounded-md px-3 py-2 text-sm text-amber-400 hover:bg-indigo-50 dark:hover:bg-indigo-600/30 transition-colors"
-              onClick={() => {
-                setOpen(false);
-              }}
-            >
-              View all
-            </NavLink>
-          </div>
+          {/* Footer */}
+          {!listLoading && !listError && notifications.length > 0 && (
+            <div className="border-t border-gray-100 dark:border-gray-800 p-2 bg-gray-50/50 dark:bg-gray-900/50 rounded-b-2xl">
+              <NavLink
+                to='/allnotifications'
+                className="flex items-center justify-center w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                onClick={close}
+              >
+                View all notifications
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </NavLink>
+            </div>
+          )}
         </div>
       )}
 
-      {detailOpen && activeNotif && (
+      {/* Details Modal overlay */}
+      {detailOpen && activeNotif && createPortal(
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Notification details"
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/40 dark:bg-black/60 backdrop-blur-sm p-4 animate-in fade-in"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) setDetailOpen(false);
           }}
         >
           <div
             ref={detailRef}
-            className="w-full max-w-md rounded-lg bg-white dark:bg-gray-800 p-4 shadow-lg outline-none"
+            className="w-full max-w-sm sm:max-w-md rounded-2xl bg-white dark:bg-gray-900 shadow-2xl outline-none transform animate-in zoom-in-95 duration-200 overflow-hidden"
           >
-            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-2">
-              <h4 className="text-sm font-semibold text-black dark:text-gray-200">
-                {activeNotif.header}
-              </h4>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                  <Bell className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                </div>
+                <h4 className="text-base font-bold text-gray-900 dark:text-white">
+                  Notification
+                </h4>
+              </div>
               <button
-                className="rounded-md p-1 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="rounded-full p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 onClick={() => setDetailOpen(false)}
                 aria-label="Close details"
               >
-                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor" aria-hidden="true">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 8.586l4.95-4.95 1.414 1.414L11.414 10l4.95 4.95-1.414 1.414L10 11.414l-4.95 4.95-1.414-1.414L8.586 10l-4.95-4.95L5.05 3.636 10 8.586z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="mt-3 space-y-2">
-              <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+            
+            {/* Modal Body */}
+            <div className="px-5 py-6">
+              <h5 className="text-lg font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+                {activeNotif.header}
+              </h5>
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap border border-gray-100 dark:border-gray-700/50 max-h-[50vh] overflow-y-auto">
                 {activeNotif.content}
+              </div>
+              <p className="mt-4 text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center">
+                {formatTime(activeNotif.createdAt)}
               </p>
-              <p className="text-xs text-gray-400">{formatTime(activeNotif.createdAt)}</p>
             </div>
-            <div className="mt-4 flex justify-end gap-2">
+            
+            {/* Modal Footer */}
+            <div className="px-5 py-4 border-t border-gray-100 dark:border-gray-800 flex justify-end bg-gray-50 dark:bg-gray-800">
               <button
-                className="rounded-md px-3 py-2 text-sm text-black dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="rounded-xl px-5 py-2.5 text-sm font-semibold bg-gray-900 text-white dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
                 onClick={() => setDetailOpen(false)}
               >
-                Close
+                Got it
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

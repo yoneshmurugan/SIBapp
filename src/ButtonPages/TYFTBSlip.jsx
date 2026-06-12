@@ -89,8 +89,8 @@ function ButtonPage({ onClose = () => { } }) {
       const notificationData = {
         receiver: data.receiver_displayname,
         sender: getuser?.username ?? "",
-        header: `You've received the TYB from the user : ${(getuser?.username ?? "").toString()}`,
-        content: `Thankyou for Business(TYB), I have earned ₹${data.business_amount} from your referral. Description : ${data.business_description} `,
+        header: `💸 Thank You for the Business (TYB) from ${(getuser?.username ?? "").toString()}!`,
+        content: `Amazing job! ${(getuser?.username ?? "").toString()} just logged a TYB slip for your referral.\n\nAmount Generated: ₹${data.business_amount}\nNote: ${data.business_description}\n\nKeep up the great work!`,
         read: false
       };
 

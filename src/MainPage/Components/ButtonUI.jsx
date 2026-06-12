@@ -20,27 +20,26 @@ function ButtonUI({ label, description, component }) {
   const Comp = componentMap[component] ?? null;
 
   return (
-    <div className="w-full h-full min-h-[100px]">
+    <div className="w-full">
       <button
         onClick={handleToggle}
         className="
-          bg-yellow-300  dark:bg-yellow-400
-          hover:bg-yellow-500 dark:hover:bg-yellow-400/80
+          bg-yellow-300 dark:bg-yellow-400
+          hover:bg-yellow-400 dark:hover:bg-yellow-400/80
           rounded-2xl
-          hover:scale-[1.02] active:scale-95
-          transition-all duration-200 ease-in-out
+          hover:scale-[1.03] active:scale-95
+          transition-all duration-150 ease-in-out
           flex flex-col items-center justify-center
-          w-full h-full
-          p-3 sm:p-4
+          w-full
+          py-5 px-2
           text-black
           shadow-sm
+          gap-1
         "
         type="button"
       >
-        <div>
-          <h4 className="text-sm sm:text-base font-bold mt-1">{label}</h4>
-          <p className="text-xs sm:text-sm font-medium mt-1 text-gray-700 dark:text-black/70">{description}</p>
-        </div>
+        <h4 className="text-[13px] font-black leading-tight text-center text-black">{label}</h4>
+        <p className="text-[10px] font-medium text-center leading-snug text-black/60">{description}</p>
       </button>
 
       {open && Comp ? (

@@ -1,110 +1,106 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import {
+  AreaChart, Area, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, CartesianGrid,
+} from 'recharts';
 import { transformWeeklyData } from '../../utils/dataTransform.mjs';
-import useFetch from '../../hooks/useFetch';
 
-function LoadingAnimation() {
+const ALL_SERIES = [
+  { key: 'referral_given', label: 'Referrals', color: '#3b82f6' },
+  { key: 'tyftb_given',   label: 'TYFTB',     color: '#ef4444' },
+  { key: 'M2Ms',          label: 'M2Ms',      color: '#8b5cf6' },
+];
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload || !payload.length) return null;
   return (
-    <div
-      className="
-        w-full h-[320px]
-        flex items-center justify-center
-        bg-white dark:bg-gray-800
-        rounded-lg
-        transition-colors duration-300
-      "
-    >
-      <div className="flex gap-2">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="
-              w-3 h-3 rounded-full bg-blue-500
-              animate-bounce
-            "
-            style={{
-              animationDelay: `${i * 0.15}s`,
-            }}
-          />
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-3 min-w-[130px]">
+      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">{label}</p>
+      <div className="space-y-1.5">
+        {payload.map((entry, i) => (
+          <div key={i} className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+              <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">{entry.name}</span>
+            </div>
+            <span className="text-[11px] font-black text-gray-900 dark:text-white">{entry.value}</span>
+          </div>
         ))}
       </div>
     </div>
   );
+};
+
+function SkeletonLoader() {
+  return (
+    <div className="w-full h-full rounded-2xl bg-gray-50 dark:bg-gray-800/30 animate-pulse" />
+  );
 }
 
-export default function RevenueLine() {
-  const { data, loading, error } = useFetch(
-    `${import.meta.env.VITE_BACKEND_SERVER}/dashboard/weekstats`,
-    {
-      method: "GET",
-      credentials: "include",
-    }
-  );
-
-  if (loading) {
-    return <LoadingAnimation />;
-  }
+export default function RevenueAreaChart({ data, loading, error, activeSeries = 'all', accentColor = '#f59e0b' }) {
+  if (loading) return <SkeletonLoader />;
 
   if (error) {
     return (
-      <div
-        className="
-          w-full h-[320px]
-          flex items-center justify-center
-          text-red-600 font-semibold text-lg
-          bg-red-50 dark:bg-red-950 dark:text-red-300
-          rounded-lg
-          transition-colors duration-300
-        "
-      >
-        Error loading data. Please try again later.
+      <div className="w-full h-full flex items-center justify-center rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800">
+        <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Failed to load data</p>
       </div>
     );
   }
 
-  const transformedData = data ? transformWeeklyData(data) : [];
+  const chartData = data ? transformWeeklyData(data) : [];
+  const visibleSeries = activeSeries === 'all' ? ALL_SERIES : ALL_SERIES.filter(s => s.key === activeSeries);
 
   return (
-    <div
-      className="
-        w-full h-full py-4
-        bg-white dark:bg-gray-900
-        rounded-lg
-        transition-colors duration-300
-        text-black dark:text-white
-      "
-    >
-      <ResponsiveContainer>
-        <LineChart data={transformedData} margin={{ top: 16, right: 16, bottom: 0, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#ccc" className="dark:stroke-gray-600" />
-          <XAxis
-            dataKey="name"
-            stroke="currentColor"
-            tick={{ fill: 'currentColor' }}
-            className="dark:fill-gray-200 dark:stroke-gray-200"
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -28, bottom: 0 }}>
+        <defs>
+          {ALL_SERIES.map(s => (
+            <linearGradient key={s.key} id={`grad-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor={s.color} stopOpacity={0.25} />
+              <stop offset="100%" stopColor={s.color} stopOpacity={0} />
+            </linearGradient>
+          ))}
+        </defs>
+
+        <CartesianGrid
+          strokeDasharray="4 4"
+          vertical={false}
+          stroke="currentColor"
+          className="opacity-[0.06]"
+        />
+        <XAxis
+          dataKey="name"
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700, letterSpacing: '0.08em' }}
+          dy={8}
+        />
+        <YAxis
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }}
+          allowDecimals={false}
+        />
+        <Tooltip
+          content={<CustomTooltip />}
+          cursor={{ stroke: accentColor, strokeWidth: 1.5, strokeDasharray: '4 4', opacity: 0.5 }}
+        />
+
+        {visibleSeries.map(s => (
+          <Area
+            key={s.key}
+            name={s.label}
+            type="monotone"
+            dataKey={s.key}
+            stroke={s.color}
+            strokeWidth={2.5}
+            fill={`url(#grad-${s.key})`}
+            fillOpacity={1}
+            dot={false}
+            activeDot={{ r: 5, strokeWidth: 2, stroke: '#fff', fill: s.color }}
           />
-          <YAxis
-            stroke="currentColor"
-            tick={{ fill: 'currentColor' }}
-            className="dark:fill-gray-200 dark:stroke-gray-200"
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'transparent',
-              color: 'currentcolor',
-              borderRadius: '8px',
-            }}
-            wrapperStyle={{
-              backgroundColor: 'transparent',
-            }}
-            labelStyle={{ color: 'currentColor' }}
-            itemStyle={{ color: 'currentColor' }}
-          />
-          <Line type="monotone" dataKey="referral_given" stroke="currentColor" strokeWidth={2} />
-          <Line type="monotone" dataKey="tyb_given" stroke="#ef4444" strokeWidth={2} />
-          <Line type="monotone" dataKey="M2Ms" stroke="#3b82f6" strokeWidth={2} />
-          <Legend />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+        ))}
+      </AreaChart>
+    </ResponsiveContainer>
   );
 }

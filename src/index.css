@@ -1,3 +1,17 @@
+:root {
+  /* Prevent text selection (like a native app) */
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* Remove the grey highlight when tapping buttons */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Allow text selection ONLY in input fields */
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
 @import "tailwindcss";
 
 html {
@@ -8,6 +22,8 @@ html {
 body {
   scrollbar-color: #9ca3af00 #f3f4f600;
   scrollbar-width: thin;
+  /* Protect against edge-to-edge bottom navigation overlap */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .scrollbar-left {

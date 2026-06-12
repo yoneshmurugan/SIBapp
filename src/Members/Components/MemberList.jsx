@@ -15,8 +15,8 @@ const MemberList = ({ members }) => {
   };
 
   return (
-    <div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-8 place-items-center">
+    <div className="w-full pb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 lg:gap-8 place-items-center w-full">
         {currentMembers.map((member, index) => (
           <MemberCard
             key={index}
@@ -25,7 +25,11 @@ const MemberList = ({ members }) => {
               blood_group: member.blood_group,
               username: member.user.username,
               company_name: member.company_name,
-              verticals: member.verticals,
+              verticals: Array.isArray(member.vertical_ids) && member.vertical_ids.length > 0 
+                ? member.vertical_ids[0] 
+                : (Array.isArray(member.verticals) && member.verticals.length > 0 
+                    ? member.verticals[0] 
+                    : member.verticals || "N/A"),
               chapter: member.chapter,
               region: member.region,
             }}
@@ -35,20 +39,21 @@ const MemberList = ({ members }) => {
               company_email: member.company_email,
               company_address: member.company_address
             }}
-            culturaldetails={{
+            extraDetails={{
               vagai_category: member.vagai_category,
               kulam_category: member.kulam_category,
               native_place: member.native_place,
-              kuladeivam: member.kuladeivam
+              kuladeivam: member.kuladeivam,
+              services: member.services,
+              all_verticals: Array.isArray(member.vertical_ids) ? member.vertical_ids : (Array.isArray(member.verticals) ? member.verticals : [member.verticals])
             }}
-            link={`${window.location.origin}/profile/${member._id}?user=${member.user._id}`}
+            link={`https://senguntharinbusiness.com/profile/${member._id}?user=${member.user._id}`}
           />
         ))}
       </div>
-      <div className="flex justify-center items-center gap-2 mt-4">
-        {/* Same pagination controls */}
+      <div className="flex flex-wrap justify-center items-center gap-2 mt-8 px-2">
         <button
-          className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors duration-300"
+          className="shrink-0 px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors duration-300 font-bold text-sm shadow-sm"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -57,17 +62,18 @@ const MemberList = ({ members }) => {
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
           <button
             key={page}
-            className={`px-3 py-1 rounded transition-colors duration-300 ${page === currentPage
-              ? "bg-amber-400 text-black dark:text-gray-900"
-              : "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600"
-              }`}
+            className={`shrink-0 w-10 h-10 rounded-full font-bold text-sm transition-all duration-300 shadow-sm ${
+              page === currentPage
+                ? "bg-amber-400 text-amber-950 scale-110"
+                : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700"
+            }`}
             onClick={() => handlePageChange(page)}
           >
             {page}
           </button>
         ))}
         <button
-          className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors duration-300"
+          className="shrink-0 px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors duration-300 font-bold text-sm shadow-sm"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >

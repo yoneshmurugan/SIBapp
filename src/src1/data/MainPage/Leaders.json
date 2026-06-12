@@ -14,7 +14,7 @@
         "position": "Coordinator",
         "business": "Rainbow TV",
         "phone": "+91 98651 82929",
-        "website": "https://example.com/baskar"
+        "website": ""
     },
     {
         "img": "/assets/JPEG/19.jpg",
@@ -22,7 +22,7 @@
         "position": "Coordinator",
         "business": "Specialist In Medical Insurance",
         "phone": "+91 94430 16079",
-        "website": "https://example.com/deepak"
+        "website": ""
     },
 {
     "img": "/assets/JPEG/Rajkumar.jpg",
@@ -30,7 +30,7 @@
     "position": "Secretary",
     "business": "MR Group of Companies",
     "phone": "+91 88837 31408",
-    "website": "https://example.com/rajkumar"
+    "website": ""
 },
 {
         "img": "/assets/JPEG/101.jpg",
@@ -56,7 +56,6 @@
         "phone": "+91 95242 33350",
         "website": "https://www.senguntharinbusiness.in/profile/6917e5eb464e43ce68ce4daa?user=69161e4bca6065dce8bda871"
     },
-        
         {
         "img": "/assets/JPEG/15.jpg",
         "name": "V.S.Sathish Kumar",
@@ -73,5 +72,4 @@
         "phone": "+91 95242 33350",
         "website": ""
     }
-
 ]

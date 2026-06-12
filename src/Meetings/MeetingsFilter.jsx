@@ -33,11 +33,12 @@ function MeetingsFilter({
       className="
         w-full
         rounded-3xl
-        bg-white dark:bg-gray-800
-        p-2 md:p-6
-        shadow-2xl
-        border border-white dark:border-gray-700
-        transition-colors duration-300
+        bg-white/90 dark:bg-gray-900/60
+        backdrop-blur-xl
+        p-4 md:p-6
+        shadow-xl shadow-gray-200/50 dark:shadow-black/20
+        border border-gray-100 dark:border-gray-800
+        transition-all duration-300 hover:shadow-2xl hover:shadow-gray-200/60 dark:hover:shadow-black/30
       "
       aria-label="Directory filters"
     >

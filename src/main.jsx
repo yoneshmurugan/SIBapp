@@ -34,6 +34,7 @@ import Admin from './Admin/Admin';
 import AdminRoute from './hooks/AdminRoute';
 import ChapterDetails from './Admin/Chapterdetails.jsx';
 import PrivacyPanel from "./Settings/components/PrivacyPanel";
+import VersionChecker from './Components/VersionChecker';
 
 // We must import Preferences here to read the native storage!
 import { Preferences } from "@capacitor/preferences";
@@ -138,6 +139,8 @@ if (!rootEl) throw new Error('Root element not found');
 
 createRoot(rootEl).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <VersionChecker>
+      <RouterProvider router={router} />
+    </VersionChecker>
   </StrictMode>
 );

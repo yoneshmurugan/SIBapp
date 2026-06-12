@@ -1,28 +1,26 @@
+import { BarChart3 } from "lucide-react";
 import Stat from "./Components/Stat";
 
 function Stats({
   header = "Activity Details",
   items = [
-    { name: "Referrals Given", value: 23 },
-    { name: "Referrals Received", value: 23 },
-    { name: "TYB Given", value: 23 },
-    { name: "TYB Received", value: 23 },
-    { name: "M2M Attended", value: 23 },
+    { name: "Referrals Given", value: 0 },
+    { name: "Referrals Received", value: 0 },
+    { name: "TYB Given", value: 0 },
+    { name: "TYB Received", value: 0 },
+    { name: "M2M Attended", value: 0 },
   ],
 }) {
-  const StatItems = items.map((element, index) => (
-    <Stat name={element.name} value={element.value} key={index} />
-  ));
-
   return (
-    <div className="h-fit min-w-[98%] max-w-[98%] 
-                    bg-white dark:bg-gray-800 
-                    rounded-2xl -mt-2 ml-3 
-                    border border-gray-600 dark:border-gray-700 
-                    p-2 transition-colors duration-300">
-      <p className="font-bold mx-2 text-gray-900 dark:text-gray-100">{header}</p>
-      <div className="flex flex-wrap justify-around items-center text-nowrap">
-        {StatItems}
+    <div className="w-full bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl border border-stone-100 dark:border-gray-800 p-4 sm:p-6 shadow-sm dark:shadow-none transition-colors duration-300">
+      <h2 className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2 mb-4">
+         <BarChart3 size={16} className="text-amber-500" />
+         {header}
+      </h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        {items.map((element, index) => (
+          <Stat name={element.name} value={element.value} key={index} />
+        ))}
       </div>
     </div>
   );

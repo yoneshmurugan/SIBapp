@@ -1,5 +1,5 @@
 import { ModalViewer } from '../Components/Modalcontactviewer';
-import { ModalViewercultural } from '../Components/CulturalModal';
+import { ModalViewerDetails } from '../Components/CulturalModal';
 import { NavLink } from 'react-router-dom';
 
 function MemberCard({
@@ -12,7 +12,7 @@ function MemberCard({
     chapter: "Alpha Chapter",
     region: "Erode",
   },
-  culturaldetails = {},
+  extraDetails = {},
   contactdetails = {},
   link
 }) {
@@ -20,92 +20,85 @@ function MemberCard({
     /* 1. Increased Max Width: max-w-[300px] allows more space for text.
        2. mx-auto: Centers the card in its grid cell on mobile.
     */
-    <div className="flex flex-col justify-end pt-12 w-full max-w-[300px] mx-auto">
+    <div className="flex flex-col pt-12 w-full max-w-[280px] mx-auto h-full">
       
       {/* Card Body */}
-      <div className="relative bg-white dark:bg-gray-800 w-full rounded-t-2xl rounded-b-xl flex flex-col items-center shadow-md hover:shadow-xl transition-all duration-300 pb-5 ">
+      <div className="relative bg-white dark:bg-gray-800 w-full rounded-2xl flex flex-col flex-1 shadow-md hover:shadow-xl transition-all duration-300 pb-4">
         
         {/* --- Profile Image (Floating) --- */}
-        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-1">
-          <div className="h-[110px] w-[110px] bg-gray-300 dark:bg-gray-700 rounded-full shadow-lg border-2 border-gray-400 dark:border-gray-600 relative ">
+        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-[5]">
+          <div className="h-[100px] w-[100px] bg-gray-200 dark:bg-gray-700 rounded-full shadow-lg border-2 border-white dark:border-gray-800 relative overflow-hidden">
             <img
               src={member.profile_image_url || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
               alt={member.username}
-              className="h-full w-full rounded-full object-cover object-top "
-
+              className="h-full w-full object-cover object-top"
             />
             {/* Blood Group Badge */}
-            <div className="h-[28px] w-[28px] rounded-full bg-red-500 absolute bottom-2 -right-1 font-bold border-2 border-white flex items-center justify-center">
-              <p className="text-white text-[9px]">{member.blood_group}</p>
+            <div className="h-[24px] w-[24px] rounded-full bg-red-500 absolute bottom-1 right-1 font-bold border-2 border-white dark:border-gray-800 flex items-center justify-center">
+              <p className="text-white text-[8px]">{member.blood_group}</p>
             </div>
           </div>
         </div>
-
-        {/* --- Main Content --- */}
-        {/* mt-16 ensures text starts below the floating image */}
-        <div className="flex flex-col items-center w-full mt-16 px-4">
+ 
+        {/* --- Main Content Area --- */}
+        <div className="flex flex-col flex-1 pt-16 px-4">
           
-          {/* Name & Company - Allowed to wrap instead of truncate */}
-          <div className="text-center w-full mb-2">
-            <h4 className="font-bold text-lg text-gray-900 dark:text-gray-100 leading-tight break-words">
+          {/* Name & Company */}
+          <div className="text-center w-full mb-3">
+            <h4 className="font-bold text-base text-gray-900 dark:text-gray-100 leading-tight line-clamp-1">
               {member.username}
             </h4>
-            <p className="text-sm font-bold text-gray-500 dark:text-gray-300 mt-1 leading-snug">
+            <p className="text-[12px] font-bold text-amber-600 dark:text-amber-400 mt-0.5 line-clamp-1">
               {member.company_name}
             </p>
           </div>
-
-          {/* Verticals Badge - Width increased, text wraps if needed */}
-          <div className="w-full">
-            <div className="bg-yellow-400 dark:bg-yellow-500 py-1.5 px-2 rounded-xl w-full text-center shadow-sm min-h-[30px] flex items-center justify-center">
-              <p className="font-bold text-xs leading-tight text-gray-900">
+ 
+          {/* Verticals Badge */}
+          <div className="w-full mb-4">
+            <div className="bg-amber-400 dark:bg-amber-500 py-1.5 px-2 rounded-xl w-full text-center shadow-sm">
+              <p className="font-black text-[10px] uppercase tracking-wider text-amber-950 line-clamp-2">
                 {member.verticals}
               </p>
             </div>
           </div>
-
-          {/* Divider */}
-          <div className="border-b border-gray-300 dark:border-gray-600 h-px w-full my-3"></div>
-
+ 
           {/* Chapter & Region Details */}
-          <div className="w-full space-y-2">
-            <div className="flex justify-between items-start w-full gap-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 shrink-0">Chapter</p>
-              {/* Modified to show only first letter of each word (Abbreviation) */}
-              <p className="text-xs font-bold text-gray-900 dark:text-gray-100 text-right">
-                {member.chapter?.split(' ').map(word => word[0]).join('').toUpperCase()}
+          <div className="w-full space-y-1.5 px-1">
+            <div className="flex justify-between items-center w-full">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Chapter</p>
+              <p className="text-[11px] font-bold text-gray-800 dark:text-gray-200">
+                {member.chapter?.split(' ').map(word => word[0]).join('').toUpperCase() || "SIB"}
               </p>
             </div>
-            <div className="flex justify-between items-start w-full gap-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 shrink-0">Region</p>
-              <p className="text-xs font-bold text-gray-900 dark:text-gray-100 text-right">{member.region}</p>
+            <div className="flex justify-between items-center w-full">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Region</p>
+              <p className="text-[11px] font-bold text-gray-800 dark:text-gray-200">{member.region}</p>
             </div>
           </div>
           
-          {/* --- Cultural Modal --- */}
-          {/* Added my-3 to fix overlapping with Region */}
-          <div className="w-full my-9 flex justify-center">
-             <ModalViewercultural data={culturaldetails} />
+          <div className="mt-auto pt-6 mb-4 flex justify-center">
+             <ModalViewerDetails data={extraDetails} />
           </div>
-         
         </div>
-
+ 
         {/* --- Footer (Contact + Button) --- */}
-        <div className="flex flex-row justify-between items-center w-full px-4 gap-3 -mt-13">
-          {/* Contact Modal */}
-          <div className="shrink-0">
-             <ModalViewer contactdetails={contactdetails} />
+        <div className="px-4 pb-1">
+          <div className="flex flex-row items-center w-full gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+            {/* Contact Modal */}
+            <div className="shrink-0">
+               <ModalViewer contactdetails={contactdetails} />
+            </div>
+ 
+            {/* View Profile Button */}
+            <NavLink
+              to={link}
+              className="flex-1 flex justify-center items-center h-[38px] bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl hover:opacity-90 transition-all duration-200 shadow-sm active:scale-95 px-2 overflow-hidden"
+            >
+              <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wide whitespace-nowrap">View Profile</span>
+            </NavLink>
           </div>
-
-          {/* View Profile Button */}
-          <NavLink
-            to={link}
-            className="flex-1 -ml-4 flex justify-center items-center h-[35px] bg-white dark:bg-gray-600 border border-gray-400 dark:border-gray-500 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors duration-300 shadow-sm"
-          >
-            <span className="text-[10px]  font-bold text-gray-800 dark:text-white text-nowrap">View Profile</span>
-          </NavLink>
         </div>
-
+ 
       </div>
     </div>
   );

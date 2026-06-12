@@ -29,6 +29,11 @@ const MemberCard = ({ member, onSendReminder, loading, onrenewuser, selected, on
         <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           Email: {member.email}
         </div>
+        {member.phone && (
+          <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 font-mono">
+            Phone: {member.phone}
+          </div>
+        )}
         <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           Due: {member.dueDate}
         </div>
@@ -46,6 +51,17 @@ const MemberCard = ({ member, onSendReminder, loading, onrenewuser, selected, on
       >
         {loading ? 'Sending...' : 'Remind'}
       </button>
+      {member.phone && (
+        <button
+          onClick={() => {
+            const msg = `⏳ Action Required: Membership Renewal\nHi ${member.name}! 👋\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}. 📅\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active! 🚀`;
+            window.open(`https://wa.me/${member.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+          }}
+          className="px-4 py-2 rounded-lg font-medium text-sm border border-green-500 bg-green-500 text-white hover:bg-green-600 transition-colors duration-200 flex-grow sm:flex-grow-0"
+        >
+          WhatsApp
+        </button>
+      )}
       <button
         onClick={() => onrenewuser(member)}
         disabled={loading}
@@ -150,6 +166,7 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
         name: m.user?.username || "Unknown",
         userId: m.user?._id,
         email: m.user?.email || "N/A",
+        phone: m.user?.phone_number || "",
         dueDate: formatDate(m.renewal_date),
         rawDueDate: m.renewal_date,
         status: getStatus(m.renewal_date, m.membership_status),
@@ -251,8 +268,8 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
     try {
       const payload = {
         receiver: member.name,
-        header: "Membership Renewal Reminder",
-        content: `Hello ${member.name},\n\nThis is a reminder that your membership renewal is due on ${member.dueDate}.\n\nChapter: ${member.chapter}\n\nPlease complete your renewal at your earliest convenience.\n\nThank you!`
+        header: `⏳ Action Required: Membership Renewal`,
+        content: `Hi ${member.name}!\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}.\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active!`
       };
 
       const res = await fetch(
@@ -317,8 +334,8 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             receiver: memberToRenew.name,
-            header: "Membership Renewal Date Updated",
-            content: `Hello ${memberToRenew.name},\n\nGood news! Your membership renewal date has been successfully updated.\n\nNew Renewal Due Date: ${renewDate}\n\nChapter: ${memberToRenew.chapter}\n\nPlease ensure timely completion of your renewal to maintain your membership benefits.\n\nThank you!`
+            header: `🎉 Membership Renewal Successful!`,
+            content: `Hi ${memberToRenew.name}, great news!\n\nYour membership in ${memberToRenew.chapter} has been successfully renewed! Your new due date is ${renewDate}.\n\nThank you for being a valued member of the SIB family!`
           })
         }
       );
@@ -408,8 +425,8 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
         try {
           const payload = {
             receiver: member.name,
-            header: "Membership Renewal Reminder",
-            content: `Hello ${member.name},\n\nThis is a reminder that your membership renewal is due on ${member.dueDate}.\n\nChapter: ${member.chapter}\n\nPlease complete your renewal at your earliest convenience.\n\nThank you!`
+            header: `⏳ Action Required: Membership Renewal`,
+            content: `Hi ${member.name}!\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}.\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active!`
           };
 
           const res = await fetch(

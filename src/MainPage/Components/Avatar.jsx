@@ -4,14 +4,6 @@ import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import classNames from "../../utils/classname";
 
-import { signOut } from "firebase/auth";
-import { auth } from "../../firebase"; 
-import { Preferences } from "@capacitor/preferences";
-
-// --- ADD THIS IMPORT ---
-import { CapacitorCookies } from '@capacitor/core';
-// -----------------------
-
 export function HeaderAvatar({
   src = "../../../public/assets/19.jpg",
   alt = "User avatar",
@@ -39,31 +31,35 @@ export function HeaderAvatar({
     try {
       setLoading(true);
 
-      // 1. Tell backend to destroy the session
-      await fetch(logoutUrl, logoutOptions).catch(() => console.log("Backend logout ping failed, continuing local wipe..."));
-
-      // 2. Destroy the Native iOS Bearer Token
-      await Preferences.remove({ key: 'sib_session_token' });
-
-      // 3. Destroy the Web Bearer Token
-      window.localStorage.removeItem('sib_session_token');
-
-      // 4. NUKE THE NATIVE APPLE COOKIE JAR (The missing link!)
-      await CapacitorCookies.clearAllCookies();
-
-      // 5. Destroy the Firebase SDK Session
-      try {
-        await signOut(auth);
-      } catch (fbError) {
-        console.warn("Firebase sign out silent error:", fbError);
+      const fcmToken = localStorage.getItem('fcmToken');
+      if (fcmToken) {
+        try {
+          await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/remove-fcm-token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ fcmToken })
+          });
+        } catch (e) {
+          console.error('Failed to remove fcm token', e);
+        }
       }
 
-      // 6. Force navigate to the main page
-      navigate("/");
+      const response = await fetch(logoutUrl, logoutOptions);
+      const data = await response.json();
 
+      if (data.message === "Logged out") {
+        // Clear all cached data
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Navigate to home/login
+        navigate("/");
+      } else {
+        alert(`Logout failed: ${data.message || "Unknown error"}`);
+      }
     } catch (error) {
-      console.error(`Logout Error: ${error.message}`);
-      navigate("/");
+      alert(`Error occurred: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -149,9 +145,9 @@ export function HeaderAvatar({
           role="menu"
           tabIndex={-1}
           className="
-            absolute right-0 mt-2 w-56
+            absolute right-0 mt-2 w-56 z-50
             rounded-lg border border-neutral-200 dark:border-neutral-700
-            bg-white dark:bg-gray-800 shadow-lg
+            bg-white dark:bg-gray-800 shadow-xl
             overflow-hidden max-h-[70vh] overflow-y-auto
           "
         >

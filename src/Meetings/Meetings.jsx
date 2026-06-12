@@ -136,37 +136,51 @@ function Meetings() {
   }, [mappedData]);
 
   return (
-    <div className="flex flex-col items-center justify-start w-full min-h-screen transition-colors duration-300 pb-[calc(env(safe-area-inset-bottom)_+_1rem)]">
-      
-      {/* Set to top-0 since Header.jsx now handles the notch padding internally */}
-      <div className="fixed top-0 left-0 w-full z-50">
+    <div className="flex flex-col items-center justify-start w-full min-h-screen transition-colors duration-300">
+      <div className="fixed top-[10px] left-0 w-full z-10 bg-transparent">
         <Header />
       </div>
-
-      {/* Added the dynamic calc() to push the main content down below the notch + header height */}
-      <main className="mt-[calc(env(safe-area-inset-top)_+_90px)] w-full max-w-7xl px-3 sm:px-6 md:px-10">
-        <h1 className="pb-2 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-          Meetings
-        </h1>
+      <main className="mt-[80px] w-full max-w-7xl px-3 sm:px-6 md:px-10">
+        <div className="mb-6 flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl shadow-lg shadow-amber-500/20">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 tracking-tight">
+              My Meetings
+            </h1>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium ml-[52px]">Track your attendance and meeting history</p>
+        </div>
         <section className="w-full mb-6">
           <MeetingsFilter onChange={setFilterState} />
         </section>
         <section className="mb-6">
           <Stats header="Meeting Stats" items={stats} />
         </section>
-        <section className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 rounded-2xl shadow-sm transition-colors duration-300">
-          <div className="ml-3 overflow-y-auto h-[400px] sm:h-[400px] rounded-2xl">
-            <Meeting header />
-            {loading ? (
-              <div className="flex justify-center items-center py-8 text-gray-700 dark:text-gray-300">Loading...</div>
-            ) : filteredMeetings.length > 0 ? (
-              filteredMeetings.map(content => (
+        <section className="w-full mb-8">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
+              <p className="text-gray-500 dark:text-gray-400 font-medium">Loading your meetings...</p>
+            </div>
+          ) : filteredMeetings.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {filteredMeetings.map(content => (
                 <Meeting key={content.id} content={content} />
-              ))
-            ) : (
-              <div className="p-10 text-center text-gray-500 font-semibold">No Meetings Found</div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-800/50 border border-dashed border-gray-300 dark:border-gray-700 rounded-3xl">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                <span className="text-2xl">📅</span>
+              </div>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">No Meetings Found</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your filters to see more results.</p>
+            </div>
+          )}
         </section>
       </main>
     </div>

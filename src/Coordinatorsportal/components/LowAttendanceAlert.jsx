@@ -148,8 +148,8 @@ const LowAttendanceAlert = () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               receiver: member.name,
-              header: 'Low Attendance Alert',
-              content: `Hello ${member.name}, your attendance is ${member.attendance}%. Please improve your participation.`
+              header: `⚠️ Action Required: Low Attendance Alert`,
+              content: `Hi ${member.name}, we've noticed your attendance is currently at ${member.attendance}%.\n\nYour presence is vital to the chapter's success! Please make sure to attend upcoming meetings to stay active and avoid any penalties. We hope to see you soon!`,
             })
           });
           if (!res.ok) {
@@ -364,9 +364,19 @@ const LowAttendanceAlert = () => {
                               Send Alert
                             </button>
                             <button
+                              onClick={() => {
+                                  const msg = `⚠️ Action Required: Low Attendance Alert\nHi ${row.name}, we've noticed your attendance is currently at ${row.attendance}%. 📉\n\nYour presence is vital to the chapter's success! Please make sure to attend upcoming meetings to stay active and avoid any penalties. We hope to see you soon! 🤝`;
+                                  window.open(`https://wa.me/${row.contact}?text=${encodeURIComponent(msg)}`, '_blank');
+                              }}
+                              disabled={loading}
+                              className="flex-1 px-3 py-1 rounded text-xs font-semibold bg-green-500 hover:bg-green-600 text-white disabled:opacity-50 transition-colors"
+                            >
+                              WhatsApp
+                            </button>
+                            <button
                               onClick={() => handleCall(row.contact)}
                               disabled={loading}
-                              className="px-3 py-1 rounded text-xs font-semibold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 transition-colors"
+                              className="flex-1 px-3 py-1 rounded text-xs font-semibold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 transition-colors"
                             >
                               Call
                             </button>

@@ -19,11 +19,11 @@ function EventManagement() {
   );
 
   function reminderHeader(event) {
-    return `Event Reminder: ${event.event_title}`;
+    return `📅 Upcoming Event Reminder: ${event.event_title}`;
   }
 
   function reminderContent(event) {
-    return `This is a reminder for your upcoming event "${event.event_title}" scheduled on ${new Date(event.event_date).toLocaleDateString()} at ${event.event_time} in ${event.location || "the designated location"}.\nEvent type: ${event.event_type}. Status: ${event.event_status}.\n${event.event_description ? "\nDescription: " + event.event_description : ""}`;
+    return `Don't forget! Your event '${event.event_title}' is happening soon! ⏳\n\n🗓 Date: ${new Date(event.event_date).toLocaleDateString()} at ${event.event_time}\n📍 Location: ${event.location || 'See event details'}\n\n${event.event_description ? '📝 ' + event.event_description : ''}\n\nSee you there! 👋`;
   }
 
   const sendEventReminder = async () => {

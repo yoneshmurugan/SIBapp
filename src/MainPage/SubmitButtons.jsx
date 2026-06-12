@@ -4,25 +4,25 @@ import ButtonUI from './Components/ButtonUI'
 function SubmitButtons() {
   const buttonData = [
     {
-      label: "Submit Referral",
-      discription: "Create new referral slip",
+      label: "Referral",
+      discription: "New referral slip",
       component: "referral",
     },
     {
-      label: "Submit TYB",
-      discription: "Create new TYB slip",
+      label: "TYFTB",
+      discription: "New TYB slip",
       component: "tyftb",
     },
     {
-      label: "Submit M to M",
-      discription: "Create new M to M slip",
+      label: "M to M",
+      discription: "New M2M slip",
       component: "m2m",
     },
-    {
-      label: "Submit Visitor",
-      discription: "Create new visitor slip",
-      component: "visitors",
-    },
+    // {
+    //   label: "Submit Visitor",
+    //   discription: "Create new visitor slip",
+    //   component: "visitors",
+    // },
   ];
 
   const buttons = () => {
@@ -38,20 +38,11 @@ function SubmitButtons() {
   };
 
   return (
-    <div
-      className="
-        bg-white dark:bg-gray-700/5
-        rounded-lg sm:rounded-xl lg:rounded-2xl
-        grid 
-        grid-cols-2 
-        md:grid-cols-4 
-        gap-3 sm:gap-4
-        p-3 sm:p-4
-        shadow-sm dark:shadow-gray-900/5
-        transition-colors duration-300
-      "
-    >
-      {buttons()}
+    <div className="bg-white dark:bg-gray-900 rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors duration-300 space-y-2.5">
+      <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.18em] px-1">Quick Submit</p>
+      <div className="grid grid-cols-3 gap-2">
+        {buttons()}
+      </div>
     </div>
   );
 }

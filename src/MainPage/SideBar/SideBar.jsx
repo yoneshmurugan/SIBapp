@@ -1,21 +1,18 @@
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import SidebarList from './SidebarList';
 import useFetch from "../../hooks/useFetch";
 
-export default function HeaderAvatar({
-  items: initialItems = [
-    { name: "Dashboard", icon: "House", path: "/dashboard" },
-    { name: "My Activity", icon: "TrendingUp", path: "/myactivity" },
-    { name: "Members Directory", icon: "users", path: "/members" },
-    { name: "Meetings", icon: "calendar", path: "/meetings" },
-    // { name: "Chapter Info", icon: "building2", path: "/mychapter" },
-    { name: "Referral Slips", icon: "fileText", path: "/slips" },
-    { name: "Notifications", icon: "messageSquareDot", path: "/allnotifications" },
-    // { name: "Visitors", icon: "userPlus", path: "/visitors" },
-    // { name: "Substitutes", icon: "clock4", path: "/substitutes" }
-  ]
-}) {
+const DEFAULT_ITEMS = [
+  { name: "Dashboard",         icon: "House",           path: "/dashboard" },
+  { name: "My Activity",       icon: "TrendingUp",      path: "/myactivity" },
+  { name: "Members Directory", icon: "Users",           path: "/members" },
+  { name: "Meetings",          icon: "Calendar",        path: "/meetings" },
+  { name: "Referral Slips",    icon: "FileText",        path: "/slips" },
+  { name: "Notifications",     icon: "MessageSquareDot",path: "/allnotifications" },
+];
+
+export default function SideBar({ items: initialItems = DEFAULT_ITEMS }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState(initialItems);
   const btnRef = useRef(null);
@@ -30,54 +27,43 @@ export default function HeaderAvatar({
     { method: "GET", credentials: "include" }
   );
 
+  // Add coordinator items
   useEffect(() => {
-    if (coordinatorsAccess?.hasaccess) {
-      setItems(prev => {
-        const exists = prev.some(e => e.path === "/coordinatorsportal");
-        if (!exists) {
-          return [
-            ...prev,
-            { name: "Members Analytics", icon: "chartLine", path: "/memberdetailedanalytics" },
-            { name: "Coordinators Portal", icon: "users", path: "/coordinatorsportal" }
-          ];
-        }
-        return prev;
-      });
-    }
+    if (!coordinatorsAccess?.hasaccess) return;
+    setItems(prev => {
+      if (prev.some(e => e.path === "/coordinatorsportal")) return prev;
+      return [
+        ...prev,
+        { name: "Members Analytics",  icon: "ChartLine",  path: "/memberdetailedanalytics" },
+        { name: "Coordinators Portal", icon: "ShieldCheck", path: "/coordinatorsportal" },
+      ];
+    });
   }, [coordinatorsAccess]);
 
+  // Add president items (superset of coordinator)
   useEffect(() => {
-    if (access?.hasaccess) {
-      setItems(prev => {
-        const existsPres = prev.some(e => e.path === "/presidentportal");
-        if (!existsPres) {
-         return [
-    ...prev,
-    { name: "Members Analytics", icon: "chartLine", path: "/memberdetailedanalytics" },
-    { name: "President Portal", icon: "users", path: "/presidentportal" },
-    { name: "Coordinators Portal", icon: "users", path: "/coordinatorsportal" }
-];
-
-        }
-        return prev;
-      });
-    }
+    if (!access?.hasaccess) return;
+    setItems(prev => {
+      if (prev.some(e => e.path === "/presidentportal")) return prev;
+      // Remove coordinator-only entries if president is adding their own superset
+      const base = prev.filter(e => e.path !== "/memberdetailedanalytics" && e.path !== "/coordinatorsportal");
+      return [
+        ...base,
+        { name: "Members Analytics",  icon: "ChartLine",  path: "/memberdetailedanalytics" },
+        { name: "President Portal",   icon: "Crown",       path: "/presidentportal" },
+        { name: "Coordinators Portal", icon: "ShieldCheck", path: "/coordinatorsportal" },
+      ];
+    });
   }, [access]);
 
+  // Close on outside click or Escape
   useEffect(() => {
-    function onDocClick(e) {
-      if (!open) return;
-      if (
-        btnRef.current && !btnRef.current.contains(e.target) &&
-        menuRef.current && !menuRef.current.contains(e.target)
-      ) {
-        setOpen(false);
-      }
-    }
-    function onKey(e) {
-      if (!open) return;
-      if (e.key === "Escape") setOpen(false);
-    }
+    if (!open) return;
+    const onDocClick = e => {
+      if (btnRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
+      setOpen(false);
+    };
+    const onKey = e => { if (e.key === "Escape") setOpen(false); };
     document.addEventListener("mousedown", onDocClick);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -86,51 +72,63 @@ export default function HeaderAvatar({
     };
   }, [open]);
 
-  const handleMenuItemClick = () => setOpen(false);
-
   return (
-    <div className="relative z-10">
+    <div className="relative z-50">
+      {/* Hamburger button */}
       <button
         ref={btnRef}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen(v => !v)}
-        onKeyDown={e => {
-          if (["Enter", " "].includes(e.key)) {
-            e.preventDefault();
-            setOpen(v => !v);
-          }
-        }}
-        className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
-        aria-label="Toggle sidebar menu"
+        className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150 active:scale-90"
+        aria-label="Toggle navigation menu"
       >
-        <Menu className="text-gray-700 dark:text-gray-200" size={24} />
+        {open
+          ? <X className="text-gray-700 dark:text-gray-200" size={22} />
+          : <Menu className="text-gray-700 dark:text-gray-200" size={22} />
+        }
       </button>
 
+      {/* Overlay backdrop */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/20 dark:bg-black/40 backdrop-blur-[2px]"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* Dropdown panel */}
       {open && (
         <div
           ref={menuRef}
           role="menu"
           tabIndex={-1}
           className="
-            absolute left-0 mt-2 w-56
-            rounded-lg border border-neutral-300 dark:border-gray-600
-            bg-white dark:bg-gray-800
-            shadow-2xl
-            max-h-[70vh] overflow-y-auto
-            transition-all duration-200
-            animate-in fade-in zoom-in-95
+            absolute left-0 top-[calc(100%+8px)] z-50
+            w-[240px]
+            bg-white dark:bg-gray-900
+            border border-gray-200 dark:border-gray-800
+            rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/40
+            overflow-hidden
+            animate-in fade-in slide-in-from-top-2 duration-200
           "
         >
-          <ul className="py-2 px-1">
-            {items.map(element => (
+          {/* Panel header */}
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.18em]">Navigation</p>
+          </div>
+
+          {/* Nav items */}
+          <ul className="p-2 space-y-0.5 max-h-[70vh] overflow-y-auto">
+            {items.map((element, i) => (
               <SidebarList
                 key={element.path}
                 name={element.name}
                 icon={element.icon}
                 path={element.path}
-                onClick={handleMenuItemClick}
+                onclick={() => setOpen(false)}
+                index={i}
               />
             ))}
           </ul>

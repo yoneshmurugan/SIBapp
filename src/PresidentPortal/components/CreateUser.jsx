@@ -124,7 +124,7 @@ export default function CreateMemberForm() {
 
             const payload = {
                 receiver: form.username,
-                header: "Welcome to SIB Platform!r",
+                header: "👋 Welcome to SIB Platform",
                 content: `Hello and welcome to the Sengunthar In Business family! Your account has been created successfully. You can now log in to access all features and participate in chapter activities. If you have any questions or need assistance, feel free to reach out to support.`
             };
 

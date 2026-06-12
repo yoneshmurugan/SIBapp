@@ -94,7 +94,7 @@ export default function ModalViewer() {
         const result = await res.json();
         if (result?.message === "success") {
           const notificationData = {
-            header: `A new chapter meeting has been scheduled.`,
+            header: `🗓️ A new chapter meeting has been scheduled.`,
             content: `A new meeting titled ${title} has been scheduled for ${date} at ${time} in ${location}. Please review the meeting details and ensure your availability. Please mark your calendar and be prepared to attend.
             Thank you!`,
             read: false,

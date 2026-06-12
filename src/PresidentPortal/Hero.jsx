@@ -19,11 +19,11 @@ function Hero() {
   );
 
   function reminderHeader(meeting) {
-    return `Meeting Reminder: ${meeting.title}`;
+    return `⏰ Meeting Reminder: ${meeting.title}`;
   }
 
   function reminderContent(meeting) {
-    return `This is a reminder for your upcoming meeting "${meeting.title}" scheduled on ${new Date(meeting.meeting_date).toLocaleDateString()} at ${meeting.meeting_time} in ${meeting.location || "the designated location"}.\nMeeting type: ${meeting.meeting_type}. Duration: ${meeting.duration} minutes.\n${meeting.meeting_notes ? "\nNotes: " + meeting.meeting_notes : ""}`;
+    return `Get ready! The '${meeting.title}' meeting is coming up. 👥\n\n🗓 Date: ${new Date(meeting.meeting_date).toLocaleDateString()} at ${meeting.meeting_time}\n📍 Location: ${meeting.location || 'See meeting details'}\n⏱ Duration: ${meeting.duration} mins\n\n${meeting.meeting_notes ? '📌 ' + meeting.meeting_notes : ''}`;
   }
 
   const sendRemainder = async () => {

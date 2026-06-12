@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import useFetch from "../hooks/useFetch";
 import Header from "../MainPage/Header";
+import { Bell, Info, X, Calendar, User, AlignLeft, CheckCircle2 } from "lucide-react";
 
 function formatTime(iso) {
   try {
@@ -14,7 +15,12 @@ function formatTime(iso) {
     if (hr < 24) return `${hr}h ago`;
     const day = Math.floor(hr / 24);
     if (day < 7) return `${day}d ago`;
-    return d.toLocaleString();
+    return d.toLocaleString([], {
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
   } catch {
     return "";
   }
@@ -64,144 +70,214 @@ export default function NotificationsPage() {
     }
   }, [showDetail]);
 
+  const handleClearAll = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/notification/deleteallnotifications`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (res.ok) {
+        setUrl(`${url}?retry=${Date.now()}`);
+      }
+    } catch (e) {
+      console.error("Failed to clear notifications", e);
+    }
+  };
+
+  const sortedData = Array.isArray(data) ? [...data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
+
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="absolute w-full left-0 top-1">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
+      <div className="absolute w-full left-0 top-1">
         <Header />
+      </div>
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+              Notifications
+            </h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Stay updated with the latest activities and alerts.
+            </p>
+          </div>
+          {!loading && !error && sortedData.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="text-sm font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+            >
+              Clear All
+            </button>
+          )}
         </div>
-      <h1 className="text-2xl font-bold mb-6 mt-10 dark:text-amber-50">Notifications</h1>
-      {loading && (
-        <div className="text-gray-500 dark:text-gray-400 py-8 text-center">Loading notifications…</div>
-      )}
-      {error && (
-        <div className="py-8 text-center">
-          <div className="text-red-600 mb-2">Failed to load: {error}</div>
-          <button
-            className="rounded-md px-4 py-2 bg-amber-400 text-black hover:bg-amber-500"
-            onClick={() => setUrl(url)}
-          >
-            Retry
-          </button>
-        </div>
-      )}
-      {!loading && !error && Array.isArray(data) && data.length === 0 && (
-        <div className="text-black dark:text-gray-200 py-8 text-center">No notifications.</div>
-      )}
-      {!loading && !error && Array.isArray(data) && data.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
-          <table className="w-full min-w-[400px] border-collapse">
-            <thead>
-              <tr className="bg-indigo-50 dark:bg-indigo-900/30">
-                <th className="text-left px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">New</th>
-                <th className="text-left px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Header</th>
-                <th className="text-left px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Content</th>
-                <th className="text-left px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Time</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((n) => (
-                <tr key={n._id} className={n.read ? "" : "bg-indigo-50 dark:bg-indigo-900/10"}>
-                  <td className="px-3 py-2">
-                    {!n.read && (
-                      <span className="inline-block h-2 w-2 rounded-full bg-red-500" aria-label="Unread" />
-                    )}
-                  </td>
-                  <td className="px-3 py-2 font-medium truncate max-w-[120px] text-gray-900 dark:text-gray-200">{n.header}</td>
-                  <td className="px-3 py-2 truncate max-w-[220px] text-gray-700 dark:text-gray-400">{n.content}</td>
-                  <td className="px-3 py-2 text-gray-500 dark:text-gray-400 text-xs">{formatTime(n.createdAt)}</td>
-                  <td className="px-3 py-2">
-                    <button
-                      onClick={() => {
-                        setActiveNotif(n);
-                        setShowDetail(true);
-                      }}
-                      className="rounded-md px-2 py-1 bg-indigo-100 dark:bg-indigo-700 text-indigo-800 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-xs"
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      {showDetail && activeNotif && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Notification details"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setShowDetail(false);
-          }}
-        >
+
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-500 dark:text-gray-400 font-medium">Loading notifications...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="py-12 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-red-100 dark:border-red-900/30 text-center px-4">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Info className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Failed to load notifications</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">{error}</p>
+            <button
+              className="rounded-xl px-6 py-2.5 bg-amber-400 text-black font-semibold hover:bg-amber-500 transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-amber-400"
+              onClick={() => setUrl(`${url}?retry=${Date.now()}`)}
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && sortedData.length === 0 && (
+          <div className="py-20 bg-white dark:bg-gray-800/50 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 text-center px-4">
+            <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900 text-gray-300 dark:text-gray-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <Bell className="w-10 h-10" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">You're all caught up</h3>
+            <p className="text-gray-500 dark:text-gray-400">There are no new notifications to show here right now.</p>
+          </div>
+        )}
+
+        {!loading && !error && sortedData.length > 0 && (
+          <div className="space-y-4">
+            {sortedData.map((n) => (
+              <div
+                key={n._id}
+                onClick={() => {
+                  setActiveNotif(n);
+                  setShowDetail(true);
+                }}
+                className={`group relative bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/50 transition-all duration-200 cursor-pointer overflow-hidden ${
+                  !n.read ? "ring-1 ring-amber-400/50 bg-amber-50/10 dark:bg-amber-900/5" : ""
+                }`}
+              >
+                {!n.read && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>
+                )}
+                
+                <div className="flex gap-4 sm:gap-5">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${
+                      !n.read ? "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400" : "bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400"
+                    }`}>
+                      <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+                      <h3 className={`text-base sm:text-lg truncate pr-4 ${!n.read ? "font-bold text-gray-900 dark:text-white" : "font-semibold text-gray-800 dark:text-gray-200"}`}>
+                        {n.header}
+                      </h3>
+                      <span className="text-xs font-medium text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                        {formatTime(n.createdAt)}
+                      </span>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed mb-3">
+                      {n.content}
+                    </p>
+                    
+                    <div className="flex items-center text-xs font-medium text-amber-600 dark:text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-1 group-hover:translate-y-0 duration-200">
+                      View details <span className="ml-1">→</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Modal Overlay for Details */}
+        {showDetail && activeNotif && (
           <div
-            ref={detailRef}
-            className="w-full max-w-md rounded-lg bg-white dark:bg-gray-800 p-4 shadow-lg outline-none"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Notification details"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setShowDetail(false);
+            }}
           >
-            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-2 mb-2">
-              <h4 className="text-lg font-semibold text-black dark:text-gray-200">
-                {activeNotif.header}
-              </h4>
-              <button
-                className="rounded-md p-1 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                onClick={() => setShowDetail(false)}
-                aria-label="Close details"
-              >
-                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor" aria-hidden="true">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 8.586l4.95-4.95 1.414 1.414L11.414 10l4.95 4.95-1.414 1.414L10 11.414l-4.95 4.95-1.414-1.414L8.586 10l-4.95-4.95L5.05 3.636 10 8.586z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="space-y-2">
-              <div className="text-gray-800 dark:text-gray-200">
-                <span className="font-semibold">Message:</span>
-                <div className="mt-1 whitespace-pre-wrap">{activeNotif.content}</div>
+            <div
+              ref={detailRef}
+              className="w-full max-w-lg rounded-3xl bg-white dark:bg-gray-900 shadow-2xl outline-none transform animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              {/* Modal Header */}
+              <div className="flex-shrink-0 px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-start justify-between bg-gray-50/50 dark:bg-gray-800/20">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      !activeNotif.read ? "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                    }`}>
+                      <Bell className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                      {activeNotif.header}
+                    </h4>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {formatTime(activeNotif.createdAt)}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  className="rounded-full p-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus:outline-none"
+                  onClick={() => setShowDetail(false)}
+                  aria-label="Close details"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <div className="text-gray-400 text-xs">
-                <div>
-                  <span className="font-semibold">Created:</span> {formatTime(activeNotif.createdAt)}
+
+              {/* Modal Body */}
+              <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-5 mb-6 border border-gray-100 dark:border-gray-700/50">
+                  <h5 className="text-sm font-semibold text-gray-900 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <AlignLeft className="w-4 h-4 text-amber-500" />
+                    Message
+                  </h5>
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed text-sm sm:text-base">
+                    {activeNotif.content}
+                  </p>
                 </div>
-                <div>
-                  <span className="font-semibold">Status:</span> {activeNotif.read ? 'Read' : 'Unread'}
-                </div>
-                {activeNotif.sender && (
-                  <div>
-                    <span className="font-semibold">Sender:</span> {activeNotif.sender}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50 flex flex-col">
+                    <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                       Status
+                    </span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                      {activeNotif.read ? (
+                         <><CheckCircle2 className="w-4 h-4 text-green-500" /> Read</>
+                      ) : (
+                         <><span className="w-2 h-2 rounded-full bg-amber-500 ml-1"></span> Unread</>
+                      )}
+                    </span>
                   </div>
-                )}
-                {activeNotif.receiver && (
-                  <div>
-                    <span className="font-semibold">Receiver:</span> {activeNotif.receiver}
-                  </div>
-                )}
-                {activeNotif.readAt && (
-                  <div>
-                    <span className="font-semibold">Read At:</span> {formatTime(activeNotif.readAt)}
-                  </div>
-                )}
-                <div>
-                  <span className="font-semibold">Notification ID:</span> {activeNotif._id}
                 </div>
               </div>
-            </div>
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                className="rounded-md px-4 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-black dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
-                onClick={() => setShowDetail(false)}
-              >
-                Close
-              </button>
+
+              {/* Modal Footer */}
+              <div className="flex-shrink-0 px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 flex justify-end">
+                <button
+                  className="rounded-xl px-6 py-2.5 text-sm font-semibold bg-gray-900 text-white dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 shadow-sm"
+                  onClick={() => setShowDetail(false)}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   );
 }

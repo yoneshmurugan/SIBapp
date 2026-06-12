@@ -81,7 +81,7 @@ export default function CreateEvent() {
         const result = await res.json();
         if (result?.message === "success") {
           const notificationData = {
-            header: `A new Event has been scheduled.`,
+            header: `🎟️ A new Event has been scheduled.`,
             content: `A new Event titled ${title} has been scheduled for ${date} at ${time} in ${location}. Please review the meeting details and ensure your availability. Please mark your calendar and be prepared to attend.
             Thank you!`,
             read: false,

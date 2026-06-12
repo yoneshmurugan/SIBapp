@@ -42,37 +42,40 @@ const DetailRow = ({
   editable = false,
   onChange,
   type = "text",
-}) => (
-  <div className="flex items-start gap-3 w-full overflow-hidden">
-    {/* ALIGNMENT FIX: Fixed width container for icon (or empty space) */}
-    <div className="mt-0.5 shrink-0 w-5 flex justify-center text-slate-400 dark:text-gray-400">
-      {icon || <div className="w-5" />} 
-    </div>
-
-    <div className="min-w-0 flex-1">
-      {/* Label */}
-      <p className="text-sm w-full truncate font-semibold text-slate-600 dark:text-gray-300">
-        {label}
-      </p>
-      
-      {/* Value */}
-      {editable ? (
+}) => {
+  if (editable) {
+    return (
+      <div className="flex flex-col gap-1 w-full group transition-colors p-3 rounded-xl bg-gray-50 dark:bg-gray-800/30 hover:bg-gray-100/50 dark:hover:bg-gray-800/50">
+        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+          {label}
+        </p>
         <input
           type={type}
           value={value || ""}
           onChange={(e) => onChange && onChange(e.target.value)}
-          className={`text-sm w-full text-slate-900 dark:text-gray-100 ${valueClass} border border-slate-300 dark:border-gray-600 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-transparent`}
+          className={`text-[13px] font-semibold w-full text-gray-900 dark:text-white ${valueClass} border-b border-amber-200 dark:border-amber-900/50 focus:border-amber-500 bg-transparent px-0 py-1 outline-none transition-colors`}
         />
-      ) : (
-        /* OVERFLOW FIX: 'truncate' forces single line with ellipsis. 
-           Address overrides this with 'whitespace-normal' via valueClass. */
-        <p className={`w-full text-sm text-slate-900 dark:text-gray-100 truncate ${valueClass}`}>
-          {value || "-"}
+      </div>
+    );
+  }
+
+  // View Mode
+  return (
+    <div className="flex items-start gap-4 py-2 border-b border-gray-100/50 dark:border-gray-800/50 last:border-0">
+      <div className="mt-1 shrink-0 text-amber-500/80 dark:text-amber-400/80">
+        {icon || <div className="w-5 h-5" />} 
+      </div>
+      <div className="flex flex-col">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-0.5">
+          {label}
         </p>
-      )}
+        <p className={`text-[14px] font-medium text-gray-800 dark:text-gray-200 leading-snug ${valueClass}`}>
+          {value || "—"}
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ProfileCard = ({
   data = {
@@ -158,12 +161,9 @@ const ProfileCard = ({
   };
 
   const renderFields = (fields) => (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-2">
       {fields.map((field) => (
-        <div
-          key={field.key}
-          className={`${field.colSpan === 2 ? "md:col-span-2" : "md:col-span-1"} min-w-0`}
-        >
+        <div key={field.key} className="min-w-0">
           <DetailRow
             editable={isEditing}
             icon={field.icon}
@@ -179,21 +179,21 @@ const ProfileCard = ({
   );
 
   return (
-    <section className="w-full rounded-3xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm">
+    <section className="w-full rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
       {(loading || status.message) && (
-        <div className="mb-4 text-center text-sm font-medium animate-fade-in">
-          {loading && <div className="text-blue-500">Saving changes...</div>}
+        <div className="mb-4 text-center text-xs font-bold animate-fade-in">
+          {loading && <div className="text-amber-500">Saving changes...</div>}
           {!loading && status.type === "error" && (
-            <div className="text-red-500">{status.message}</div>
+            <div className="text-red-500 bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{status.message}</div>
           )}
           {!loading && status.type === "success" && (
-            <div className="text-green-600">{status.message}</div>
+            <div className="text-green-600 bg-green-50 dark:bg-green-900/20 py-2 rounded-lg">{status.message}</div>
           )}
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-gray-100">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-black text-gray-900 dark:text-white">
           Personal Details
         </h2>
         {editable && (
@@ -201,23 +201,23 @@ const ProfileCard = ({
             type="button"
             onClick={handleEditToggle}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-sm font-medium text-amber-600 dark:text-amber-400 shadow-sm hover:bg-amber-50 dark:hover:bg-amber-500/20 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 px-4 py-1.5 text-[11px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 active:scale-95 transition-all"
           >
-            {isEditing ? <Save size={15} /> : <PencilLine size={15} />}
+            {isEditing ? <Save size={13} /> : <PencilLine size={13} />}
             {isEditing ? "Save" : "Edit"}
           </button>
         )}
       </div>
 
-      <div className="my-4 h-px w-full bg-slate-200/70 dark:bg-gray-700" />
-
       {/* Basic Contact Info */}
-      {renderFields(fieldConfig.slice(0, 4))}
-
-      <div className="my-5 h-px w-full bg-slate-200/70 dark:bg-gray-700" />
+      <div className={isEditing ? "bg-gray-50 dark:bg-gray-800/30 rounded-2xl p-2 mb-4" : "mb-6"}>
+        {renderFields(fieldConfig.slice(0, 4))}
+      </div>
 
       {/* Personal Info */}
-      {renderFields(fieldConfig.slice(4))}
+      <div className={isEditing ? "bg-gray-50 dark:bg-gray-800/30 rounded-2xl p-2" : ""}>
+        {renderFields(fieldConfig.slice(4))}
+      </div>
     </section>
   );
 };

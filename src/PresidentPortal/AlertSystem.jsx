@@ -8,6 +8,7 @@ const AlertSystem = ({ onAlertSent }) => {
     notificationMethods: {
       inapp: true,
       email: false,
+      push: true,
     }
   });
 
@@ -46,7 +47,7 @@ const AlertSystem = ({ onAlertSent }) => {
       setError('Alert message is required');
       return false;
     }
-    if (!formData.notificationMethods.inapp && !formData.notificationMethods.email) {
+    if (!formData.notificationMethods.inapp && !formData.notificationMethods.email && !formData.notificationMethods.push) {
       setError('Please select at least one notification method');
       return false;
     }
@@ -61,13 +62,20 @@ const AlertSystem = ({ onAlertSent }) => {
     setSuccess(null);
 
     try {
+      const typeIcons = {
+        Announcement: '📢',
+        Urgent: '🚨',
+        'Event Info': '📅'
+      };
+      
       const payload = {
-        header: `[${formData.type}] ${formData.title}`,
+        header: `${typeIcons[formData.type] || ''} ${formData.type}: ${formData.title}`.trim(),
         content: formData.message,
         type: formData.type,
         methods: {
           inapp: formData.notificationMethods.inapp,
-          email: formData.notificationMethods.email
+          email: formData.notificationMethods.email,
+          push: formData.notificationMethods.push
         }
       };
 
@@ -94,7 +102,8 @@ const AlertSystem = ({ onAlertSent }) => {
         message: "",
         notificationMethods: {
           inapp: true,
-          email: false
+          email: false,
+          push: true
         }
       });
 
@@ -211,6 +220,15 @@ const AlertSystem = ({ onAlertSent }) => {
           <label className="flex items-center gap-2 cursor-pointer">
             <input 
               type="checkbox"
+              checked={formData.notificationMethods.push}
+              onChange={() => handleNotificationChange('push')}
+              className="accent-blue-500 scale-110"
+            />
+            <span className="text-gray-900 dark:text-gray-100 text-sm">Push Notification</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input 
+              type="checkbox"
               checked={formData.notificationMethods.email}
               onChange={() => handleNotificationChange('email')}
               className="accent-blue-500 scale-110"
@@ -226,7 +244,9 @@ const AlertSystem = ({ onAlertSent }) => {
           ${alertTypeColors[formData.type]}
         `}>
           <h3 className="font-bold mb-2 text-gray-900 dark:text-gray-50">Preview:</h3>
-          <p className="font-semibold mb-2 text-gray-900 dark:text-gray-50">{`[${formData.type}] ${formData.title}`}</p>
+          <p className="font-semibold mb-2 text-gray-900 dark:text-gray-50">
+            {`${formData.type === 'Announcement' ? '📢' : formData.type === 'Urgent' ? '🚨' : '📅'} ${formData.type}: ${formData.title}`}
+          </p>
           <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{formData.message}</p>
         </div>
       )}

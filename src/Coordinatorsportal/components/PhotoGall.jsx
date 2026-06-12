@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   X, ChevronLeft, ChevronRight, ZoomIn, Image as ImageIcon, 
   Plus, Trash2, Upload, FolderPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2,
-  Calendar, ArrowLeftIcon, Star, GripHorizontal, Save
+  Calendar, ArrowLeftIcon, Star, GripHorizontal, Save, Users, MapPin, MessageSquare, Info
 } from 'lucide-react';
+
+const M2M_PUBLIC_API_URL = `${import.meta.env.VITE_BACKEND_SERVER}/public/getm2mslips`;
 
 const BACKEND_SERVER_URL = import.meta.env.VITE_BACKEND_SERVER; 
 const UPLOAD_API_URL = `${BACKEND_SERVER_URL}/auth/upload/photo`;
@@ -95,7 +97,13 @@ const UploadProgress = ({ progress, currentFile, totalFiles }) => {
   );
 };
 
-const Lightbox = ({ isOpen, image, onClose, onNext, onPrev, hasNext, hasPrev }) => {
+const Lightbox = ({ isOpen, image, onClose, onNext, onPrev, hasNext, hasPrev, m2mSlip }) => {
+  const [showDetails, setShowDetails] = useState(true);
+
+  useEffect(() => {
+    if (isOpen) setShowDetails(true); // Reset on open
+  }, [isOpen, image]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!isOpen) return;
@@ -111,42 +119,114 @@ const Lightbox = ({ isOpen, image, onClose, onNext, onPrev, hasNext, hasPrev }) 
   if (!isOpen || !image) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 backdrop-blur-sm animate-in fade-in duration-200">
-      <button 
-        onClick={onClose}
-        className="absolute top-4 right-4 p-2 text-white/75 hover:text-white hover:bg-white/10 rounded-full transition-colors z-50"
-      >
-        <X size={32} />
-      </button>
-
-      {hasPrev && (
-        <button 
-          onClick={(e) => { e.stopPropagation(); onPrev(); }}
-          className="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/75 hover:text-white hover:bg-white/10 rounded-full transition-colors z-50 hidden md:block"
-        >
-          <ChevronLeft size={40} />
+    <div className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm animate-in fade-in duration-200 flex flex-col">
+      {/* Top Bar */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 z-50">
+        <button onClick={onClose} className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+          <X size={22} />
         </button>
-      )}
 
-      {hasNext && (
-        <button 
-          onClick={(e) => { e.stopPropagation(); onNext(); }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/75 hover:text-white hover:bg-white/10 rounded-full transition-colors z-50 hidden md:block"
+        {m2mSlip && (
+          <button
+            onClick={() => setShowDetails(v => !v)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+              showDetails ? 'bg-white text-neutral-900' : 'bg-white/10 text-white hover:bg-white/20'
+            }`}
+          >
+            <Info size={14} />
+            M2M Details
+          </button>
+        )}
+
+        <div className="flex gap-2">
+          {hasPrev && (
+            <button onClick={(e) => { e.stopPropagation(); onPrev(); }} className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+              <ChevronLeft size={22} />
+            </button>
+          )}
+          {hasNext && (
+            <button onClick={(e) => { e.stopPropagation(); onNext(); }} className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+              <ChevronRight size={22} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+        {/* Image */}
+        <div 
+          className="flex-1 flex items-center justify-center p-4"
+          onClick={onClose}
         >
-          <ChevronRight size={40} />
-        </button>
-      )}
+          <img 
+            src={image.src} 
+            alt="Gallery Image"
+            className="max-w-full max-h-full object-contain shadow-2xl rounded-lg select-none"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
 
-      <div 
-        className="relative w-full h-full flex items-center justify-center p-4 md:p-12"
-        onClick={onClose}
-      >
-        <img 
-          src={image.src} 
-          alt="Gallery Image"
-          className="max-w-full max-h-full object-contain shadow-2xl rounded-sm select-none"
-          onClick={(e) => e.stopPropagation()}
-        />
+        {/* M2M Details Panel */}
+        {m2mSlip && showDetails && (
+          <div className="w-full md:w-80 bg-neutral-900/95 border-t md:border-t-0 md:border-l border-white/10 overflow-y-auto animate-in slide-in-from-bottom md:slide-in-from-right duration-300">
+            <div className="p-5">
+              <h3 className="text-white font-bold text-base mb-1">M2M Meeting Details</h3>
+              <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-5">
+                {m2mSlip.chapter?.chapter_name || 'Chapter'}
+              </p>
+
+              {/* Members */}
+              <div className="bg-white/5 rounded-xl p-4 mb-3">
+                <div className="flex items-center gap-2 mb-3">
+                  <Users size={14} className="text-neutral-400" />
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Members</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <p className="text-white text-sm font-semibold">{m2mSlip.member1?.username || 'N/A'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                    <p className="text-white text-sm font-semibold">{m2mSlip.member2?.username || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Date & Location */}
+              <div className="bg-white/5 rounded-xl p-4 mb-3 space-y-3">
+                <div className="flex items-start gap-2">
+                  <Calendar size={14} className="text-neutral-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Meeting Date</p>
+                    <p className="text-white text-sm font-semibold mt-1">
+                      {m2mSlip.meeting_date ? new Date(m2mSlip.meeting_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <MapPin size={14} className="text-neutral-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Location</p>
+                    <p className="text-white text-sm font-semibold mt-1">{m2mSlip.location || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Discussion Points */}
+              {m2mSlip.discussion_points && (
+                <div className="bg-white/5 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MessageSquare size={14} className="text-neutral-400" />
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Discussion</span>
+                  </div>
+                  <p className="text-neutral-200 text-sm leading-relaxed">{m2mSlip.discussion_points}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -268,6 +348,17 @@ export default function PhotoGallery({ onBack }) {
 
   const [newAlbumTitle, setNewAlbumTitle] = useState("");
   const fileInputRef = useRef(null);
+
+  // M2M Slips State — fetched from public endpoint
+  const [m2mSlips, setM2mSlips] = useState([]);
+
+  // Fetch M2M slips from public API
+  useEffect(() => {
+    fetch(M2M_PUBLIC_API_URL, { method: 'GET' })
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setM2mSlips(Array.isArray(data) ? data : []))
+      .catch(() => setM2mSlips([]));
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -629,6 +720,11 @@ export default function PhotoGallery({ onBack }) {
   const selectedAlbum = albums.find(a => a.id === selectedAlbumId);
   const currentPhotos = selectedAlbum ? (selectedAlbum.photos || []) : [];
 
+  // Match current lightbox photo to an M2M slip by image_url
+  const currentM2mSlip = lightboxOpen && currentPhotos[currentImageIndex]
+    ? m2mSlips.find(slip => slip.image_url === currentPhotos[currentImageIndex].src) || null
+    : null;
+
   const nextImage = useCallback(() => {
     setCurrentImageIndex((prev) => (prev + 1 < currentPhotos.length ? prev + 1 : 0));
   }, [currentPhotos.length]);
@@ -637,8 +733,21 @@ export default function PhotoGallery({ onBack }) {
     setCurrentImageIndex((prev) => (prev - 1 >= 0 ? prev - 1 : currentPhotos.length - 1));
   }, [currentPhotos.length]);
 
+  // --- System Preference Dark Mode ---
+  useEffect(() => {
+    const root = document.documentElement;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const apply = (e) => {
+      if (e.matches) root.classList.add('dark');
+      else root.classList.remove('dark');
+    };
+    apply(mq); // Apply immediately on mount
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-neutral-900 text-neutral-100 font-sans selection:bg-emerald-500/30">
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-neutral-100 font-sans selection:bg-emerald-500/30 transition-colors duration-200">
       
       {/* Toast Container */}
       <div className="fixed top-4 right-4 z-[100] flex flex-col space-y-2 pointer-events-none">
@@ -669,50 +778,73 @@ export default function PhotoGallery({ onBack }) {
       )}
 
       {/* HEADER */}
-      <header className="border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-md sticky top-0 z-40">
+      <header className="border-b border-gray-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setSelectedAlbumId(null)}>
-            {/* BACK BUTTON */}
+          <div className="flex items-center space-x-3">
+            {/* Back to Portal */}
             {onBack && (
               <button 
                 onClick={onBack}
-                className="mr-2 p-2 bg-neutral-800 hover:bg-neutral-700 rounded-lg text-neutral-400 hover:text-white transition-colors"
+                className="mr-1 p-2 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 title="Back to Portal"
               >
-                <ArrowLeftIcon size={20} />
+                <ArrowLeftIcon size={18} />
               </button>
             )}
-            
-            <div className="p-2 bg-emerald-500/10 rounded-lg">
-              <ImageIcon className="text-emerald-500" size={20} />
+
+            {/* Logo / Title */}
+            <div
+              className="flex items-center space-x-2.5 cursor-pointer group"
+              onClick={() => setSelectedAlbumId(null)}
+            >
+              <div className="p-2 bg-emerald-500/10 dark:bg-emerald-500/10 rounded-xl">
+                <ImageIcon className="text-emerald-600 dark:text-emerald-500" size={18} />
+              </div>
+              <div>
+                <h1 className="text-base font-bold tracking-tight text-gray-900 dark:text-white leading-tight">Gallery</h1>
+                {selectedAlbum && (
+                  <p className="text-[10px] font-bold text-gray-400 dark:text-neutral-500 uppercase tracking-widest -mt-0.5">
+                    Albums &amp; Collections
+                  </p>
+                )}
+              </div>
             </div>
-            <h1 className="text-lg font-semibold tracking-tight text-white">Gallery</h1>
+
+            {/* Breadcrumb separator for inner album */}
+            {selectedAlbum && (
+              <>
+                <span className="text-gray-300 dark:text-neutral-700 font-light text-lg select-none">/</span>
+                <span className="text-sm font-semibold text-gray-700 dark:text-neutral-300 truncate max-w-[140px]">
+                  {selectedAlbum.title}
+                </span>
+              </>
+            )}
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
               {selectedAlbumId ? (
                 <button 
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
-                  {isUploading ? <Loader2 className="animate-spin" size={16}/> : <Upload size={16} />}
-                  <span>{isUploading ? 'Uploading...' : 'Upload Photos'}</span>
+                  {isUploading ? <Loader2 className="animate-spin" size={15}/> : <Upload size={15} />}
+                  <span>{isUploading ? 'Uploading...' : 'Upload'}</span>
                 </button>
               ) : isReordering ? (
                 <button 
                   onClick={saveReorder}
-                  className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors animate-pulse"
+                  className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
                 >
-                  <Save size={16} />
-                  <span>Done Reordering</span>
+                  <Save size={15} />
+                  <span>Done</span>
                 </button>
               ) : (
                 <button 
                   onClick={() => setIsCreatingAlbum(true)}
-                  className="flex items-center space-x-2 bg-neutral-100 hover:bg-white text-neutral-900 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm"
                 >
-                  <Plus size={16} />
+                  <Plus size={15} />
                   <span>New Album</span>
                 </button>
               )}
@@ -725,92 +857,111 @@ export default function PhotoGallery({ onBack }) {
         {/* VIEW: ALBUM LIST */}
         {!selectedAlbumId && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="mb-8 flex justify-between items-end">
-                <div>
-                  <h2 className="text-3xl font-bold text-white mb-2">Albums & Collections</h2>
-                  <p className="text-neutral-400">
-                    {isReordering 
-                      ? "Drag albums to change their order." 
-                      : "Select an album to view or long-press to reorder."}
-                  </p>
-                </div>
-                {isReordering && (
-                   <span className="text-emerald-400 text-sm font-medium bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                     Reorder Mode Active
-                   </span>
-                )}
+            <div className="mb-8 flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Albums &amp; Collections</h2>
+                <p className="text-sm text-gray-500 dark:text-neutral-500">
+                  {isReordering 
+                    ? 'Drag albums to change their order.' 
+                    : `${albums.length} album${albums.length !== 1 ? 's' : ''} · Long-press to reorder`}
+                </p>
               </div>
-
-              {loading ? (
-                <div className="flex justify-center items-center py-20">
-                  <Loader2 className="animate-spin text-neutral-500" size={32} />
-                </div>
-              ) : albums.length === 0 ? (
-                <div className="text-center py-20 border-2 border-dashed border-neutral-800 rounded-xl">
-                  <FolderPlus className="mx-auto h-12 w-12 text-neutral-600 mb-4" />
-                  <h3 className="text-lg font-medium text-white">No albums yet</h3>
-                  <p className="text-neutral-500 mt-1">Create your first album to start uploading photos.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {albums.map((album, index) => (
-                    <AlbumCard 
-                      key={album.id} 
-                      index={index}
-                      album={album} 
-                      onClick={() => !isReordering && setSelectedAlbumId(album.id)}
-                      onDelete={handleDeleteAlbum}
-                      onLongPress={handleLongPress}
-                      isReordering={isReordering}
-                      onDragStart={handleDragStart}
-                      onDragEnter={handleDragEnter}
-                      onDragEnd={handleDragEnd}
-                    />
-                  ))}
-                </div>
+              {isReordering && (
+                <span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
+                  Reorder Mode
+                </span>
               )}
+            </div>
+
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-24 space-y-3">
+                <Loader2 className="animate-spin text-gray-400 dark:text-neutral-600" size={28} />
+                <p className="text-xs font-bold text-gray-400 dark:text-neutral-600 uppercase tracking-widest">Loading albums...</p>
+              </div>
+            ) : albums.length === 0 ? (
+              <div className="text-center py-24 border-2 border-dashed border-gray-200 dark:border-neutral-800 rounded-2xl">
+                <FolderPlus className="mx-auto h-10 w-10 text-gray-300 dark:text-neutral-700 mb-4" />
+                <h3 className="text-base font-semibold text-gray-700 dark:text-white">No albums yet</h3>
+                <p className="text-sm text-gray-400 dark:text-neutral-500 mt-1">Create your first album to start uploading photos.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {albums.map((album, index) => (
+                  <AlbumCard 
+                    key={album.id} 
+                    index={index}
+                    album={album} 
+                    onClick={() => !isReordering && setSelectedAlbumId(album.id)}
+                    onDelete={handleDeleteAlbum}
+                    onLongPress={handleLongPress}
+                    isReordering={isReordering}
+                    onDragStart={handleDragStart}
+                    onDragEnter={handleDragEnter}
+                    onDragEnd={handleDragEnd}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* VIEW: SINGLE ALBUM GALLERY */}
         {selectedAlbumId && selectedAlbum && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Gallery Toolbar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-              <div className="flex items-start space-x-4">
-                <button 
-                  onClick={() => setSelectedAlbumId(null)}
-                  className="mt-1 p-2 hover:bg-neutral-800 rounded-full transition-colors text-neutral-400 hover:text-white"
-                >
-                  <ArrowLeft size={24} />
-                </button>
-                <div>
-                  <h2 className="text-3xl font-bold text-white">{selectedAlbum.title}</h2>
-                  <div className="flex items-center text-neutral-400 mt-1 text-sm">
-                      <Calendar size={14} className="mr-1.5" />
-                      {selectedAlbum.date && (new Date(selectedAlbum.date)).toLocaleDateString()}
-                  </div>
+            {/* Album Hero Banner */}
+            {selectedAlbum.coverImg && (
+              <div className="relative w-full h-40 rounded-2xl overflow-hidden mb-6 shadow-md">
+                <img src={selectedAlbum.coverImg} alt={selectedAlbum.title} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute bottom-4 left-5">
+                  <h2 className="text-2xl font-black text-white">{selectedAlbum.title}</h2>
+                  <p className="text-white/70 text-xs font-semibold mt-0.5 flex items-center gap-1.5">
+                    <Calendar size={11} />
+                    {selectedAlbum.date && new Date(selectedAlbum.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
+                    <span className="text-white/40">·</span>
+                    {currentPhotos.length} photos
+                  </p>
                 </div>
               </div>
-              
-              <div className="text-sm text-neutral-500 font-mono">
-                {currentPhotos.length} items
+            )}
+
+            {/* Gallery Toolbar */}
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setSelectedAlbumId(null)}
+                  className="p-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl transition-colors text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white"
+                >
+                  <ArrowLeft size={18} />
+                </button>
+                {!selectedAlbum.coverImg && (
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selectedAlbum.title}</h2>
+                    <p className="text-xs text-gray-500 dark:text-neutral-500 flex items-center gap-1 mt-0.5">
+                      <Calendar size={11} />
+                      {selectedAlbum.date && new Date(selectedAlbum.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
+                    </p>
+                  </div>
+                )}
               </div>
+              <span className="text-xs font-bold text-gray-400 dark:text-neutral-600 bg-gray-100 dark:bg-neutral-800 px-3 py-1.5 rounded-full">
+                {currentPhotos.length} {currentPhotos.length === 1 ? 'photo' : 'photos'}
+              </span>
             </div>
 
             {/* Photos Grid */}
             {currentPhotos.length === 0 ? (
-               <div className="text-center py-20 bg-neutral-800/30 rounded-xl">
-                 <div className="inline-flex items-center justify-center p-4 bg-neutral-800 rounded-full mb-4">
-                    <Upload className="h-8 w-8 text-neutral-500" />
+               <div className="text-center py-20 bg-gray-100 dark:bg-neutral-800/30 rounded-2xl border border-gray-200 dark:border-neutral-800">
+                 <div className="inline-flex items-center justify-center p-4 bg-gray-200 dark:bg-neutral-800 rounded-full mb-4">
+                    <Upload className="h-7 w-7 text-gray-400 dark:text-neutral-500" />
                  </div>
-                 <h3 className="text-lg font-medium text-white">Album is empty</h3>
-                 <p className="text-neutral-500 mt-1 mb-4">Upload photos to get started.</p>
+                 <h3 className="text-base font-semibold text-gray-700 dark:text-white">Album is empty</h3>
+                 <p className="text-sm text-gray-400 dark:text-neutral-500 mt-1 mb-4">Upload photos to get started.</p>
                  <button 
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-emerald-500 hover:text-emerald-400 font-medium"
+                  className="text-emerald-600 dark:text-emerald-500 hover:text-emerald-500 font-semibold text-sm"
                  >
-                   Select files from computer
+                   Select files
                  </button>
                </div>
             ) : (
@@ -946,6 +1097,7 @@ export default function PhotoGallery({ onBack }) {
         onPrev={prevImage}
         hasNext={currentPhotos.length > 1}
         hasPrev={currentPhotos.length > 1}
+        m2mSlip={currentM2mSlip}
       />
     </div>
   );

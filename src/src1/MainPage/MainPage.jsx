@@ -12,16 +12,8 @@ import './style.css'
 
 function MainPage() {
   return (
-    <div 
-      className="sib"
-      style={{
-        // 1. Pushes content down past the Notch AND the Fixed Header
-        paddingTop: 'calc(env(safe-area-inset-top))',
-        marginTop: '-24px',
-        // 2. Protects your footer from the iOS home bar
-        paddingBottom: 'env(safe-area-inset-bottom)'
-      }}
-    >
+    <div className="sib pt-safe pb-safe overflow-hidden">
+      <div className="h-full overflow-y-auto">
       <Header />
       <Hero />
       <Gallery />
@@ -32,8 +24,9 @@ function MainPage() {
       <Contact />
       <Footer />
       <Fab />
+</div>
     </div>
   )
 }
 
-export default MainPage;
+export default MainPage
