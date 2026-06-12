@@ -4,6 +4,10 @@
 <dict>
 	<key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
+	<key>NSContactsUsageDescription</key>
+    <string>This app requires access to your contacts to help you invite colleagues or share business information with your network.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>This app requires access to your photo library to allow you to upload profile pictures or business documents.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
