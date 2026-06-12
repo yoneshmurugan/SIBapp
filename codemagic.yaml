@@ -53,25 +53,21 @@ workflows:
           
       - name: Apply Apple Certificates
         script: xcode-project use-profiles
-          
       - name: Build iOS native app
         script: |
-          cat <<EOF > export_options.plist
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>app-store</string>
-          </dict>
-          </plist>
-          EOF
-          
-          xcode-project build-ipa \
-            --workspace "ios/App/App.xcworkspace" \
-            --scheme "App" \
-            --export-options-plist export_options.plist
-            
+          # 1. Clean the build folder to ensure a fresh start
+          xcodebuild clean -workspace ios/App/App.xcworkspace -scheme App
+
+          # 2. Archive the app (This creates the .xcarchive)
+          xcodebuild archive -workspace ios/App/App.xcworkspace \
+                             -scheme App \
+                             -archivePath build/App.xcarchive \
+                             -destination 'generic/platform=iOS'
+
+          # 3. Create the IPA from the archive
+          xcodebuild -exportArchive -archivePath build/App.xcarchive \
+                     -exportPath build/ios/ipa \
+                     -exportOptionsPlist export_options.plist            
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
