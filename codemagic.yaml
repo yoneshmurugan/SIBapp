@@ -36,7 +36,7 @@ workflows:
       - name: Update iOS Version and Build Number
         script: |
           # Sets Marketing Version to 1.0.2 (New Train)
-          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0.2" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0.3" ios/App/App/Info.plist
           # Sets Build Number to the unique Codemagic build ID
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
       - name: Sync Capacitor iOS
