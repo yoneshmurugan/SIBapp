@@ -107,6 +107,10 @@ function ButtonPage({ onClose = () => { } }) {
         header: `🚀 Awesome! You received a new Referral from ${data.referrer_username}`,
         content: `Great news! ${data.referrer_username} has sent a new business referral your way.\n\nDetails: ${data.description}\n\nFollow up quickly and turn this into a win!`,
         read: false,
+        data: {
+          action: "OPEN_TYB",
+          referrerName: data.referrer_username
+        }
       };
 
       await fetch(

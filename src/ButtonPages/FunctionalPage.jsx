@@ -1,7 +1,21 @@
 import ButtonUI from "./ButtonUi";
 import Header from "../MainPage/Header";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import TYFTBSlip from "./TYFTBSlip";
 
 function SubmitButtons() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [deepLinkData, setDeepLinkData] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.action === 'OPEN_TYB') {
+      setDeepLinkData(location.state.referrerName);
+      // Clear state so it doesn't reopen on subsequent navigations
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate]);
   const buttonData = [
     { label: "Submit Referral", description: "Create new referral slip", component: "referral" },
     { label: "Submit TYB", description: "Create new referral slip", component: "tyftb" },
@@ -32,6 +46,19 @@ function SubmitButtons() {
           ))}
         </div>
       </div>
+
+      {deepLinkData && (
+        <div className="fixed inset-0 z-[1000]" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeepLinkData(null)} />
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <div className="w-full h-full max-w-[1600px] max-h-[100vh]">
+              <div className="relative w-full h-full rounded-xl overflow-auto p-5 ">
+                <TYFTBSlip onClose={() => setDeepLinkData(null)} prefillTo={deepLinkData} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

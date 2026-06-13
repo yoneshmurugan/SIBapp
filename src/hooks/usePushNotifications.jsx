@@ -53,7 +53,12 @@ const usePushNotifications = () => {
 
             await FirebaseMessaging.addListener('notificationActionPerformed', (event) => {
                 console.log('Push action performed: ', JSON.stringify(event.notification));
-                navigate('/allnotifications');
+                const data = event.notification?.data;
+                if (data && data.action === 'OPEN_TYB') {
+                    navigate('/slips', { state: { action: 'OPEN_TYB', referrerName: data.referrerName } });
+                } else {
+                    navigate('/allnotifications');
+                }
             });
 
         } catch (error) {

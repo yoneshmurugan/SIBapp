@@ -7,14 +7,14 @@ import FilterButton from "../Members/Components/FilterButton";
 import { getDate } from "../utils/getDate.mjs";
 import { X, IndianRupee, Calendar, Briefcase, FileText, User, Layers } from "lucide-react";
 
-function ButtonPage({ onClose = () => { } }) {
+function ButtonPage({ onClose = () => { }, prefillTo = "" }) {
   const todaysDate = getDate();
   const [date, setDate] = useState(todaysDate);
   const [amount, setAmount] = useState("");
   const [businessType, setBusinessType] = useState("new");
   const [referralType, setReferralType] = useState("tier1");
   const [comments, setComments] = useState("");
-  const [to, setTo] = useState("");
+  const [to, setTo] = useState(prefillTo);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [response, setResponse] = useState(null);
