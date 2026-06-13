@@ -69,9 +69,10 @@ function MemberActivityReport({ onBack }) {
         let result = memberData.filter(m => {
             const matchesSearch = m.name?.toLowerCase().includes(searchQuery.toLowerCase());
             const isApproved = approvedMembers.has(m.id) || m.approvalStatus === 'APPROVED';
+            const hasActivity = m.referralsGiven > 0 || m.businessMade > 0 || m.mToM > 0 || m.visitorsBrought > 0;
             const matchesStatus = statusFilter === 'ALL' 
                 ? true 
-                : statusFilter === 'APPROVED' ? isApproved : !isApproved;
+                : statusFilter === 'APPROVED' ? isApproved : (!isApproved && hasActivity);
             return matchesSearch && matchesStatus;
         });
 
