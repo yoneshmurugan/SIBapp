@@ -24,6 +24,7 @@ import ErrorDisplay from './Notfound/ErrorDisplay';
 import CoordinatorRoute from './hooks/CoordinatorRoute'
 import CSAEPolicy from './Notfound/CSAEPolicy'
 import PublicMembers from './Members/PublicMembers';
+import WallOfWishes from './WallOfWishes/WallOfWishes';
 
 import './index.css'
 import MainPage from './src1/MainPage/MainPage';
@@ -103,6 +104,7 @@ const router = createBrowserRouter([
       { path: '/slips', element: <FunctionalPage /> },
       { path: '/profile', element: <Profile /> },
       { path: '/allnotifications', element: <NotificationsPage /> },
+      { path: '/wall-of-wishes', element: <WallOfWishes /> },
     ]
   },
   {

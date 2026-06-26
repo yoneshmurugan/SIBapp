@@ -9,6 +9,7 @@ const DEFAULT_ITEMS = [
   { name: "Members Directory", icon: "Users",           path: "/members" },
   { name: "Meetings",          icon: "Calendar",        path: "/meetings" },
   { name: "Referral Slips",    icon: "FileText",        path: "/slips" },
+  { name: "Wall of Wishes",    icon: "PartyPopper",     path: "/wall-of-wishes" },
   { name: "Notifications",     icon: "MessageSquareDot",path: "/allnotifications" },
 ];
 
