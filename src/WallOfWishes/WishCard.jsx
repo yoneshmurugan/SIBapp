@@ -34,6 +34,11 @@ export default function WishCard({ memberName, profileImage, type, date, chapter
         })
       });
       
+      if (response.status === 429) {
+        setStatus('alreadysent');
+        return;
+      }
+      
       if (!response.ok) throw new Error('Failed to send wish');
       
       setStatus('success');
@@ -157,11 +162,13 @@ export default function WishCard({ memberName, profileImage, type, date, chapter
                 : "bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 hover:shadow-pink-500/30 hover:shadow-2xl hover:brightness-110"),
               status === 'loading' && "bg-gray-500 opacity-80 cursor-wait",
               status === 'success' && "bg-green-500 shadow-green-500/30",
+              status === 'alreadysent' && "bg-gray-700 shadow-gray-700/30 cursor-not-allowed opacity-80",
               status === 'error' && "bg-red-500"
             )}>
               {status === 'idle' && <><Sparkles size={18} /> Send Wishes ✨</>}
               {status === 'loading' && "Sending..."}
               {status === 'success' && "Wishes Sent 💖"}
+              {status === 'alreadysent' && "Already Sent Today ✓"}
               {status === 'error' && "Failed, Retry?"}
             </button>
           )}

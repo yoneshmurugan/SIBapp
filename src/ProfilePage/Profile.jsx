@@ -4,6 +4,7 @@ import ProfileCard from "./Components/ProfileCard";
 import MyBioCard from "./Components/BioCard";
 import ProfessionalDetailsCard from "./Components/ProfessionalDetails";
 import IdCardModal from "./Components/IDcard";
+import ViewProfile from "./ViewProfile";
 import useFetch from "../hooks/useFetch";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -17,12 +18,12 @@ const isFilled = (val) => {
 };
 
 function Profile() {
+  const { id } = useParams();
   const [editable, setEditable] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [completionPercentage, setcompletionPercentage] = useState(0);
   const [missingFields, setMissingFields] = useState([]);
   const [showIdCard, setShowIdCard] = useState(false);
-  const { id } = useParams();
 
   const queryParams = new URLSearchParams(window.location.search);
   const user = queryParams.get("user");
@@ -46,6 +47,7 @@ function Profile() {
       credentials: "include"
     }
   );
+
 
   useEffect(() => {
     if (showProfileData?.editable && !id) {
@@ -134,6 +136,11 @@ function Profile() {
     setcompletionPercentage(pct);
     setMissingFields(missing);
   }, [profileData]);
+
+  // If viewing another member's profile, render the new ViewProfile component
+  if (id) {
+    return <ViewProfile />;
+  }
 
   if (loading1 || loading2) {
     return (
