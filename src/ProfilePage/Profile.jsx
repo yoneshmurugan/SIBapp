@@ -4,6 +4,7 @@ import ProfileCard from "./Components/ProfileCard";
 import MyBioCard from "./Components/BioCard";
 import ProfessionalDetailsCard from "./Components/ProfessionalDetails";
 import IdCardModal from "./Components/IDcard";
+import EarnedBadgesCard from "./Components/EarnedBadgesCard";
 import ViewProfile from "./ViewProfile";
 import useFetch from "../hooks/useFetch";
 import { useState, useEffect } from "react";
@@ -18,19 +19,22 @@ const isFilled = (val) => {
 };
 
 function Profile() {
-  const { id } = useParams();
   const [editable, setEditable] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [completionPercentage, setcompletionPercentage] = useState(0);
-  const [missingFields, setMissingFields] = useState([]);
   const [showIdCard, setShowIdCard] = useState(false);
+  const { id } = useParams();
 
   const queryParams = new URLSearchParams(window.location.search);
   const user = queryParams.get("user");
 
+  if (id) {
+    return <ViewProfile />;
+  }
+
   const { data: showProfileData, loading: loading1, error: error1 } = useFetch(
     id
-      ? `${import.meta.env.VITE_BACKEND_SERVER}/public/showprofile`
+      ? null
       : `${import.meta.env.VITE_BACKEND_SERVER}/profile/showprofile`,
     {
       method: "GET",
@@ -40,14 +44,13 @@ function Profile() {
 
   const { data: getProfileData, loading: loading2, error: error2 } = useFetch(
     id
-      ? `${import.meta.env.VITE_BACKEND_SERVER}/public/getprofilebyid/${id}?user=${user}`
+      ? null
       : `${import.meta.env.VITE_BACKEND_SERVER}/profile/getprofile`,
     {
       method: "GET",
       credentials: "include"
     }
   );
-
 
   useEffect(() => {
     if (showProfileData?.editable && !id) {
@@ -122,25 +125,13 @@ function Profile() {
       ...bioFields
     ];
     const total = fieldsToCheck.length;
-    let filledCount = 0;
-    const missing = [];
-    fieldsToCheck.forEach(key => {
+    const filled = fieldsToCheck.reduce((acc, key) => {
       const val = profileData[key];
-      if (isFilled(val)) {
-        filledCount++;
-      } else {
-        missing.push(key);
-      }
-    });
-    const pct = total > 0 ? Math.round((filledCount / total) * 100) : 0;
+      return acc + (isFilled(val) ? 1 : 0);
+    }, 0);
+    const pct = total > 0 ? Math.round((filled / total) * 100) : 0;
     setcompletionPercentage(pct);
-    setMissingFields(missing);
   }, [profileData]);
-
-  // If viewing another member's profile, render the new ViewProfile component
-  if (id) {
-    return <ViewProfile />;
-  }
 
   if (loading1 || loading2) {
     return (
@@ -159,8 +150,13 @@ function Profile() {
     );
   }
 
+  // If we are viewing another user's profile via ID, render the ViewProfile component.
+  if (id) {
+    return <ViewProfile />;
+  }
+
   return (
-    <main className="min-h-screen bg-stone-50 dark:bg-black/90 transition-colors duration-300">
+    <main className="min-h-screen bg-gray-1/50">
       <div className="container mx-auto px-4 py-4">
         {editable && <Header />}
 
@@ -174,22 +170,31 @@ function Profile() {
             profile_id={profileData?._id}
             editable={editable}
             completionPercentage={completionPercentage}
-            missingFields={missingFields}
           />
         </div>
 
         {/* Action Bar for Profile */}
-        <div className="mt-4 flex justify-end gap-3 px-1">
+        <div className="mt-4 flex justify-end gap-3">
           <button
             onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all duration-200 font-bold text-[13px]"
+            className="flex items-center gap-2 px-5 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-all duration-200 font-medium text-sm"
           >
-            <RefreshCw size={15} />
+            <RefreshCw size={18} />
             Refresh
           </button>
+          
+          {!id && (
+            <button
+              onClick={() => setShowIdCard(true)}
+              className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-medium text-sm"
+            >
+              <CreditCard size={18} />
+              View ID Card
+            </button>
+          )}
         </div>
 
-        <section className="mt-4 flex flex-col gap-4">
+        <section className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div className="order-1">
             <ProfileCard
               data={{
@@ -222,7 +227,8 @@ function Profile() {
               editable={editable}
             />
           </div>
-          <div className="w-full">
+          <div className="order-3 md:col-span-2 lg:col-span-1 flex flex-col gap-4">
+            <EarnedBadgesCard />
             <MyBioCard
               editable={editable}
               initialBioData={[
@@ -230,19 +236,19 @@ function Profile() {
                   title: "GAINS Profile",
                   content: profileData?.bio,
                   defaultOpen: true,
-                  description: "Goals, achievements, interests, networks & skills."
+                  description: "A brief summary of your goals, achievements, interests, connections, and skills."
                 },
                 {
                   title: "30-sec Pitch",
                   content: profileData?.elevator_pitch_30s,
                   defaultOpen: false,
-                  description: "A concise introduction."
+                  description: "A concise introduction highlighting your business and main benefits in 30 seconds."
                 },
                 {
                   title: "Why SIB?",
                   content: profileData?.why_sib,
                   defaultOpen: false,
-                  description: "Your journey with SIB."
+                  description: "An opportunity to grow by connecting with the Sengunthar business community."
                 }
               ]}
             />

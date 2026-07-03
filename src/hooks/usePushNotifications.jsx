@@ -58,6 +58,8 @@ const usePushNotifications = () => {
                     navigate('/slips', { state: { action: 'OPEN_TYB', referrerName: data.referrerName } });
                 } else if (data && data.action === 'OPEN_WALL_OF_WISHES') {
                     navigate('/wall-of-wishes');
+                } else if (data && data.action === 'OPEN_PROFILE_BADGES') {
+                    navigate('/profile');
                 } else {
                     navigate('/allnotifications');
                 }
