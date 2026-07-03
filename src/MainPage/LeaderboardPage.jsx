@@ -537,6 +537,7 @@ function BreakdownModal({ user, onClose }) {
 export default function LeaderboardPage() {
   const [showRules, setShowRules] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [selectedUserForBadges, setSelectedUserForBadges] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [headerReady, setHeaderReady] = useState(false);
@@ -774,7 +775,16 @@ export default function LeaderboardPage() {
         )}
       </main>
 
-      <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
+      <RulesModal 
+        isOpen={showRules} 
+        onClose={() => {
+          setShowRules(false);
+          if (isFirstLoad) {
+            setShowBadges(true);
+            setIsFirstLoad(false);
+          }
+        }} 
+      />
       <BadgesModal isOpen={showBadges} onClose={() => setShowBadges(false)} />
       <UserEarnedBadgesModal user={selectedUserForBadges} onClose={() => setSelectedUserForBadges(null)} />
       <BreakdownModal user={selectedUser} onClose={() => setSelectedUser(null)} />
