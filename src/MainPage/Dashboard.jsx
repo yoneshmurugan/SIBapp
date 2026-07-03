@@ -31,6 +31,7 @@ function Dashboard() {
             <UserInfo />
           </div>
           <ChapterOverview />
+          <LeaderboardTeaser />
           <Graphs />
           <div className="lg:hidden">
             <SubmitButtons />
@@ -43,7 +44,6 @@ function Dashboard() {
           <div className="hidden lg:block">
             <UserInfo />
           </div>
-          <LeaderboardTeaser />
           <div className="hidden lg:block">
             <SubmitButtons />
           </div>

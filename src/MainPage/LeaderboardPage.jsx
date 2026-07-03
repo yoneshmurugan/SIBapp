@@ -600,7 +600,10 @@ export default function LeaderboardPage() {
         </span>
       </div>
 
-      <div className="fixed top-[10px] left-0 w-full z-40 bg-transparent">
+      <div 
+        className="fixed left-0 w-full z-40 bg-transparent transition-all duration-300"
+        style={{ top: 'calc(10px + env(safe-area-inset-top, 0px))' }}
+      >
         <Header />
       </div>
 
