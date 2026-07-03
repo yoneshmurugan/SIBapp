@@ -13,7 +13,7 @@ export default function HeaderAvatar({
     { name: "Referral Slips", icon: "fileText", path: "/slips" },
     { name: "Notifications", icon: "messageSquareDot", path: "/allnotifications" },
     { name: "Wall of Wishes", icon: "gift", path: "/wall-of-wishes" },
-    { name: "Leaderboard", icon: "award", path: "/leaderboard" }
+    { name: "Leaderboard", icon: "award", path: "/leaderboard", highlight: true }
   ]
 }) {
   const [open, setOpen] = useState(false);
@@ -119,6 +119,7 @@ export default function HeaderAvatar({
                 name={element.name}
                 icon={element.icon}
                 path={element.path}
+                highlight={element.highlight}
                 onClick={handleMenuItemClick}
               />
             ))}
