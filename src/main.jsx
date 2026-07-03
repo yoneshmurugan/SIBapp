@@ -23,6 +23,7 @@ import NotFound404 from './Notfound/Notfound';
 import FunctionalPage from './ButtonPages/FunctionalPage'
 import SignInPage from './SigninPage/SignInPage';
 import ProtectedRoute from './hooks/protectedRoute';
+import LeaderboardPage from './MainPage/LeaderboardPage';
 import ResetPassword from './ResetPassword/ResetPassword';
 import NotificationsPage from './NotificationPanel/NotificationsPage';
 import PresidentPortal from './PresidentPortal/PresidentPortal';
@@ -115,6 +116,7 @@ const router = createBrowserRouter([
       { path: '/profile', element: <Profile /> },
       { path: '/allnotifications', element: <NotificationsPage /> },
       { path: '/wall-of-wishes', element: <WallOfWishes /> },
+      { path: '/leaderboard', element: <LeaderboardPage /> },
     ]
   },
   {

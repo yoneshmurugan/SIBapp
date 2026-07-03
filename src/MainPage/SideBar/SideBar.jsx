@@ -1,19 +1,21 @@
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import SidebarList from './SidebarList';
 import useFetch from "../../hooks/useFetch";
 
-const DEFAULT_ITEMS = [
-  { name: "Dashboard",         icon: "House",           path: "/dashboard" },
-  { name: "My Activity",       icon: "TrendingUp",      path: "/myactivity" },
-  { name: "Members Directory", icon: "Users",           path: "/members" },
-  { name: "Meetings",          icon: "Calendar",        path: "/meetings" },
-  { name: "Referral Slips",    icon: "FileText",        path: "/slips" },
-  { name: "Wall of Wishes",    icon: "PartyPopper",     path: "/wall-of-wishes" },
-  { name: "Notifications",     icon: "MessageSquareDot",path: "/allnotifications" },
-];
-
-export default function SideBar({ items: initialItems = DEFAULT_ITEMS }) {
+export default function HeaderAvatar({
+  items: initialItems = [
+    { name: "Dashboard", icon: "House", path: "/dashboard" },
+    { name: "My Activity", icon: "TrendingUp", path: "/myactivity" },
+    { name: "Members Directory", icon: "users", path: "/members" },
+    { name: "Meetings", icon: "calendar", path: "/meetings" },
+    // { name: "Chapter Info", icon: "building2", path: "/mychapter" },
+    { name: "Referral Slips", icon: "fileText", path: "/slips" },
+    { name: "Notifications", icon: "messageSquareDot", path: "/allnotifications" },
+    { name: "Wall of Wishes", icon: "gift", path: "/wall-of-wishes" },
+    { name: "Leaderboard", icon: "award", path: "/leaderboard" }
+  ]
+}) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState(initialItems);
   const btnRef = useRef(null);
@@ -28,43 +30,43 @@ export default function SideBar({ items: initialItems = DEFAULT_ITEMS }) {
     { method: "GET", credentials: "include" }
   );
 
-  // Add coordinator items
   useEffect(() => {
-    if (!coordinatorsAccess?.hasaccess) return;
     setItems(prev => {
-      if (prev.some(e => e.path === "/coordinatorsportal")) return prev;
-      return [
-        ...prev,
-        { name: "Members Analytics",  icon: "ChartLine",  path: "/memberdetailedanalytics" },
-        { name: "Coordinators Portal", icon: "ShieldCheck", path: "/coordinatorsportal" },
-      ];
-    });
-  }, [coordinatorsAccess]);
+      let next = [...initialItems];
+      
+      if (coordinatorsAccess?.hasaccess || access?.hasaccess) {
+        if (!next.some(e => e.path === "/memberdetailedanalytics")) {
+          next.push({ name: "Members Analytics", icon: "chartLine", path: "/memberdetailedanalytics" });
+        }
+        if (!next.some(e => e.path === "/coordinatorsportal")) {
+          next.push({ name: "Coordinators Portal", icon: "users", path: "/coordinatorsportal" });
+        }
+      }
 
-  // Add president items (superset of coordinator)
-  useEffect(() => {
-    if (!access?.hasaccess) return;
-    setItems(prev => {
-      if (prev.some(e => e.path === "/presidentportal")) return prev;
-      // Remove coordinator-only entries if president is adding their own superset
-      const base = prev.filter(e => e.path !== "/memberdetailedanalytics" && e.path !== "/coordinatorsportal");
-      return [
-        ...base,
-        { name: "Members Analytics",  icon: "ChartLine",  path: "/memberdetailedanalytics" },
-        { name: "President Portal",   icon: "Crown",       path: "/presidentportal" },
-        { name: "Coordinators Portal", icon: "ShieldCheck", path: "/coordinatorsportal" },
-      ];
-    });
-  }, [access]);
+      if (access?.hasaccess) {
+        if (!next.some(e => e.path === "/presidentportal")) {
+          next.push({ name: "President Portal", icon: "users", path: "/presidentportal" });
+        }
+      }
 
-  // Close on outside click or Escape
+      return next;
+    });
+  }, [coordinatorsAccess, access]);
+
   useEffect(() => {
-    if (!open) return;
-    const onDocClick = e => {
-      if (btnRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
-      setOpen(false);
-    };
-    const onKey = e => { if (e.key === "Escape") setOpen(false); };
+    function onDocClick(e) {
+      if (!open) return;
+      if (
+        btnRef.current && !btnRef.current.contains(e.target) &&
+        menuRef.current && !menuRef.current.contains(e.target)
+      ) {
+        setOpen(false);
+      }
+    }
+    function onKey(e) {
+      if (!open) return;
+      if (e.key === "Escape") setOpen(false);
+    }
     document.addEventListener("mousedown", onDocClick);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -73,63 +75,51 @@ export default function SideBar({ items: initialItems = DEFAULT_ITEMS }) {
     };
   }, [open]);
 
+  const handleMenuItemClick = () => setOpen(false);
+
   return (
-    <div className="relative z-50">
-      {/* Hamburger button */}
+    <div className="relative z-10">
       <button
         ref={btnRef}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen(v => !v)}
-        className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150 active:scale-90"
-        aria-label="Toggle navigation menu"
+        onKeyDown={e => {
+          if (["Enter", " "].includes(e.key)) {
+            e.preventDefault();
+            setOpen(v => !v);
+          }
+        }}
+        className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+        aria-label="Toggle sidebar menu"
       >
-        {open
-          ? <X className="text-gray-700 dark:text-gray-200" size={22} />
-          : <Menu className="text-gray-700 dark:text-gray-200" size={22} />
-        }
+        <Menu className="text-gray-700 dark:text-gray-200" size={24} />
       </button>
 
-      {/* Overlay backdrop */}
-      {open && (
-        <div
-          className="fixed inset-0 z-40 bg-black/20 dark:bg-black/40 backdrop-blur-[2px]"
-          onClick={() => setOpen(false)}
-        />
-      )}
-
-      {/* Dropdown panel */}
       {open && (
         <div
           ref={menuRef}
           role="menu"
           tabIndex={-1}
           className="
-            absolute left-0 top-[calc(100%+8px)] z-50
-            w-[240px]
-            bg-white dark:bg-gray-900
-            border border-gray-200 dark:border-gray-800
-            rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/40
-            overflow-hidden
-            animate-in fade-in slide-in-from-top-2 duration-200
+            absolute left-0 mt-2 w-56
+            rounded-lg border border-neutral-300 dark:border-gray-600
+            bg-white dark:bg-gray-800
+            shadow-2xl
+            max-h-[70vh] overflow-y-auto
+            transition-all duration-200
+            animate-in fade-in zoom-in-95
           "
         >
-          {/* Panel header */}
-          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.18em]">Navigation</p>
-          </div>
-
-          {/* Nav items */}
-          <ul className="p-2 space-y-0.5 max-h-[70vh] overflow-y-auto">
-            {items.map((element, i) => (
+          <ul className="py-2 px-1">
+            {items.map(element => (
               <SidebarList
                 key={element.path}
                 name={element.name}
                 icon={element.icon}
                 path={element.path}
-                onclick={() => setOpen(false)}
-                index={i}
+                onClick={handleMenuItemClick}
               />
             ))}
           </ul>

@@ -1,62 +1,55 @@
-import Header from './Header.jsx';
-import ChapterOverview from './ChapterOverview.jsx';
-import SubmitButtons from './SubmitButtons.jsx';
-import UpcomingEvents from './UpcomingEvents.jsx';
-import Graphs from './Graphs.jsx';
-import Activity from './Activity.jsx';
-import UserInfo from './UserInfo.jsx';
-import Siteinfo from './SiteInfo.jsx';
-import usePushNotifications from '../hooks/usePushNotifications.jsx';
+import ChapterOverview from './ChapterOverview.jsx'
+import Header from './Header.jsx'
+import Activity from './Activity.jsx'
+import Siteinfo from './SiteInfo.jsx'
+import UpcomingEvents from './UpcomingEvents.jsx'
+import Graphs from './Graphs.jsx'
+import SubmitButtons from './SubmitButtons.jsx'
+import { User } from 'lucide-react'
+import UserInfo from './UserInfo.jsx'
+import LeaderboardTeaser from './LeaderboardTeaser.jsx'
 
-/**
- * Mobile-first dashboard layout.
- *
- * Ordering rationale:
- *  1. Header   — always visible, sticky
- *  2. UserInfo — who am I? (personal welcome)
- *  3. Chapter  — chapter stats at a glance
- *  4. Buttons  — primary actions (Referral / TYB / M2M)
- *  5. Graphs   — my weekly performance
- *  6. Events+Leadership — schedule & team
- *  7. Activity — recent history (scroll-down content)
- *  8. SiteInfo — chapter meta (least urgent)
- */
+
 function Dashboard() {
-  usePushNotifications();
-  
   return (
     <div className="w-full min-h-screen bg-gray-100 dark:bg-gray-950">
+      <div className="
+        max-w-7xl mx-auto
+        p-3 sm:p-4 lg:p-6 
+        gap-4 lg:gap-6
+        grid grid-cols-1 md:grid-cols-12 
+        auto-rows-min
+      ">
+        {/* Header: Full Width */}
+        <div className="col-span-1 md:col-span-12 sticky top-0 z-50 bg-gray-100 dark:bg-gray-950/90 backdrop-blur-sm pb-2">
+          <Header />
+        </div>
 
-      {/* ── Sticky Header ─────────────────────────────────────── */}
-      <div className="sticky top-0 z-50 bg-gray-100 dark:bg-gray-950 px-3 pt-3 pb-2 shadow-sm dark:shadow-none">
-        <Header />
-      </div>
+        {/* Main Content Area (Left Column on Desktop) */}
+        <div className="col-span-1 md:col-span-12 lg:col-span-8 flex flex-col gap-4 lg:gap-6">
+          <div className="lg:hidden">
+            <UserInfo />
+          </div>
+          <ChapterOverview />
+          <Graphs />
+          <div className="lg:hidden">
+            <SubmitButtons />
+          </div>
+          <UpcomingEvents />
+        </div>
 
-      {/* ── Page Content — single scrollable column ─────────── */}
-      <div className="px-3 pb-24 space-y-3 mt-1">
-
-        {/* Who am I */}
-        <UserInfo />
-
-        {/* Chapter stats snapshot */}
-        <ChapterOverview />
-
-        {/* Quick action slips */}
-
-        {/* My weekly graph */}
-        <Graphs />
-                <SubmitButtons />
-
-
-        {/* Upcoming events & leadership */}
-        <UpcomingEvents />
-
-        {/* Activity feed */}
-        <Activity />
-
-        {/* Footer-level info */}
-        <Siteinfo />
-
+        {/* Sidebar Area (Right Column on Desktop) */}
+        <div className="col-span-1 md:col-span-12 lg:col-span-4 flex flex-col gap-4 lg:gap-6">
+          <div className="hidden lg:block">
+            <UserInfo />
+          </div>
+          <LeaderboardTeaser />
+          <div className="hidden lg:block">
+            <SubmitButtons />
+          </div>
+          <Activity />
+          <Siteinfo />
+        </div>
       </div>
     </div>
   );
