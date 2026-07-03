@@ -113,15 +113,15 @@ export default function WallOfWishes() {
         backgroundColor: '#030712' // fallback to gray-950
       }}
     >
-      {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-gray-950/85 backdrop-blur-sm z-0"></div>
+      {/* Dark overlay for readability (Optimized for mobile scroll) */}
+      <div className="absolute inset-0 bg-[#030712]/95 z-0"></div>
 
       {/* ── Confetti layer (only when there are today's celebrants) ── */}
       {hasCelebrants && (
         <div className="fixed inset-0 z-50 pointer-events-none">
           <Confetti
             mode="boom"
-            particleCount={typeof window !== 'undefined' && window.innerWidth < 768 ? 40 : 80}
+            particleCount={80}
             shapeSize={18}
             launchSpeed={1.5}
             colors={['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#F7DC6F', '#E056FD', '#FF9FF3', '#FFC312']}
@@ -185,10 +185,10 @@ export default function WallOfWishes() {
 
             {/* Hero cards grid — big and centered for 1-3 people */}
             <div className={`
-              grid gap-3 sm:gap-8 justify-items-center px-2 sm:px-0
+              grid gap-8 justify-items-center
               ${todaysCelebrants.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' : ''}
-              ${todaysCelebrants.length === 2 ? 'grid-cols-2 sm:grid-cols-2 max-w-2xl mx-auto' : ''}
-              ${todaysCelebrants.length >= 3 ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 max-w-6xl mx-auto' : ''}
+              ${todaysCelebrants.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto' : ''}
+              ${todaysCelebrants.length >= 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto' : ''}
             `}>
               {todaysCelebrants.map((celebrant, i) => (
                 <div
@@ -256,7 +256,7 @@ export default function WallOfWishes() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 max-w-6xl mx-auto px-2 sm:px-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {upcomingEvents.slice(1).map((event, i) => {
                 const eventDate = new Date(event.targetDate);
                 const now = new Date();

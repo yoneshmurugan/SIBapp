@@ -10,6 +10,30 @@ export default function WishCard({ memberName, profileImage, type, date, chapter
 
   const [status, setStatus] = useState('idle');
 
+  const { data: profileData } = useFetch(
+    profileId ? `${import.meta.env.VITE_BACKEND_SERVER}/public/getprofilebyid/${profileId}?user=${userId || ''}` : null
+  );
+
+  let years = null;
+  if (profileData && !profileData.message) {
+    if (isBirthday && profileData.dob) {
+      const birthYear = new Date(profileData.dob).getFullYear();
+      const currentYear = new Date().getFullYear();
+      years = currentYear - birthYear;
+    } else if (!isBirthday && profileData.wedding_date) {
+      const weddingYear = new Date(profileData.wedding_date).getFullYear();
+      const currentYear = new Date().getFullYear();
+      years = currentYear - weddingYear;
+    }
+  }
+
+  const getOrdinalSuffix = (n) => {
+    if (!n) return '';
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
   const avatarUrl = profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(memberName)}&background=random&size=256&bold=true`;
 
   const linkTarget = profileId ? `/profile/${profileId}?user=${userId || ''}` : '#';
@@ -54,30 +78,30 @@ export default function WishCard({ memberName, profileImage, type, date, chapter
       className="relative group w-full max-w-sm mx-auto block cursor-pointer"
       style={{ animationDelay: `${index * 150}ms` }}
     >
-      {/* Outer glow ring */}
+      {/* Outer glow ring (Optimized for mobile) */}
       <div className={clsx(
-        "absolute -inset-1 rounded-3xl blur-xl opacity-40 group-hover:opacity-70 transition-opacity duration-700",
+        "absolute -inset-0.5 rounded-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-500",
         isBirthday
           ? "bg-gradient-to-r from-amber-400 via-orange-500 to-red-500"
           : "bg-gradient-to-r from-pink-400 via-rose-500 to-fuchsia-500"
       )} />
 
       <div className={clsx(
-        "relative overflow-hidden rounded-3xl border backdrop-blur-sm transition-all duration-500 transform hover:scale-[1.03] hover:shadow-2xl",
+        "relative overflow-hidden rounded-3xl border transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl",
         isBirthday
-          ? "bg-gradient-to-br from-amber-950/90 via-orange-950/80 to-red-950/90 border-amber-700/40"
-          : "bg-gradient-to-br from-pink-950/90 via-rose-950/80 to-fuchsia-950/90 border-pink-700/40"
+          ? "bg-gradient-to-br from-[#2a1306] via-[#200d05] to-[#2a0808] border-amber-700/40"
+          : "bg-gradient-to-br from-[#2a0b16] via-[#200610] to-[#2a061c] border-pink-700/40"
       )}>
 
-        {/* Animated background orbs */}
+        {/* Static background orbs (Optimized) */}
         <div className={clsx(
-          "absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-20 animate-pulse",
+          "absolute top-0 right-0 w-32 h-32 rounded-full opacity-[0.08]",
           isBirthday ? "bg-amber-500" : "bg-pink-500"
-        )} />
+        )} style={{ filter: 'blur(40px)' }} />
         <div className={clsx(
-          "absolute bottom-0 left-0 w-32 h-32 rounded-full blur-3xl opacity-15",
+          "absolute bottom-0 left-0 w-24 h-24 rounded-full opacity-[0.05]",
           isBirthday ? "bg-orange-400" : "bg-rose-400"
-        )} style={{ animation: 'pulse 3s ease-in-out infinite reverse' }} />
+        )} style={{ filter: 'blur(30px)' }} />
 
         {/* Floating sparkle decorations */}
         <div className="absolute top-4 right-4 opacity-30 group-hover:opacity-60 transition-opacity">
@@ -88,10 +112,10 @@ export default function WishCard({ memberName, profileImage, type, date, chapter
         </div>
 
         <div className="relative z-10 p-4 sm:p-8 flex flex-col items-center text-center">
-          {/* Avatar with glowing ring */}
+          {/* Avatar with glowing ring (Optimized) */}
           <div className="relative mb-3 sm:mb-5">
             <div className={clsx(
-              "absolute -inset-2 rounded-full blur-md opacity-60 animate-pulse",
+              "absolute -inset-1.5 rounded-full opacity-40",
               isBirthday
                 ? "bg-gradient-to-r from-amber-400 to-orange-500"
                 : "bg-gradient-to-r from-pink-400 to-rose-500"
@@ -143,7 +167,7 @@ export default function WishCard({ memberName, profileImage, type, date, chapter
           )}>
             <div className="flex items-center gap-1">
               <Icon size={12} className="animate-bounce sm:w-4 sm:h-4" />
-              <span>{isBirthday ? 'Birthday' : 'Anniversary'}</span>
+              <span>{years ? `${getOrdinalSuffix(years)} ` : ''}{isBirthday ? 'Birthday' : 'Anniversary'}</span>
             </div>
             <span className="opacity-40 hidden sm:inline">•</span>
             <span className="text-white/80 whitespace-nowrap">{date}</span>
