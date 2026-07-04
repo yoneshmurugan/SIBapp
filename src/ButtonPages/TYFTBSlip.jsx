@@ -158,7 +158,7 @@ function ButtonPage({ onClose = () => { }, prefillTo = "" }) {
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 pb-64 sm:p-8 sm:pb-8 space-y-6 sm:space-y-8 custom-scrollbar">
           
           {/* Section 1: Who & When */}
           <section className="space-y-4">
