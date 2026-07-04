@@ -140,10 +140,10 @@ const ProfileStrip = ({
       <div className="relative z-10 flex flex-col gap-5 p-5 md:flex-row md:items-center md:justify-between bg-gradient-to-br from-white/60 to-transparent dark:from-gray-900/60 backdrop-blur-sm rounded-3xl">
         <div className="flex min-w-0 items-center gap-5">
           <div 
-            className={`relative h-20 w-20 shrink-0 rounded-full bg-gradient-to-tr from-amber-200 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 p-1 shadow-inner md:h-24 md:w-24 transition-transform duration-300 group-hover:scale-105 cursor-pointer hover:ring-2 hover:ring-amber-400`}
+            className={`relative h-20 w-20 shrink-0 rounded-full bg-gradient-to-tr from-amber-200 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 p-1 shadow-inner md:h-24 md:w-24 transition-transform duration-300 group-hover:scale-105 cursor-pointer hover:ring-2 hover:ring-amber-400 flex items-center justify-center`}
             onClick={() => setShowImagePreview(true)}
           >
-            <span className="absolute inset-0 flex items-center justify-center text-amber-700 font-bold dark:text-amber-400 text-lg">
+            <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-white dark:bg-gray-800 relative">
               {avatar ? (
                 <img
                   src={avatar}
@@ -151,8 +151,10 @@ const ProfileStrip = ({
                   className="h-full w-full rounded-full object-cover"
                   loading="lazy"
                 />
-              ) : initials}
-            </span>
+              ) : (
+                <span className="text-amber-700 font-bold dark:text-amber-400 text-lg">{initials}</span>
+              )}
+            </div>
             <input
               id="avatar-upload"
               ref={fileInputRef}

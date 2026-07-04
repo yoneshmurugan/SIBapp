@@ -183,12 +183,11 @@ export default function WallOfWishes() {
               </h2>
             </div>
 
-            {/* Hero cards grid — big and centered for 1-3 people */}
             <div className={`
-              grid gap-8 justify-items-center
+              grid gap-4 sm:gap-8 justify-items-center px-2
               ${todaysCelebrants.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' : ''}
-              ${todaysCelebrants.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto' : ''}
-              ${todaysCelebrants.length >= 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto' : ''}
+              ${todaysCelebrants.length === 2 ? 'grid-cols-2 max-w-2xl mx-auto' : ''}
+              ${todaysCelebrants.length >= 3 ? 'grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto' : ''}
             `}>
               {todaysCelebrants.map((celebrant, i) => (
                 <div
@@ -256,7 +255,7 @@ export default function WallOfWishes() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 max-w-5xl mx-auto px-2">
               {upcomingEvents.slice(1).map((event, i) => {
                 const eventDate = new Date(event.targetDate);
                 const now = new Date();
