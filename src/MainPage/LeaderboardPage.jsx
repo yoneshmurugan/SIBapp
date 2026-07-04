@@ -312,7 +312,7 @@ function RulesModal({ isOpen, onClose }) {
             <X size={18} />
           </button>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto">
           <div className="text-gray-300 text-sm space-y-2 bg-gray-800/30 p-4 rounded-xl border border-gray-700/30">
             <p>
               Earn points by participating in chapter activities. The members with the highest points will be featured on the leaderboard! The leaderboard resets at the beginning of every month, giving everyone a fresh chance to win.
@@ -343,7 +343,9 @@ function RulesModal({ isOpen, onClose }) {
               </div>
             ))}
           </div>
-          <button onClick={onClose} className="w-full mt-2 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] duration-200">
+        </div>
+        <div className="p-4 border-t border-gray-800 bg-gray-900/80">
+          <button onClick={onClose} className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] duration-200">
             Got it / புரிந்தது ✨
           </button>
         </div>
@@ -379,7 +381,7 @@ function BadgesModal({ isOpen, onClose }) {
             <X size={18} />
           </button>
         </div>
-        <div className="p-5 space-y-3 max-h-[70vh] overflow-y-auto">
+        <div className="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
           <p className="text-gray-400 text-sm mb-1">Special badges awarded to top performers each month.</p>
           {BADGES.map((badge, i) => (
             <div key={badge.type} className={`flex items-center gap-4 p-3.5 rounded-xl border ${badge.borderColor} ${badge.bgColor} hover:scale-[1.02] transition-all duration-300 lb-modal-item`} style={{ animationDelay: `${i * 80 + 150}ms` }}>
@@ -390,7 +392,9 @@ function BadgesModal({ isOpen, onClose }) {
               </div>
             </div>
           ))}
-          <button onClick={onClose} className="w-full mt-2 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] duration-200">
+        </div>
+        <div className="p-4 border-t border-gray-800 bg-gray-900/80">
+          <button onClick={onClose} className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] duration-200">
             Close
           </button>
         </div>
@@ -446,7 +450,9 @@ function UserEarnedBadgesModal({ user, onClose }) {
               );
             })
           )}
-          <button onClick={onClose} className="w-full mt-2 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] duration-200">
+        </div>
+        <div className="p-4 border-t border-gray-800 bg-gray-900/80">
+          <button onClick={onClose} className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] duration-200">
             Close
           </button>
         </div>
