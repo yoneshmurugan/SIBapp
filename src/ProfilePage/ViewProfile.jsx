@@ -303,6 +303,7 @@ export default function ViewProfile() {
                     )}
                   </div>
                 </div>
+                </div>
               </div>
 
               {/* Name & Title */}
