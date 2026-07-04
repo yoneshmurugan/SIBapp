@@ -716,7 +716,7 @@ export default function LeaderboardPage() {
 
                   {/* Avatar */}
                   <div className="relative shrink-0">
-                    <div className="absolute -inset-1.5 bg-amber-500/30 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute -inset-1.5 bg-amber-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
                     <img
                       src={user.avatar}
                       alt={user.name}
@@ -800,10 +800,10 @@ export default function LeaderboardPage() {
          ═══════════════════════════════════════════════════════════ */}
       <style>{`
         /* ── Background orbs ── */
-        .lb-orb { position: absolute; border-radius: 9999px; filter: blur(120px); pointer-events: none; }
-        .lb-orb-1 { width: 500px; height: 500px; top: -100px; left: -100px; background: radial-gradient(circle, rgba(245,158,11,0.12), transparent 70%); animation: lb-drift-1 22s ease-in-out infinite; }
-        .lb-orb-2 { width: 400px; height: 400px; bottom: -50px; right: -80px; background: radial-gradient(circle, rgba(99,102,241,0.10), transparent 70%); animation: lb-drift-2 28s ease-in-out infinite; }
-        .lb-orb-3 { width: 350px; height: 350px; top: 40%; left: 50%; background: radial-gradient(circle, rgba(249,115,22,0.08), transparent 70%); animation: lb-drift-3 18s ease-in-out infinite; }
+        .lb-orb { position: absolute; border-radius: 9999px; pointer-events: none; }
+        .lb-orb-1 { width: 500px; height: 500px; top: -100px; left: -100px; background: radial-gradient(circle, rgba(245,158,11,0.15), transparent 70%); animation: lb-drift-1 22s ease-in-out infinite; }
+        .lb-orb-2 { width: 400px; height: 400px; bottom: -50px; right: -80px; background: radial-gradient(circle, rgba(99,102,241,0.12), transparent 70%); animation: lb-drift-2 28s ease-in-out infinite; }
+        .lb-orb-3 { width: 350px; height: 350px; top: 40%; left: 50%; background: radial-gradient(circle, rgba(249,115,22,0.10), transparent 70%); animation: lb-drift-3 18s ease-in-out infinite; }
 
         @keyframes lb-drift-1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(60px,-40px); } }
         @keyframes lb-drift-2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-50px,40px); } }
@@ -832,12 +832,11 @@ export default function LeaderboardPage() {
         .lb-pill-btn {
           display: flex; align-items: center; gap: 8px;
           padding: 8px 18px; border-radius: 9999px; font-size: 12px; font-weight: 700;
-          background: rgba(31,41,55,0.8); border: 1px solid rgba(75,85,99,0.6);
+          background: rgba(31,41,55,0.9); border: 1px solid rgba(75,85,99,0.6);
           color: #d1d5db; transition: all 0.3s;
-          backdrop-filter: blur(8px);
         }
         .lb-pill-btn:hover {
-          background: rgba(55,65,81,0.9); color: white;
+          background: rgba(55,65,81,1); color: white;
           border-color: rgba(245,158,11,0.3);
           box-shadow: 0 0 20px -5px rgba(245,158,11,0.2);
         }
@@ -861,9 +860,9 @@ export default function LeaderboardPage() {
         .lb-row {
           position: relative; display: flex; align-items: center; gap: 14px;
           padding: 14px 16px; border-radius: 18px; overflow: hidden; cursor: pointer;
-          background: rgba(17,24,39,0.5); backdrop-filter: blur(12px);
+          background: rgba(17,24,39,0.85); 
           border: 1px solid rgba(255,255,255,0.04);
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s, border-color 0.4s, box-shadow 0.4s;
           opacity: 0; transform: translateY(16px);
           animation: lb-row-in 0.5s ease-out forwards;
         }
