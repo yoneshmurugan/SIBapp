@@ -707,9 +707,8 @@ export default function LeaderboardPage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1.2s] ease-in-out pointer-events-none" />
 
                   {/* Rank */}
-                  <div className="lb-rank-diamond shrink-0">
-                    <div className="lb-rank-diamond-bg group-hover:rotate-[135deg] group-hover:bg-amber-500/15 group-hover:border-amber-500/40" />
-                    <span className="relative z-10 font-black text-gray-500 group-hover:text-amber-400 transition-colors duration-500 text-base sm:text-xl">
+                  <div className="relative shrink-0 flex items-center justify-center w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-gray-800/60 border border-gray-600/30 group-hover:bg-amber-500/15 group-hover:border-amber-500/40 transition-all duration-300">
+                    <span className="font-black text-gray-500 group-hover:text-amber-400 transition-colors duration-300 text-xs sm:text-base">
                       {user.rank}
                     </span>
                   </div>
@@ -874,20 +873,9 @@ export default function LeaderboardPage() {
         }
         @keyframes lb-row-in { to { opacity: 1; transform: translateY(0); } }
 
-        /* ── Rank diamond ── */
-        .lb-rank-diamond { position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
-        .lb-rank-diamond-bg {
-          position: absolute; inset: 0; border-radius: 8px; transform: rotate(45deg);
-          background: rgba(31,41,55,0.6); border: 1px solid rgba(75,85,99,0.3);
-          transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+        /* ── Rank diamond (removed) ── */
         @media (min-width: 640px) {
           .lb-row { gap: 14px; padding: 14px 16px; border-radius: 18px; }
-          .lb-rank-diamond { width: 44px; height: 44px; }
-          .lb-rank-diamond-bg { border-radius: 12px; }
-        }
-        @media (min-width: 1024px) {
-          .lb-rank-diamond { width: 50px; height: 50px; }
         }
 
         /* ── Bar fill ── */
