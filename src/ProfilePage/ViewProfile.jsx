@@ -285,13 +285,14 @@ export default function ViewProfile() {
             <div className="lg:col-span-4 lg:sticky lg:top-[120px] flex flex-col items-center lg:items-start text-center lg:text-left space-y-8">
               
               {/* Avatar */}
-              <div className="relative w-full flex justify-center lg:justify-start" style={{ animation: "zoomIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both" }}>
-                <div className="absolute -inset-6 rounded-full border border-amber-500/20 animate-spin-slow w-[200px] h-[200px] lg:w-[240px] lg:h-[240px] hidden lg:block" />
-                <div className="absolute -inset-10 rounded-full border border-orange-500/10 animate-spin-reverse-slow w-[232px] h-[232px] lg:w-[272px] lg:h-[272px] hidden lg:block" />
-                
-                <div className="absolute -inset-[5px] rounded-full bg-gradient-to-tr from-amber-400 via-orange-500 to-rose-500 animate-pulse-fast blur-md opacity-70 w-[160px] h-[160px] lg:w-[200px] lg:h-[200px]" />
-                
-                <div className="relative w-[150px] h-[150px] lg:w-[190px] lg:h-[190px] rounded-full p-1.5 bg-[#050505] shadow-[0_0_50px_rgba(245,158,11,0.3)] group cursor-pointer hover:scale-105 transition-transform duration-500">
+              <div className="w-full flex justify-center lg:justify-start">
+                <div className="relative flex items-center justify-center w-[150px] h-[150px] lg:w-[190px] lg:h-[190px]" style={{ animation: "zoomIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both" }}>
+                  <div className="absolute -inset-6 rounded-full border border-amber-500/20 animate-spin-slow w-[198px] h-[198px] lg:w-[238px] lg:h-[238px] hidden lg:block" />
+                  <div className="absolute -inset-10 rounded-full border border-orange-500/10 animate-spin-reverse-slow w-[230px] h-[230px] lg:w-[270px] lg:h-[270px] hidden lg:block" />
+                  
+                  <div className="absolute -inset-[5px] rounded-full bg-gradient-to-tr from-amber-400 via-orange-500 to-rose-500 animate-pulse-fast blur-md opacity-70 w-[160px] h-[160px] lg:w-[200px] lg:h-[200px]" />
+                  
+                  <div className="relative w-full h-full rounded-full p-1.5 bg-[#050505] shadow-[0_0_50px_rgba(245,158,11,0.3)] group cursor-pointer hover:scale-105 transition-transform duration-500 z-10">
                   <div className="w-full h-full rounded-full overflow-hidden bg-gray-900 border-2 border-white/5">
                     {avatar ? (
                       <img src={avatar} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" />

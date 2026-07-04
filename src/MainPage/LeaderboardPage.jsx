@@ -720,13 +720,13 @@ export default function LeaderboardPage() {
                     <img
                       src={user.avatar}
                       alt={user.name}
-                      className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-gray-700/80 group-hover:border-amber-400/80 transition-all duration-500"
+                      className="relative w-11 h-11 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-gray-700/80 group-hover:border-amber-400/80 transition-all duration-500"
                     />
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0 ml-2">
-                    <h4 className="text-gray-200 font-bold text-base sm:text-lg truncate group-hover:text-amber-400 transition-colors duration-300">
+                    <h4 className="text-gray-200 font-bold text-[15px] sm:text-lg truncate group-hover:text-amber-400 transition-colors duration-300">
                       {user.name}
                     </h4>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1">
@@ -858,8 +858,8 @@ export default function LeaderboardPage() {
 
         /* ── Row card ── */
         .lb-row {
-          position: relative; display: flex; align-items: center; gap: 14px;
-          padding: 14px 16px; border-radius: 18px; overflow: hidden; cursor: pointer;
+          position: relative; display: flex; align-items: center; gap: 8px;
+          padding: 10px 12px; border-radius: 16px; overflow: hidden; cursor: pointer;
           background: rgba(17,24,39,0.85); 
           border: 1px solid rgba(255,255,255,0.04);
           transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s, border-color 0.4s, box-shadow 0.4s;
@@ -867,7 +867,7 @@ export default function LeaderboardPage() {
           animation: lb-row-in 0.5s ease-out forwards;
         }
         .lb-row:hover {
-          background: rgba(31,41,55,0.6);
+          background: rgba(31,41,55,0.9);
           border-color: rgba(245,158,11,0.25);
           box-shadow: 0 0 40px -10px rgba(245,158,11,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
           transform: translateX(4px);
@@ -875,13 +875,18 @@ export default function LeaderboardPage() {
         @keyframes lb-row-in { to { opacity: 1; transform: translateY(0); } }
 
         /* ── Rank diamond ── */
-        .lb-rank-diamond { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+        .lb-rank-diamond { position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
         .lb-rank-diamond-bg {
-          position: absolute; inset: 0; border-radius: 12px; transform: rotate(45deg);
+          position: absolute; inset: 0; border-radius: 8px; transform: rotate(45deg);
           background: rgba(31,41,55,0.6); border: 1px solid rgba(75,85,99,0.3);
           transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         @media (min-width: 640px) {
+          .lb-row { gap: 14px; padding: 14px 16px; border-radius: 18px; }
+          .lb-rank-diamond { width: 44px; height: 44px; }
+          .lb-rank-diamond-bg { border-radius: 12px; }
+        }
+        @media (min-width: 1024px) {
           .lb-rank-diamond { width: 50px; height: 50px; }
         }
 
