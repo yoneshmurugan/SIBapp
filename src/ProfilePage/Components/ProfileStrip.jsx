@@ -1,6 +1,7 @@
 import { Upload } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { CompletionRing } from "./CompletionRing";
+import { CompletionBadge } from "./CompletionBadge";
+import { Share } from "@capacitor/share";
 
 const ProfileStrip = ({
   name = "Refresh Page",
@@ -11,7 +12,8 @@ const ProfileStrip = ({
   chapter = "",
   profile_id = "",
   editable = false,
-  completionPercentage = 0
+  completionPercentage = 0,
+  missingFields = []
 }) => {
   const [copied, setCopied] = useState(false);
   const [initials, setInitials] = useState("");
@@ -19,6 +21,7 @@ const ProfileStrip = ({
   const [avatar, setAvatar] = useState(avatarUrl);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  const [showImagePreview, setShowImagePreview] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -26,7 +29,7 @@ const ProfileStrip = ({
   }, [name]);
 
   useEffect(() => {
-    const origin = window.location.origin;
+    const origin = "https://senguntharinbusiness.com";
     const path = "/profile/" + profile_id + "?user=" + user_id;
     setUrl(`${origin}${path}`);
   }, [user_id, profile_id]);
@@ -49,17 +52,33 @@ const ProfileStrip = ({
       title: document.title,
       text: shareText,
       url: url,
+      dialogTitle: 'Share Profile', // Useful for Android 
     };
+
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
+      // Check if sharing is supported on this device/platform
+      const canShareResult = await Share.canShare();
+
+      if (canShareResult.value) {
+        await Share.share(shareData);
       } else {
+        // Fallback to clipboard if native/web share is unavailable
         await navigator.clipboard.writeText(shareData.url);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
     } catch (err) {
       console.error("Error sharing:", err);
+      // Optional: If the share dialog was dismissed or failed, you could uncomment below to force clipboard copy
+      /*
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (clipboardErr) {
+        console.error("Clipboard backup failed", clipboardErr);
+      }
+      */
     }
   };
 
@@ -111,37 +130,31 @@ const ProfileStrip = ({
   };
 
   return (
-    <div className="w-full rounded-2xl border border-sky-200 bg-gradient-to-r from-white to-amber-100 dark:from-gray-800 dark:to-gray-700 shadow-sm my-2">
-      <div className="flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="relative h-12 w-12 shrink-0 rounded-xl bg-red-500 md:h-16 md:w-16 transition-all">
-            <span className="absolute inset-0 flex items-center justify-center text-white font-bold dark:text-gray-200">
+    <div className="relative w-full rounded-3xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-lg mt-2 mb-4 group">
+      {/* Background layer with overflow-hidden to contain the glow effects but not the dropdowns */}
+      <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none z-0">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-amber-400/20 blur-3xl opacity-50 dark:bg-amber-600/10" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-48 h-48 rounded-full bg-orange-400/20 blur-3xl opacity-50 dark:bg-orange-600/10" />
+      </div>
+
+      <div className="relative z-10 flex flex-col gap-5 p-5 md:flex-row md:items-center md:justify-between bg-gradient-to-br from-white/60 to-transparent dark:from-gray-900/60 backdrop-blur-sm rounded-3xl">
+        <div className="flex min-w-0 items-center gap-5">
+          <div 
+            className={`relative h-20 w-20 shrink-0 rounded-full bg-gradient-to-tr from-amber-200 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 p-1 shadow-inner md:h-24 md:w-24 transition-transform duration-300 group-hover:scale-105 cursor-pointer hover:ring-2 hover:ring-amber-400 flex items-center justify-center`}
+            onClick={() => setShowImagePreview(true)}
+          >
+            <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-white dark:bg-gray-800 relative">
               {avatar ? (
                 <img
                   src={avatar}
                   alt="ProfilePhoto"
-                  className="h-full w-full border-x-fuchsia-100 rounded-xl object-cover"
+                  className="h-full w-full rounded-full object-cover"
                   loading="lazy"
                 />
-              ) : initials}
-            </span>
-            {editable &&
-              <button
-                type="button"
-                onClick={openFileSelector}
-                className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full border-2 border-white text-white shadow bg-cyan-500 hover:bg-cyan-600 dark:border-gray-800"
-                aria-label="Edit profile photo"
-                title="Change Photo"
-                disabled={uploading}
-              >
-                {uploading
-                  ? <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-20" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none"></circle>
-                    <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8z"></path>
-                  </svg>
-                  : <Upload className="h-3.5 w-3.5" aria-hidden="true" />}
-              </button>
-            }
+              ) : (
+                <span className="text-amber-700 font-bold dark:text-amber-400 text-lg">{initials}</span>
+              )}
+            </div>
             <input
               id="avatar-upload"
               ref={fileInputRef}
@@ -152,44 +165,100 @@ const ProfileStrip = ({
               onChange={handleFileInput}
             />
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-900 dark:text-gray-100 line-clamp-2 md:line-clamp-1">
+          <div className="min-w-0 flex flex-col justify-center">
+            <h1 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white line-clamp-1 leading-none mb-1.5">
               {name}
+            </h1>
+            <p className="text-[13px] font-semibold text-amber-600 dark:text-amber-400 truncate mb-1">
+              {chapter || "SIB Member"}
             </p>
-            <p className="text-xs text-slate-500 dark:text-gray-400 truncate">
+            <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate">
               {email}
             </p>
           </div>
         </div>
-        <div className="flex flex-row-reverse items-center justify-center gap-2 md:gap-3">
+        
+        <div className="flex flex-row-reverse items-center justify-between gap-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md border border-white/20 dark:border-gray-700/50 rounded-2xl p-2.5 px-3 shadow-inner">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleShare}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-slate-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:focus:ring-gray-500"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-1.5 text-[12px] font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-sm"
             >
               <svg
                 viewBox="0 0 24 24"
-                className="h-4 w-4 text-slate-500 dark:text-gray-300"
+                className="h-3.5 w-3.5 text-gray-400 dark:text-gray-400"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.5"
               >
-                <path d="M10 13a5 5 0 0 1 0-7l1-1a5 5 0 0 1 7 7l-1 1" />
-                <path d="M14 11a5 5 0 0 1 0 7l-1 1a5 5 0 0 1-7-7l1-1" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 13a5 5 0 0 1 0-7l1-1a5 5 0 0 1 7 7l-1 1" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14 11a5 5 0 0 1 0 7l-1 1a5 5 0 0 1-7-7l1-1" />
               </svg>
               <span>{copied ? "Copied!" : "Share"}</span>
             </button>
           </div>
-          <span className=" text-sm text-slate-700 dark:text-gray-300 sm:inline">
-            {chapter || ""}
-          </span>
-          {editable && <CompletionRing percentage={completionPercentage} />}
+          
+          <div className="flex items-center gap-3">
+            {editable && <CompletionBadge percentage={completionPercentage} missingFields={missingFields} />}
+          </div>
         </div>
       </div>
       {uploadError && (
         <div className="px-4 pb-2 text-xs text-red-600 dark:text-red-300">
           {uploadError}
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      {showImagePreview && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity" 
+            onClick={() => setShowImagePreview(false)}
+          />
+          
+          <div className="relative w-full max-w-sm flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setShowImagePreview(false)}
+              className="absolute -top-12 right-0 p-2 text-white/70 hover:text-white transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+
+            <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full border-4 border-white/20 overflow-hidden shadow-2xl mb-8 bg-gray-800 flex items-center justify-center">
+              {avatar ? (
+                <img
+                  src={avatar}
+                  alt="Profile Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-6xl font-bold text-white/50">{initials}</span>
+              )}
+            </div>
+
+            {editable && (
+              <button
+                onClick={() => {
+                  setShowImagePreview(false);
+                  setTimeout(openFileSelector, 100);
+                }}
+                disabled={uploading}
+                className="flex items-center gap-2 px-6 py-3.5 bg-white text-gray-900 rounded-full font-bold shadow-xl active:scale-95 transition-all hover:bg-gray-50"
+              >
+                {uploading ? (
+                  <svg className="animate-spin h-5 w-5 text-amber-500" viewBox="0 0 24 24">
+                    <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                  </svg>
+                ) : (
+                  <Upload className="h-5 w-5 text-amber-500" />
+                )}
+                {uploading ? "Uploading..." : "Upload New Photo"}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

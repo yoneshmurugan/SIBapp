@@ -723,13 +723,13 @@ export default function LeaderboardPage() {
                     <h4 className="text-gray-200 font-bold text-base sm:text-lg truncate group-hover:text-amber-400 transition-colors duration-300">
                       {user.name}
                     </h4>
-                    <div className="flex items-center gap-3 mt-1">
-                      <p className="text-gray-500 text-sm truncate">{user.company}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1">
+                      <p className="text-gray-500 text-xs sm:text-sm truncate">{user.company}</p>
                       {user.badges && user.badges.length > 0 && (() => {
                         const grouped = Object.entries(user.badges.reduce((acc,curr) => { acc[curr] = (acc[curr] || 0)+1; return acc; }, {})).map(([type, count]) => ({ type, count }));
                         return (
                           <div 
-                            className="flex items-center -space-x-3 cursor-pointer hover:scale-105 transition-transform"
+                            className="flex items-center -space-x-2 cursor-pointer hover:scale-105 transition-transform"
                             onClick={(e) => { e.stopPropagation(); setSelectedUserForBadges(user); }}
                           >
                             {grouped.slice(0, 4).map((badge, idx) => (
@@ -737,18 +737,18 @@ export default function LeaderboardPage() {
                                 <img
                                   src={`/assets/badges/${badge.type}.png`}
                                   alt={badge.type}
-                                  className="w-14 h-14 object-contain drop-shadow-md rounded-full border-[1.5px] border-gray-800 bg-gray-900"
+                                  className="w-8 h-8 sm:w-10 sm:h-10 object-contain drop-shadow-md rounded-full border-[1.5px] border-gray-800 bg-gray-900"
                                   title={badge.type.replace(/_/g, ' ')}
                                 />
                                 {badge.count > 1 && (
-                                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[11px] font-black min-w-[20px] h-[20px] flex items-center justify-center rounded-full border border-gray-900 shadow-sm px-1">
+                                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[9px] font-black min-w-[16px] h-[16px] flex items-center justify-center rounded-full border border-gray-900 shadow-sm px-1">
                                     {badge.count}
                                   </div>
                                 )}
                               </div>
                             ))}
                             {grouped.length > 4 && (
-                              <div className="w-14 h-14 flex items-center justify-center rounded-full bg-gray-800 border-[1.5px] border-gray-700 z-10 text-[13px] font-black text-amber-400">
+                              <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-gray-800 border-[1.5px] border-gray-700 z-10 text-[10px] sm:text-[11px] font-black text-amber-400">
                                 +{grouped.length - 4}
                               </div>
                             )}
