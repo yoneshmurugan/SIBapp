@@ -42,9 +42,9 @@ function Footer({ margin = "auto", ismember = false }) {
 
                 const response = await fetch(`${Backend_Server_URL}/public/stats`);
                 if (!response.ok) throw new Error('Network response was not ok');
-                
+
                 const apiData = await response.json();
-                
+
                 // Map API data to footer state
                 setStats(prev => ({
                     ...prev,
@@ -88,9 +88,9 @@ function Footer({ margin = "auto", ismember = false }) {
                             <p>Certificate Number: SIB-2025-XX</p>
                             <div className="iso-certificate-placeholder">
                                 {/* Replace src with your actual certificate image */}
-                                <img 
-                                    src="/sibiso2.jpg" 
-                                    alt="ISO Certificate View" 
+                                <img
+                                    src="/sibiso2.jpg"
+                                    alt="ISO Certificate View"
                                 />
                             </div>
                             <p className="iso-desc">Recognized for excellence in business community management and operational standards.</p>
@@ -104,7 +104,7 @@ function Footer({ margin = "auto", ismember = false }) {
                     <div className="footer-bg"></div>
                     <div className="container">
                         <div className="footer-content">
-                            
+
                             {/* 1. BRANDING & ISO SECTION */}
                             <div className="footer-section brand-section">
                                 <div className="brand-header">
@@ -112,28 +112,28 @@ function Footer({ margin = "auto", ismember = false }) {
                                         {/* Main Logo */}
                                         <div className="logo-container">
                                             <div className="logo-placeholder" >
-                                                <img 
-                                                    src="/logo.webp" 
-                                                    alt="SIB Logo" 
+                                                <img
+                                                    src="/logo.webp"
+                                                    alt="SIB Logo"
                                                     className="logo-image"
-                                                    onError={(e) => {e.target.style.display='none'; e.target.parentElement.innerText='SIB'}}
+                                                    onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerText = 'SIB' }}
                                                 />
                                             </div>
                                         </div>
-                                        
+
                                         {/* Divider */}
                                         <div className="brand-divider"></div>
 
                                         {/* ISO Button (Clickable) */}
                                         <div className="iso-badge" onClick={toggleIsoModal} title="View ISO Certificate">
-                                            <img 
-                                                src="/sibiso.png" 
-                                                alt="ISO Certified" 
+                                            <img
+                                                src="/sibiso.png"
+                                                alt="ISO Certified"
                                             />
-                                            <span className="iso-badge-text">ISO 9001<br/>Certified</span>
+                                            <span className="iso-badge-text">ISO 9001<br />Certified</span>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="brand-text">
                                         <h4>Sengunthar in Business</h4>
                                         <p className="tagline">Empowering Business Excellence Through Unity</p>
@@ -143,7 +143,7 @@ function Footer({ margin = "auto", ismember = false }) {
                                 <p className="about-text">
                                     A premier business community fostering growth, collaboration, and cultural heritage.
                                 </p>
-                                
+
                                 <div className="social-links">
                                     {socialData.map((social, index) => (
                                         <a href={social.link} className="social-link" target="_blank" key={index} aria-label={social.name}>
@@ -171,14 +171,14 @@ function Footer({ margin = "auto", ismember = false }) {
                                     </div>
                                     <div className="contact-item">
                                         <Phone size={18} className="contact-icon" />
-                                        <p>+91 9842775676</p>
+                                        <p>+91 9842761144</p>
                                     </div>
                                     <div className="contact-item">
                                         <Mail size={18} className="contact-icon" />
                                         <p>members@senguntharinbusiness.in</p>
                                     </div>
                                 </div>
-                                
+
                                 <div className="stats-grid">
                                     <div className="stat-box">
                                         <span className="stat-num">{stats.members}+</span>
@@ -200,7 +200,7 @@ function Footer({ margin = "auto", ismember = false }) {
                         <div className="footer-bottom">
                             <div className="footer-divider"></div>
                             <div className="bottom-content">
-                                <p>&copy; {currentYear} Sengunthar in Business (SIB). All rights reserved. 
+                                <p>&copy; {currentYear} Sengunthar in Business (SIB). All rights reserved.
                                     <br />ISO 9001:2015 Certified</p>
                                 <div className="legal-links">
                                     <a href="/privacy-policy">Privacy Policy</a>

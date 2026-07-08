@@ -19,10 +19,7 @@ workflows:
       - name: Patch Contacts Plugin for Capacitor 8
         script: |
           sed -i '' 's/7.0.0/8.0.0/g' node_modules/@capacitor-community/contacts/Package.swift
-          
-      - name: Generate .env file
-        script: |
-          echo "VITE_APIKEY=${VITE_APIKEY}" >> .env
+          `
           echo "VITE_AUTHDOMAIN=${VITE_AUTHDOMAIN}" >> .env
           echo "VITE_PROJECTID=${VITE_PROJECTID}" >> .env
           echo "VITE_STORAGEBUCKET=${VITE_STORAGEBUCKET}" >> .env
@@ -35,8 +32,8 @@ workflows:
         script: npm run build
       - name: Update iOS Version and Build Number
         script: |
-          # Sets Marketing Version to 1.0.8 (New Train)
-          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0.8" ios/App/App/Info.plist
+          # Sets Marketing Version to 1.0.9 (New Train)
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0.9" ios/App/App/Info.plist
           # Sets Build Number to the unique Codemagic build ID
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
       - name: Sync Capacitor iOS

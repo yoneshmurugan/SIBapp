@@ -423,7 +423,7 @@ function Contact() {
       <style>{styles}</style>
       <section id="contact" className="sib-contact-section">
         <div className="sib-container">
-          
+
           {/* Section Header */}
           <header className="sib-header">
             <span className="sib-tag">Get In Touch</span>
@@ -434,13 +434,13 @@ function Contact() {
           </header>
 
           <div className="sib-content-grid">
-            
+
             {/* Left Column: Contact Information */}
             <div className="sib-info-column">
-              
+
               {/* Location Card */}
               <a
-                href="https://maps.app.goo.gl/oQvWDiGHgVvDCnvWA?g_st=ipc"
+                href=""
                 target="_blank"
                 rel="noopener noreferrer"
                 className="sib-card info-card"
@@ -451,8 +451,7 @@ function Contact() {
                 <div className="info-text">
                   <h4>Visit Office</h4>
                   <address>
-                    {/* H96 Shop No5, Periyar Nagar Main Road,<br />
-                    Erode - 638001, Tamil Nadu */}
+                    {/* Erode, Tamilnadu */}
                   </address>
                 </div>
               </a>
@@ -464,7 +463,7 @@ function Contact() {
                 </div>
                 <div className="info-text">
                   <h4>Call Us</h4>
-                  <a href="tel:+919842775676" className="link-hover">+91 98427 75676</a>
+                  <a href="tel:+919842761144" className="link-hover">+91 98427 61144</a>
                 </div>
               </div>
 
@@ -487,7 +486,7 @@ function Contact() {
                 <p className="cta-desc">
                   Join our growing network of Sengunthar business professionals. Connect, collaborate, and succeed together.
                 </p>
-                <a 
+                <a
                   href="https://docs.google.com/forms/d/e/1FAIpQLSdol7x6QjDP-KsewX1hImi8sU3RqUR2dmn-arttsVt57h6yrA/viewform?usp=header"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -503,7 +502,7 @@ function Contact() {
             {/* Right Column: Contact Form */}
             <form className="sib-card contact-form" onSubmit={handleSubmit} noValidate>
               <input type="hidden" name="access_key" value="6e2f9332-1b79-4754-849a-1cd5b267d650" />
-              
+
               <div className="form-header-internal">
                 <h3>Send a Message</h3>
                 <p>Fill out the form below and we will get back to you shortly.</p>
