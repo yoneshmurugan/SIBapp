@@ -10,7 +10,8 @@ import {
   X,
   AlertTriangle,
   User,
-  UserX
+  UserX,
+  Edit2
 } from "lucide-react";
 
 const capitalize = (str) => {
@@ -27,6 +28,8 @@ export default function PresidentRoleManagement({ chapterId = null }) {
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [blockConfirm, setBlockConfirm] = useState(null);
+  const [changeUsernameConfirm, setChangeUsernameConfirm] = useState(null);
+  const [newUsername, setNewUsername] = useState("");
 
   // Fetch Members
   const fetchMembers = async () => {
@@ -85,7 +88,45 @@ export default function PresidentRoleManagement({ chapterId = null }) {
     setMessage(null);
     const isPromoting = newRole.toLowerCase() === "president";
     
-      // Filter members that actually need updating
+      
+  const initiateChangeUsername = (userId, currentName, e) => {
+    if (e) e.stopPropagation();
+    setChangeUsernameConfirm({ id: userId, currentName });
+    setNewUsername(currentName);
+  };
+
+  const confirmChangeUsername = async () => {
+    if (!changeUsernameConfirm || !newUsername.trim()) return;
+    if (newUsername.trim() === changeUsernameConfirm.currentName) {
+      setChangeUsernameConfirm(null);
+      return;
+    }
+
+    setSaving(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/admin/change-username`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: changeUsernameConfirm.id, new_username: newUsername.trim() }),
+        credentials: "include"
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update username");
+
+      setMembers(prev => prev.map(m => 
+        m.userId === changeUsernameConfirm.id ? { ...m, name: newUsername.trim() } : m
+      ));
+      setMessage({ type: "success", text: "Username updated successfully." });
+    } catch (err) {
+      setMessage({ type: "error", text: err.message || "Failed to update username. Please try again." });
+    } finally {
+      setSaving(false);
+      setChangeUsernameConfirm(null);
+    }
+  };
+
+  // Filter members that actually need updating
     const membersToUpdate = members.filter(m => 
       selected.includes(m.id) && 
       (isPromoting ? !m.isPresident : m.role !== "Member")
@@ -225,7 +266,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
   );
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 space-y-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 relative">
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 space-y-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 relative">
       
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
@@ -287,6 +328,49 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                   className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium shadow-sm transition-colors"
                 >
                   {blockConfirm.block ? 'Suspend' : 'Reactivate'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      
+      {/* Change Username Modal */}
+      {changeUsernameConfirm && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-md w-full animate-in zoom-in-95 duration-200">
+            <div className="flex flex-col gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Change Username</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Update the system username for this member. This will safely update their name on all past slips.
+                </p>
+              </div>
+              <div className="mt-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Username</label>
+                <input
+                  type="text"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  placeholder="Enter new username"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-3 w-full mt-4">
+                <button 
+                  onClick={() => setChangeUsernameConfirm(null)}
+                  className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmChangeUsername}
+                  disabled={saving || !newUsername.trim() || newUsername.trim() === changeUsernameConfirm.currentName}
+                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg font-medium shadow-sm transition-colors"
+                >
+                  {saving ? "Saving..." : "Update Name"}
                 </button>
               </div>
             </div>
@@ -447,7 +531,12 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                           {member.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px] lg:max-w-xs">{member.name}</p>
+                          <div className="flex items-center gap-2">
+                              <p className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px] lg:max-w-xs">{member.name}</p>
+                              <button onClick={(e) => initiateChangeUsername(member.userId, member.name, e)} className="text-gray-400 hover:text-emerald-500 transition-colors p-1" title="Change Username">
+                                <Edit2 size={14} />
+                              </button>
+                            </div>
                           <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px] lg:max-w-xs">{member.email}</p>
                         </div>
                       </div>
@@ -539,7 +628,12 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                             {member.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{member.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{member.name}</p>
+                              <button onClick={(e) => initiateChangeUsername(member.userId, member.name, e)} className="text-gray-400 hover:text-emerald-500 transition-colors p-1" title="Change Username">
+                                <Edit2 size={14} />
+                              </button>
+                            </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{member.email}</p>
                           </div>
                         </div>
