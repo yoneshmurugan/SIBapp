@@ -19,7 +19,6 @@ workflows:
       - name: Patch Contacts Plugin for Capacitor 8
         script: |
           sed -i '' 's/7.0.0/8.0.0/g' node_modules/@capacitor-community/contacts/Package.swift
-          `
           echo "VITE_AUTHDOMAIN=${VITE_AUTHDOMAIN}" >> .env
           echo "VITE_PROJECTID=${VITE_PROJECTID}" >> .env
           echo "VITE_STORAGEBUCKET=${VITE_STORAGEBUCKET}" >> .env
