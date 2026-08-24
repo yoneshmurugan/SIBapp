@@ -90,6 +90,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
     
       
   const initiateChangeUsername = (userId, currentName, e) => {
+    console.log("Edit button clicked", { userId, currentName });
     if (e) e.stopPropagation();
     setChangeUsernameConfirm({ id: userId, currentName });
     setNewUsername(currentName);
@@ -533,7 +534,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                               <p className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px] lg:max-w-xs">{member.name}</p>
-                              <button onClick={(e) => initiateChangeUsername(member.userId, member.name, e)} className="text-gray-400 hover:text-emerald-500 transition-colors p-1" title="Change Username">
+                              <button type="button" onClick={(e) => { e.preventDefault(); initiateChangeUsername(member.userId, member.name, e); }} className="relative z-10 text-gray-400 hover:text-emerald-500 transition-colors p-1 cursor-pointer" title="Change Username">
                                 <Edit2 size={14} />
                               </button>
                             </div>
@@ -630,7 +631,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
                               <p className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{member.name}</p>
-                              <button onClick={(e) => initiateChangeUsername(member.userId, member.name, e)} className="text-gray-400 hover:text-emerald-500 transition-colors p-1" title="Change Username">
+                              <button type="button" onClick={(e) => { e.preventDefault(); initiateChangeUsername(member.userId, member.name, e); }} className="relative z-10 text-gray-400 hover:text-emerald-500 transition-colors p-1 cursor-pointer" title="Change Username">
                                 <Edit2 size={14} />
                               </button>
                             </div>
