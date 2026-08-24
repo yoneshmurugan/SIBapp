@@ -82,7 +82,7 @@ function Members() {
 
   // Frontend Filtering and Sorting
   useEffect(() => {
-    let result = data.filter(m => m.membership_status !== false && m.membership_status !== 0);
+    let result = [...data];
 
     // Search filter
     if (filters.search) {

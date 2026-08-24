@@ -70,7 +70,7 @@ function PublicMembers() {
 
   // PERFORMANCE: Use useMemo for filtering and sorting
   const filteredData = useMemo(() => {
-    let result = data.filter(m => m.membership_status !== false && m.membership_status !== 0);
+    let result = [...data];
 
     if (filters.search) {
       const q = filters.search.trim().toLowerCase();

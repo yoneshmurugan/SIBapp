@@ -112,7 +112,7 @@ function CrossChapterSearch({
           });
           const data = await res.json();
           if (!cancelled && Array.isArray(data)) {
-            const list = data.filter(m => m.membership_status !== false && m.membership_status !== 0).map((m) => ({
+            const list = data.map((m) => ({
               username: m.user?.username || "",
               display_name: m.display_name || m.user?.name || "",
               chapter: m.chapter?.chapter_name || "",
@@ -163,8 +163,8 @@ function CrossChapterSearch({
            });
            const data = await res.json();
            if (!cancelled && Array.isArray(data)) {
-              const list = data.filter(m => m.membership_status !== false && m.membership_status !== 0).map((m) => ({
-              username: m.user?.username || "",
+              const list = data.map((m) => ({
+                username: m.user?.username || "",
                 display_name: m.display_name || m.user?.name || "",
                 chapter: m.chapter?.chapter_name || "",
                 chapter_id: m.chapter?._id || "",
