@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Trophy, Medal, Crown, Loader2, Info, X, Star, Target, Calendar, UserRound, ChevronRight, Award, Sparkles, Flame, TrendingUp, Zap } from 'lucide-react';
+import { Trophy, Medal, Crown, Loader2, Info, X, Star, Target, Calendar, UserRound, ChevronRight, Award, Sparkles, Flame, TrendingUp, Zap, History } from 'lucide-react';
 import Header from './Header';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
+import PastLeadersModal from './PastLeadersModal';
 
 /* ═══════════════════════════════════════════════════════════════
    ANIMATED BACKGROUND SYSTEM
@@ -312,7 +313,7 @@ function RulesModal({ isOpen, onClose }) {
             <X size={18} />
           </button>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto">
           <div className="text-gray-300 text-sm space-y-2 bg-gray-800/30 p-4 rounded-xl border border-gray-700/30">
             <p>
               Earn points by participating in chapter activities. The members with the highest points will be featured on the leaderboard! The leaderboard resets at the beginning of every month, giving everyone a fresh chance to win.
@@ -343,7 +344,9 @@ function RulesModal({ isOpen, onClose }) {
               </div>
             ))}
           </div>
-          <button onClick={onClose} className="w-full mt-2 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] duration-200">
+        </div>
+        <div className="p-4 border-t border-gray-800 bg-gray-900/80">
+          <button onClick={onClose} className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] duration-200">
             Got it / புரிந்தது ✨
           </button>
         </div>
@@ -379,7 +382,7 @@ function BadgesModal({ isOpen, onClose }) {
             <X size={18} />
           </button>
         </div>
-        <div className="p-5 space-y-3 max-h-[70vh] overflow-y-auto">
+        <div className="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
           <p className="text-gray-400 text-sm mb-1">Special badges awarded to top performers each month.</p>
           {BADGES.map((badge, i) => (
             <div key={badge.type} className={`flex items-center gap-4 p-3.5 rounded-xl border ${badge.borderColor} ${badge.bgColor} hover:scale-[1.02] transition-all duration-300 lb-modal-item`} style={{ animationDelay: `${i * 80 + 150}ms` }}>
@@ -390,7 +393,9 @@ function BadgesModal({ isOpen, onClose }) {
               </div>
             </div>
           ))}
-          <button onClick={onClose} className="w-full mt-2 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] duration-200">
+        </div>
+        <div className="p-4 border-t border-gray-800 bg-gray-900/80">
+          <button onClick={onClose} className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] duration-200">
             Close
           </button>
         </div>
@@ -446,7 +451,9 @@ function UserEarnedBadgesModal({ user, onClose }) {
               );
             })
           )}
-          <button onClick={onClose} className="w-full mt-2 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] duration-200">
+        </div>
+        <div className="p-4 border-t border-gray-800 bg-gray-900/80">
+          <button onClick={onClose} className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] duration-200">
             Close
           </button>
         </div>
@@ -537,6 +544,7 @@ function BreakdownModal({ user, onClose }) {
 export default function LeaderboardPage() {
   const [showRules, setShowRules] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
+  const [showPastLeaders, setShowPastLeaders] = useState(false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [selectedUserForBadges, setSelectedUserForBadges] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -634,6 +642,7 @@ export default function LeaderboardPage() {
         {/* Action buttons - TOP RIGHT OF MAIN CONTENT */}
         <div className="absolute top-0 right-4 sm:right-6 hidden sm:flex flex-col sm:flex-row items-end sm:items-center gap-3 z-50">
           {[
+            { label: 'Past Leaders', icon: <History size={14} />, onClick: () => setShowPastLeaders(true) },
             { label: 'Badges', icon: <Award size={14} />, onClick: () => setShowBadges(true) },
             { label: 'Rules', icon: <Info size={14} />, onClick: () => setShowRules(true) },
           ].map(btn => (
@@ -647,6 +656,7 @@ export default function LeaderboardPage() {
         {/* Mobile Action Buttons */}
         <div className="sm:hidden flex items-center justify-center gap-3 mb-6 relative z-50">
           {[
+            { label: 'Past Leaders', icon: <History size={14} />, onClick: () => setShowPastLeaders(true) },
             { label: 'Badges', icon: <Award size={14} />, onClick: () => setShowBadges(true) },
             { label: 'Rules', icon: <Info size={14} />, onClick: () => setShowRules(true) },
           ].map(btn => (
@@ -701,26 +711,25 @@ export default function LeaderboardPage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1.2s] ease-in-out pointer-events-none" />
 
                   {/* Rank */}
-                  <div className="lb-rank-diamond shrink-0">
-                    <div className="lb-rank-diamond-bg group-hover:rotate-[135deg] group-hover:bg-amber-500/15 group-hover:border-amber-500/40" />
-                    <span className="relative z-10 font-black text-gray-500 group-hover:text-amber-400 transition-colors duration-500 text-base sm:text-xl">
+                  <div className="relative shrink-0 flex items-center justify-center w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-gray-800/60 border border-gray-600/30 group-hover:bg-amber-500/15 group-hover:border-amber-500/40 transition-all duration-300">
+                    <span className="font-black text-gray-500 group-hover:text-amber-400 transition-colors duration-300 text-xs sm:text-base">
                       {user.rank}
                     </span>
                   </div>
 
                   {/* Avatar */}
                   <div className="relative shrink-0">
-                    <div className="absolute -inset-1.5 bg-amber-500/30 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute -inset-1.5 bg-amber-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
                     <img
                       src={user.avatar}
                       alt={user.name}
-                      className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-gray-700/80 group-hover:border-amber-400/80 transition-all duration-500"
+                      className="relative w-11 h-11 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-gray-700/80 group-hover:border-amber-400/80 transition-all duration-500"
                     />
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0 ml-2">
-                    <h4 className="text-gray-200 font-bold text-base sm:text-lg truncate group-hover:text-amber-400 transition-colors duration-300">
+                    <h4 className="text-gray-200 font-bold text-[15px] sm:text-lg truncate group-hover:text-amber-400 transition-colors duration-300">
                       {user.name}
                     </h4>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1">
@@ -786,6 +795,8 @@ export default function LeaderboardPage() {
         }} 
       />
       <BadgesModal isOpen={showBadges} onClose={() => setShowBadges(false)} />
+      {showPastLeaders && <PastLeadersModal onClose={() => setShowPastLeaders(false)} />}
+      {showPastLeaders && <PastLeadersModal onClose={() => setShowPastLeaders(false)} />}
       <UserEarnedBadgesModal user={selectedUserForBadges} onClose={() => setSelectedUserForBadges(null)} />
       <BreakdownModal user={selectedUser} onClose={() => setSelectedUser(null)} />
 
@@ -794,10 +805,10 @@ export default function LeaderboardPage() {
          ═══════════════════════════════════════════════════════════ */}
       <style>{`
         /* ── Background orbs ── */
-        .lb-orb { position: absolute; border-radius: 9999px; filter: blur(120px); pointer-events: none; }
-        .lb-orb-1 { width: 500px; height: 500px; top: -100px; left: -100px; background: radial-gradient(circle, rgba(245,158,11,0.12), transparent 70%); animation: lb-drift-1 22s ease-in-out infinite; }
-        .lb-orb-2 { width: 400px; height: 400px; bottom: -50px; right: -80px; background: radial-gradient(circle, rgba(99,102,241,0.10), transparent 70%); animation: lb-drift-2 28s ease-in-out infinite; }
-        .lb-orb-3 { width: 350px; height: 350px; top: 40%; left: 50%; background: radial-gradient(circle, rgba(249,115,22,0.08), transparent 70%); animation: lb-drift-3 18s ease-in-out infinite; }
+        .lb-orb { position: absolute; border-radius: 9999px; pointer-events: none; }
+        .lb-orb-1 { width: 500px; height: 500px; top: -100px; left: -100px; background: radial-gradient(circle, rgba(245,158,11,0.15), transparent 70%); animation: lb-drift-1 22s ease-in-out infinite; }
+        .lb-orb-2 { width: 400px; height: 400px; bottom: -50px; right: -80px; background: radial-gradient(circle, rgba(99,102,241,0.12), transparent 70%); animation: lb-drift-2 28s ease-in-out infinite; }
+        .lb-orb-3 { width: 350px; height: 350px; top: 40%; left: 50%; background: radial-gradient(circle, rgba(249,115,22,0.10), transparent 70%); animation: lb-drift-3 18s ease-in-out infinite; }
 
         @keyframes lb-drift-1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(60px,-40px); } }
         @keyframes lb-drift-2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-50px,40px); } }
@@ -826,12 +837,11 @@ export default function LeaderboardPage() {
         .lb-pill-btn {
           display: flex; align-items: center; gap: 8px;
           padding: 8px 18px; border-radius: 9999px; font-size: 12px; font-weight: 700;
-          background: rgba(31,41,55,0.8); border: 1px solid rgba(75,85,99,0.6);
+          background: rgba(31,41,55,0.9); border: 1px solid rgba(75,85,99,0.6);
           color: #d1d5db; transition: all 0.3s;
-          backdrop-filter: blur(8px);
         }
         .lb-pill-btn:hover {
-          background: rgba(55,65,81,0.9); color: white;
+          background: rgba(55,65,81,1); color: white;
           border-color: rgba(245,158,11,0.3);
           box-shadow: 0 0 20px -5px rgba(245,158,11,0.2);
         }
@@ -853,31 +863,25 @@ export default function LeaderboardPage() {
 
         /* ── Row card ── */
         .lb-row {
-          position: relative; display: flex; align-items: center; gap: 14px;
-          padding: 14px 16px; border-radius: 18px; overflow: hidden; cursor: pointer;
-          background: rgba(17,24,39,0.5); backdrop-filter: blur(12px);
+          position: relative; display: flex; align-items: center; gap: 8px;
+          padding: 10px 12px; border-radius: 16px; overflow: hidden; cursor: pointer;
+          background: rgba(17,24,39,0.85); 
           border: 1px solid rgba(255,255,255,0.04);
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s, border-color 0.4s, box-shadow 0.4s;
           opacity: 0; transform: translateY(16px);
           animation: lb-row-in 0.5s ease-out forwards;
         }
         .lb-row:hover {
-          background: rgba(31,41,55,0.6);
+          background: rgba(31,41,55,0.9);
           border-color: rgba(245,158,11,0.25);
           box-shadow: 0 0 40px -10px rgba(245,158,11,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
           transform: translateX(4px);
         }
         @keyframes lb-row-in { to { opacity: 1; transform: translateY(0); } }
 
-        /* ── Rank diamond ── */
-        .lb-rank-diamond { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
-        .lb-rank-diamond-bg {
-          position: absolute; inset: 0; border-radius: 12px; transform: rotate(45deg);
-          background: rgba(31,41,55,0.6); border: 1px solid rgba(75,85,99,0.3);
-          transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+        /* ── Rank diamond (removed) ── */
         @media (min-width: 640px) {
-          .lb-rank-diamond { width: 50px; height: 50px; }
+          .lb-row { gap: 14px; padding: 14px 16px; border-radius: 18px; }
         }
 
         /* ── Bar fill ── */
