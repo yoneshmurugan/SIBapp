@@ -9,7 +9,8 @@ import {
   AlertCircle,
   X,
   AlertTriangle,
-  User
+  User,
+  UserX
 } from "lucide-react";
 
 const capitalize = (str) => {
