@@ -442,9 +442,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                          member.isPresident 
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' 
-                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                          member.isSuspended ? 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' : member.isPresident ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
                         }`}>
                           {member.name.charAt(0).toUpperCase()}
                         </div>
@@ -529,9 +527,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                            member.isPresident 
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' 
-                              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                            member.isSuspended ? 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' : member.isPresident ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
                           }`}>
                             {member.name.charAt(0).toUpperCase()}
                           </div>
