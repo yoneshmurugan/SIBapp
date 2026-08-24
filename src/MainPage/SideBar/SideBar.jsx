@@ -104,15 +104,17 @@ export default function HeaderAvatar({
           tabIndex={-1}
           className="
             absolute left-0 mt-2 w-56
-            rounded-lg border border-neutral-300 dark:border-gray-600
+            rounded-xl border border-neutral-200 dark:border-gray-700
             bg-white dark:bg-gray-800
-            shadow-2xl
-            max-h-[70vh] overflow-y-auto
+            shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)]
+            max-h-[75vh] overflow-y-auto overscroll-contain
+            transform-gpu
             transition-all duration-200
             animate-in fade-in zoom-in-95
+            z-[100]
           "
         >
-          <ul className="py-2 px-1">
+          <ul className="flex flex-col py-2 px-1 relative">
             {items.map(element => (
               <SidebarList
                 key={element.path}
