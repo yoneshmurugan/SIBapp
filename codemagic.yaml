@@ -1,0 +1,111 @@
+workflows:
+  ios-release:
+    name: Sengunthar iOS Build
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: "Codemagic CI CD" 
+    environment:
+      groups:
+        - credentials
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.senguntharinbusiness.app 
+      node: latest
+      xcode: latest
+    scripts:
+      - name: Install dependencies
+        script: npm install
+        
+      - name: Patch Contacts Plugin for Capacitor 8
+        script: |
+          sed -i '' 's/7.0.0/8.0.0/g' node_modules/@capacitor-community/contacts/Package.swift
+          `
+          echo "VITE_AUTHDOMAIN=${VITE_AUTHDOMAIN}" >> .env
+          echo "VITE_PROJECTID=${VITE_PROJECTID}" >> .env
+          echo "VITE_STORAGEBUCKET=${VITE_STORAGEBUCKET}" >> .env
+          echo "VITE_MESSAGINGSENDERID=${VITE_MESSAGINGSENDERID}" >> .env
+          echo "VITE_APPID=${VITE_APPID}" >> .env
+          echo "VITE_MEASUREMENTID=${VITE_MEASUREMENTID}" >> .env
+          echo "VITE_BACKEND_SERVER=${VITE_BACKEND_SERVER}" >> .env
+          
+      - name: Build Web App
+        script: npm run build
+      - name: Update iOS Version and Build Number
+        script: |
+          # Sets Marketing Version to 2.0.1 (New Train)
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 2.0.1" ios/App/App/Info.plist
+          # Sets Build Number to the unique Codemagic build ID
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
+      - name: Sync Capacitor iOS
+        script: npx cap sync ios
+      - name: Set Export Compliance
+        script: |
+          # This tells Apple your app does not use custom/non-exempt encryption.
+          # We delete the key first if it exists, then add it to ensure the build never fails.
+          /usr/libexec/PlistBuddy -c "Delete :ITSAppUsesNonExemptEncryption" ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" ios/App/App/Info.plist
+        
+      - name: Safely Link Firebase to Xcode
+        script: |
+          cd ios/App
+          cat <<EOF > link_firebase.rb
+          require 'xcodeproj'
+          project = Xcodeproj::Project.open('App.xcodeproj')
+          file_ref = project.new_file('App/GoogleService-Info.plist')
+          project.targets.first.add_resources([file_ref])
+          project.save
+          EOF
+          ruby link_firebase.rb
+          cd ../..
+          
+      - name: Force Clean Dependency Cache
+        script: |
+          cd ios/App
+          rm -rf .swiftpm
+          rm -rf Package.resolved
+          
+      - name: Install CocoaPods (Generates Workspace)
+        script: |
+          cd ios/App
+          pod install --repo-update
+          
+      - name: Apply Apple Certificates
+        script: xcode-project use-profiles
+          
+      - name: Build iOS native app
+        script: |
+          # Generate Export Options
+          cat <<EOF > export_options.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.senguntharinbusiness.app</key>
+                  <string>Codemagic CI CD</string>
+              </dict>
+          </dict>
+          </plist>
+          EOF
+          
+          # Clean, Archive, and Export
+          xcodebuild clean -workspace ios/App/App.xcworkspace -scheme App
+          xcodebuild archive -workspace ios/App/App.xcworkspace \
+                             -scheme App \
+                             -archivePath build/App.xcarchive \
+                             -destination 'generic/platform=iOS'
+          xcodebuild -exportArchive -archivePath build/App.xcarchive \
+                     -exportPath build/ios/ipa \
+                     -exportOptionsPlist export_options.plist
+            
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
