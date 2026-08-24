@@ -84,45 +84,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
     setMessage(null);
     const isPromoting = newRole.toLowerCase() === "president";
     
-  
-  const initiateBlock = () => {
-    if (selected.length === 0) return;
-    const name = selected.length === 1 
-      ? members.find(m => m.id === selected[0])?.name 
-      : `${selected.length} members`;
-      
-    const firstSelected = members.find(m => m.id === selected[0]);
-    const isCurrentlySuspended = firstSelected?.isSuspended;
-
-    setBlockConfirm({ count: selected.length, name, block: !isCurrentlySuspended });
-  };
-
-  const confirmBlock = async () => {
-    if (!blockConfirm) return;
-    setSaving(true);
-    setMessage(null);
-    
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/admin/blockuser`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userIds: selected, block: blockConfirm.block }),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Failed to block/unblock members");
-
-      fetchMembers();
-      setMessage({ type: "success", text: `Member(s) ${blockConfirm.block ? 'suspended' : 'reactivated'} successfully.` });
-      setSelected([]);
-    } catch {
-      setMessage({ type: "error", text: "Failed to update member status. Please try again." });
-    } finally {
-      setSaving(false);
-      setBlockConfirm(null);
-    }
-  };
-
-  // Filter members that actually need updating
+      // Filter members that actually need updating
     const membersToUpdate = members.filter(m => 
       selected.includes(m.id) && 
       (isPromoting ? !m.isPresident : m.role !== "Member")
@@ -217,6 +179,44 @@ export default function PresidentRoleManagement({ chapterId = null }) {
   };
 
   // Filter
+
+  const initiateBlock = () => {
+    if (selected.length === 0) return;
+    const name = selected.length === 1 
+      ? members.find(m => m.id === selected[0])?.name 
+      : `${selected.length} members`;
+      
+    const firstSelected = members.find(m => m.id === selected[0]);
+    const isCurrentlySuspended = firstSelected?.isSuspended;
+
+    setBlockConfirm({ count: selected.length, name, block: !isCurrentlySuspended });
+  };
+
+  const confirmBlock = async () => {
+    if (!blockConfirm) return;
+    setSaving(true);
+    setMessage(null);
+    
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/admin/blockuser`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userIds: selected, block: blockConfirm.block }),
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Failed to block/unblock members");
+
+      fetchMembers();
+      setMessage({ type: "success", text: `Member(s) ${blockConfirm.block ? 'suspended' : 'reactivated'} successfully.` });
+      setSelected([]);
+    } catch {
+      setMessage({ type: "error", text: "Failed to update member status. Please try again." });
+    } finally {
+      setSaving(false);
+      setBlockConfirm(null);
+    }
+  };
+
   const filteredMembers = members.filter(m =>
     m.name.toLowerCase().includes(search.trim().toLowerCase()) ||
     m.email.toLowerCase().includes(search.trim().toLowerCase()) ||
