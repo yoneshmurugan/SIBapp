@@ -2,15 +2,15 @@ import { useState } from "react";
 import TextField from "./components/TextField";
 import PasswordField from "./components/PasswordField";
 import Alert from "./components/Alert";
-import { validateEmail, validatePassword } from "./utils/validators";
+import { validateIdentifier, validatePassword } from "./utils/validators";
 
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app } from "../firebase";
 import { useNavigate } from "react-router-dom";
 
 export default function SignInForm() {
-  const [values, setValues] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [values, setValues] = useState({ identifier: "", password: "" });
+  const [errors, setErrors] = useState({ identifier: "", password: "" });
   const [globalError, setGlobalError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,10 +24,10 @@ export default function SignInForm() {
   };
 
   const validate = () => {
-    const emailErr = validateEmail(values.email);
+    const idErr = validateIdentifier(values.identifier);
     const passErr = validatePassword(values.password);
-    setErrors({ email: emailErr, password: passErr });
-    return !emailErr && !passErr;
+    setErrors({ identifier: idErr, password: passErr });
+    return !idErr && !passErr;
   };
 
   const onSubmit = async (e) => {
@@ -37,10 +37,28 @@ export default function SignInForm() {
 
     try {
       setLoading(true);
-      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      
+      // 1. Lookup Email if it's a phone number
+      let loginEmail = values.identifier.trim();
+      if (!loginEmail.includes('@')) {
+        const lookupRes = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/lookup-email`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier: loginEmail }),
+        });
+        const lookupData = await lookupRes.json();
+        if (!lookupRes.ok) {
+          throw new Error(lookupData.error || "Could not find account for this phone number");
+        }
+        loginEmail = lookupData.email;
+      }
+
+      // 2. Sign in with Firebase
+      const userCredential = await signInWithEmailAndPassword(auth, loginEmail, values.password);
       const user_id = userCredential.user.uid;
       const idToken = await userCredential.user.getIdToken(true);
 
+      // 3. Establish Session
       const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/sessionLogin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -61,7 +79,7 @@ export default function SignInForm() {
       return;
     } catch (err) {
       console.error(err);
-      setGlobalError(err.message || "Invalid email or password");
+      setGlobalError(err.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
@@ -77,17 +95,17 @@ export default function SignInForm() {
       {globalError && <Alert tone="error" message={globalError} id="form-alert" />}
 
       <TextField
-        id="email"
-        label="Email address"
-        type="email"
-        placeholder="name@example.com"
-        value={values.email}
+        id="identifier"
+        label="Email or Phone Number"
+        type="text"
+        placeholder="e.g. user@example.com or 9876543210"
+        value={values.identifier}
         onChange={onChange}
-        error={errors.email}
+        error={errors.identifier}
         autoComplete="username"
         autoCapitalize="none"
         autoCorrect="off"
-        inputMode="email"
+        inputMode="text"
         className="dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 dark:placeholder-gray-400"
       />
 
