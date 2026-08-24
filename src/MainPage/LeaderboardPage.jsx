@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Trophy, Medal, Crown, Loader2, Info, X, Star, Target, Calendar, UserRound, ChevronRight, Award, Sparkles, Flame, TrendingUp, Zap } from 'lucide-react';
+import { Trophy, Medal, Crown, Loader2, Info, X, Star, Target, Calendar, UserRound, ChevronRight, Award, Sparkles, Flame, TrendingUp, Zap, History } from 'lucide-react';
 import Header from './Header';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
+import PastLeadersModal from './PastLeadersModal';
 
 /* ═══════════════════════════════════════════════════════════════
    ANIMATED BACKGROUND SYSTEM
