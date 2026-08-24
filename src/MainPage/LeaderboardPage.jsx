@@ -544,6 +544,7 @@ function BreakdownModal({ user, onClose }) {
 export default function LeaderboardPage() {
   const [showRules, setShowRules] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
+  const [showPastLeaders, setShowPastLeaders] = useState(false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [selectedUserForBadges, setSelectedUserForBadges] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -641,6 +642,7 @@ export default function LeaderboardPage() {
         {/* Action buttons - TOP RIGHT OF MAIN CONTENT */}
         <div className="absolute top-0 right-4 sm:right-6 hidden sm:flex flex-col sm:flex-row items-end sm:items-center gap-3 z-50">
           {[
+            { label: 'Past Leaders', icon: <History size={14} />, onClick: () => setShowPastLeaders(true) },
             { label: 'Badges', icon: <Award size={14} />, onClick: () => setShowBadges(true) },
             { label: 'Rules', icon: <Info size={14} />, onClick: () => setShowRules(true) },
           ].map(btn => (
@@ -654,6 +656,7 @@ export default function LeaderboardPage() {
         {/* Mobile Action Buttons */}
         <div className="sm:hidden flex items-center justify-center gap-3 mb-6 relative z-50">
           {[
+            { label: 'Past Leaders', icon: <History size={14} />, onClick: () => setShowPastLeaders(true) },
             { label: 'Badges', icon: <Award size={14} />, onClick: () => setShowBadges(true) },
             { label: 'Rules', icon: <Info size={14} />, onClick: () => setShowRules(true) },
           ].map(btn => (
@@ -792,6 +795,8 @@ export default function LeaderboardPage() {
         }} 
       />
       <BadgesModal isOpen={showBadges} onClose={() => setShowBadges(false)} />
+      {showPastLeaders && <PastLeadersModal onClose={() => setShowPastLeaders(false)} />}
+      {showPastLeaders && <PastLeadersModal onClose={() => setShowPastLeaders(false)} />}
       <UserEarnedBadgesModal user={selectedUserForBadges} onClose={() => setSelectedUserForBadges(null)} />
       <BreakdownModal user={selectedUser} onClose={() => setSelectedUser(null)} />
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, History, Trophy, Medal, Loader2, ChevronDown, ChevronRight, Crown } from 'lucide-react';
+import { X, History, Trophy, Medal, Loader2, ChevronDown, ChevronRight, Crown, Calendar, Target, TrendingUp, UserRound } from 'lucide-react';
 import useFetch from '../hooks/useFetch';
 import clsx from 'clsx';
 
@@ -10,14 +10,30 @@ export default function PastLeadersModal({ onClose }) {
   );
 
   const [expandedYear, setExpandedYear] = useState(null);
+  const [expandedMonth, setExpandedMonth] = useState(null);
 
   useEffect(() => {
     if (data && data.length > 0 && !expandedYear) {
       setExpandedYear(data[0].year);
+      if (data[0].months && data[0].months.length > 0) {
+        setExpandedMonth(data[0].months[0].month);
+      }
     }
   }, [data]);
 
   const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  const getBadgeDetails = (type) => {
+    switch (type) {
+        case 'month_winner': return { label: 'Month Winner', icon: <Crown className="w-5 h-5 text-amber-400 drop-shadow-md" fill="currentColor" />, color: 'text-amber-500' };
+        case 'runner_up': return { label: 'Runner Up', icon: <Medal className="w-5 h-5 text-gray-300 drop-shadow-md" fill="currentColor" />, color: 'text-gray-300' };
+        case 'full_attendance': return { label: 'Full Attendance', icon: <Calendar className="w-5 h-5 text-blue-400 drop-shadow-md" />, color: 'text-blue-400' };
+        case 'highest_referral': return { label: 'Highest Referrals', icon: <Target className="w-5 h-5 text-emerald-400 drop-shadow-md" />, color: 'text-emerald-400' };
+        case 'highest_tyb': return { label: 'Highest TYB', icon: <TrendingUp className="w-5 h-5 text-purple-400 drop-shadow-md" />, color: 'text-purple-400' };
+        case 'highest_m2m': return { label: 'Highest M2M', icon: <UserRound className="w-5 h-5 text-rose-400 drop-shadow-md" />, color: 'text-rose-400' };
+        default: return { label: 'Winner', icon: <Medal className="w-5 h-5 text-gray-400" />, color: 'text-gray-400' };
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 pb-20 sm:pb-6">
@@ -73,7 +89,12 @@ export default function PastLeadersModal({ onClose }) {
                   {/* Year Header */}
                   <button 
                     className="w-full flex items-center justify-between px-6 py-4 bg-gray-800/50 hover:bg-gray-800/80 transition-colors"
-                    onClick={() => setExpandedYear(expandedYear === yearData.year ? null : yearData.year)}
+                    onClick={() => {
+                        setExpandedYear(expandedYear === yearData.year ? null : yearData.year);
+                        if (expandedYear !== yearData.year && yearData.months.length > 0) {
+                            setExpandedMonth(yearData.months[0].month);
+                        }
+                    }}
                   >
                     <span className="text-xl font-black text-gray-200">{yearData.year}</span>
                     {expandedYear === yearData.year ? (
@@ -83,42 +104,59 @@ export default function PastLeadersModal({ onClose }) {
                     )}
                   </button>
 
-                  {/* Months List */}
+                  {/* Year Content (Months) */}
                   <div className={clsx(
-                    "grid gap-6 transition-all duration-300 ease-in-out",
+                    "grid gap-4 transition-all duration-300 ease-in-out bg-gray-900/20",
                     expandedYear === yearData.year ? "grid-rows-[1fr] opacity-100 p-4 sm:p-6" : "grid-rows-[0fr] opacity-0"
                   )}>
-                    <div className="overflow-hidden flex flex-col gap-8">
+                    <div className="overflow-hidden flex flex-col gap-4">
                       {yearData.months.map((monthData) => (
-                        <div key={monthData.month} className="flex flex-col gap-4">
-                          <h4 className="text-sm font-bold text-amber-500 uppercase tracking-widest pl-2 border-l-2 border-amber-500/50">
-                            {monthNames[monthData.month]}
-                          </h4>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {monthData.winners.map((winner, idx) => (
-                              <div key={idx} className="flex items-center gap-4 bg-gray-900/60 p-3 rounded-2xl border border-gray-700/50 hover:border-amber-500/30 transition-colors">
-                                {/* Avatar */}
-                                <div className="relative">
-                                  <img src={winner.avatar} alt={winner.name} className="w-12 h-12 rounded-full object-cover border border-gray-700" />
-                                  <div className="absolute -bottom-1 -right-1">
-                                    {winner.badge_type === 'month_winner' ? (
-                                      <Crown className="w-5 h-5 text-amber-400 drop-shadow-md" fill="currentColor" />
-                                    ) : (
-                                      <Medal className="w-5 h-5 text-gray-300 drop-shadow-md" fill="currentColor" />
-                                    )}
-                                  </div>
+                        <div key={monthData.month} className="bg-gray-800/50 rounded-xl border border-gray-700/30 overflow-hidden">
+                            {/* Month Header (Accordion) */}
+                            <button 
+                                className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-700/30 transition-colors"
+                                onClick={() => setExpandedMonth(expandedMonth === monthData.month ? null : monthData.month)}
+                            >
+                                <h4 className="text-sm font-bold text-amber-500 uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    {monthNames[monthData.month]}
+                                </h4>
+                                {expandedMonth === monthData.month ? (
+                                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                                ) : (
+                                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                                )}
+                            </button>
+
+                            {/* Month Content (Winners List) */}
+                            <div className={clsx(
+                                "grid transition-all duration-300 ease-in-out",
+                                expandedMonth === monthData.month ? "grid-rows-[1fr] opacity-100 p-4 border-t border-gray-700/30" : "grid-rows-[0fr] opacity-0"
+                            )}>
+                                <div className="overflow-hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {monthData.winners.map((winner, idx) => {
+                                        const badge = getBadgeDetails(winner.badge_type);
+                                        return (
+                                            <div key={idx} className="flex items-center gap-4 bg-gray-900/60 p-3 rounded-2xl border border-gray-700/50 hover:border-amber-500/30 transition-colors">
+                                                {/* Avatar */}
+                                                <div className="relative">
+                                                <img src={winner.avatar} alt={winner.name} className="w-12 h-12 rounded-full object-cover border border-gray-700" />
+                                                <div className="absolute -bottom-1 -right-1">
+                                                    {badge.icon}
+                                                </div>
+                                                </div>
+                                                {/* Info */}
+                                                <div className="flex flex-col min-w-0">
+                                                <span className="text-gray-100 font-bold text-sm truncate">{winner.name}</span>
+                                                <span className={clsx("text-xs font-semibold uppercase tracking-wider", badge.color)}>
+                                                    {badge.label}
+                                                </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                                {/* Info */}
-                                <div className="flex flex-col min-w-0">
-                                  <span className="text-gray-100 font-bold text-sm truncate">{winner.name}</span>
-                                  <span className="text-amber-500/80 text-xs font-semibold uppercase tracking-wider">
-                                    {winner.badge_type === 'month_winner' ? "Winner" : "Runner Up"}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                            </div>
                         </div>
                       ))}
                     </div>

@@ -24,7 +24,8 @@ export default function PresidentRoleManagement({ chapterId = null }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
-  const [deleteConfirm, setDeleteConfirm] = useState(null); // { id, name } | null
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [blockConfirm, setBlockConfirm] = useState(null);
 
   // Fetch Members
   const fetchMembers = async () => {
@@ -44,6 +45,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
             email: item.user?.email || "",
             role: item.role ? capitalize(item.role) : "Member",
             isPresident: /president/i.test(item.role || ""),
+            isSuspended: item.membership_status === false || item.membership_status === 0,
             avatar: item.user?.avatar
           }))
         : [];
@@ -82,7 +84,45 @@ export default function PresidentRoleManagement({ chapterId = null }) {
     setMessage(null);
     const isPromoting = newRole.toLowerCase() === "president";
     
-    // Filter members that actually need updating
+  
+  const initiateBlock = () => {
+    if (selected.length === 0) return;
+    const name = selected.length === 1 
+      ? members.find(m => m.id === selected[0])?.name 
+      : `${selected.length} members`;
+      
+    const firstSelected = members.find(m => m.id === selected[0]);
+    const isCurrentlySuspended = firstSelected?.isSuspended;
+
+    setBlockConfirm({ count: selected.length, name, block: !isCurrentlySuspended });
+  };
+
+  const confirmBlock = async () => {
+    if (!blockConfirm) return;
+    setSaving(true);
+    setMessage(null);
+    
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/admin/blockuser`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userIds: selected, block: blockConfirm.block }),
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Failed to block/unblock members");
+
+      fetchMembers();
+      setMessage({ type: "success", text: `Member(s) ${blockConfirm.block ? 'suspended' : 'reactivated'} successfully.` });
+      setSelected([]);
+    } catch {
+      setMessage({ type: "error", text: "Failed to update member status. Please try again." });
+    } finally {
+      setSaving(false);
+      setBlockConfirm(null);
+    }
+  };
+
+  // Filter members that actually need updating
     const membersToUpdate = members.filter(m => 
       selected.includes(m.id) && 
       (isPromoting ? !m.isPresident : m.role !== "Member")
@@ -213,6 +253,39 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                   className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium shadow-sm shadow-red-200 dark:shadow-none transition-colors"
                 >
                   Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Block Confirmation Modal */}
+      {blockConfirm && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-sm w-full animate-in zoom-in-95 duration-200">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-full">
+                <UserX size={32} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Confirm {blockConfirm.block ? 'Suspension' : 'Reactivation'}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  Are you sure you want to {blockConfirm.block ? 'suspend' : 'reactivate'} <span className="font-semibold text-gray-900 dark:text-gray-200">{blockConfirm.name}</span>? 
+                </p>
+              </div>
+              <div className="flex gap-3 w-full mt-2">
+                <button 
+                  onClick={() => setBlockConfirm(null)}
+                  className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmBlock}
+                  className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium shadow-sm transition-colors"
+                >
+                  {blockConfirm.block ? 'Suspend' : 'Reactivate'}
                 </button>
               </div>
             </div>
