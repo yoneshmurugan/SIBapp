@@ -366,6 +366,14 @@ export default function PresidentRoleManagement({ chapterId = null }) {
           </button>
 
           <button
+            onClick={initiateBlock}
+            disabled={saving}
+            className="flex-none flex items-center justify-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-orange-600 dark:text-orange-400 hover:bg-orange-50 hover:border-orange-200 dark:hover:bg-orange-900/20 dark:hover:border-orange-800 rounded-xl font-medium transition-all active:scale-95 disabled:opacity-50 text-xs sm:text-sm"
+            title="Suspend / Reactivate User"
+          >
+            <UserX size={16} />
+          </button>
+          <button
             onClick={initiateDelete}
             disabled={saving}
             className="flex-none flex items-center justify-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-red-600 dark:text-red-400 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:border-red-800 rounded-xl font-medium transition-all active:scale-95 disabled:opacity-50 text-xs sm:text-sm"
