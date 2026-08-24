@@ -90,67 +90,6 @@ export default function PresidentRoleManagement({ chapterId = null }) {
     const isPromoting = newRole.toLowerCase() === "president";
     
       
-  const initiateChangeUsername = async (userId, currentName, e) => {
-    if (e) e.stopPropagation();
-    if (e) e.preventDefault();
-    
-    const newName = window.prompt(`Change username for ${currentName}:`, currentName);
-    
-    if (newName && newName.trim() && newName.trim() !== currentName) {
-      setSaving(true);
-      setMessage(null);
-      try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/admin/change-username`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: userId, new_username: newName.trim() }),
-          credentials: "include"
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to update username");
-
-        setMembers(prev => prev.map(m => 
-          m.userId === userId ? { ...m, name: newName.trim() } : m
-        ));
-        setMessage({ type: "success", text: "Username updated successfully." });
-      } catch (err) {
-        setMessage({ type: "error", text: err.message || "Failed to update username. Please try again." });
-      } finally {
-        setSaving(false);
-      }
-    }
-  };
-
-  const confirmChangeUsername = async () => {
-    if (!changeUsernameConfirm || !newUsername.trim()) return;
-    if (newUsername.trim() === changeUsernameConfirm.currentName) {
-      setChangeUsernameConfirm(null);
-      return;
-    }
-
-    setSaving(true);
-    setMessage(null);
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/admin/change-username`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: changeUsernameConfirm.id, new_username: newUsername.trim() }),
-        credentials: "include"
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update username");
-
-      setMembers(prev => prev.map(m => 
-        m.userId === changeUsernameConfirm.id ? { ...m, name: newUsername.trim() } : m
-      ));
-      setMessage({ type: "success", text: "Username updated successfully." });
-    } catch (err) {
-      setMessage({ type: "error", text: err.message || "Failed to update username. Please try again." });
-    } finally {
-      setSaving(false);
-      setChangeUsernameConfirm(null);
-    }
-  };
 
   // Filter members that actually need updating
     const membersToUpdate = members.filter(m => 
