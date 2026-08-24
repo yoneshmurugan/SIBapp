@@ -20,6 +20,7 @@ const capitalize = (str) => {
 };
 
 export default function PresidentRoleManagement({ chapterId = null }) {
+  console.log("PRESIDENT ROLE RENDERED: V3 - NATIVE PROMPT TEST");
   const [members, setMembers] = useState([]);
   const [selected, setSelected] = useState([]);
   const [search, setSearch] = useState("");
