@@ -10,7 +10,8 @@ import {
   X,
   AlertTriangle,
   User,
-  UserX
+  UserX,
+  Edit2
 } from "lucide-react";
 
 const capitalize = (str) => {
@@ -19,6 +20,7 @@ const capitalize = (str) => {
 };
 
 export default function PresidentRoleManagement({ chapterId = null }) {
+  console.log("PRESIDENT ROLE RENDERED: V3 - NATIVE PROMPT TEST");
   const [members, setMembers] = useState([]);
   const [selected, setSelected] = useState([]);
   const [search, setSearch] = useState("");
@@ -27,6 +29,8 @@ export default function PresidentRoleManagement({ chapterId = null }) {
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [blockConfirm, setBlockConfirm] = useState(null);
+  const [changeUsernameConfirm, setChangeUsernameConfirm] = useState(null);
+  const [newUsername, setNewUsername] = useState("");
 
   // Fetch Members
   const fetchMembers = async () => {
@@ -79,49 +83,46 @@ export default function PresidentRoleManagement({ chapterId = null }) {
     }
   };
 
+  const initiateChangeUsername = async (userId, currentName, e) => {
+    if (e) e.stopPropagation();
+    if (e) e.preventDefault();
+    
+    const newName = window.prompt(`Change username for ${currentName}:`, currentName);
+    
+    if (newName && newName.trim() && newName.trim() !== currentName) {
+      setSaving(true);
+      setMessage(null);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/admin/change-username`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId, new_username: newName.trim() }),
+          credentials: "include"
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to update username");
+
+        setMembers(prev => prev.map(m => 
+          m.userId === userId ? { ...m, name: newName.trim() } : m
+        ));
+        setMessage({ type: "success", text: "Username updated successfully." });
+      } catch (err) {
+        setMessage({ type: "error", text: err.message || "Failed to update username. Please try again." });
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
+  const confirmChangeUsername = async () => {};
+
   // Bulk Role Update Logic
   const handleUpdateRole = async (newRole) => {
     setSaving(true);
     setMessage(null);
     const isPromoting = newRole.toLowerCase() === "president";
     
-  
-  const initiateBlock = () => {
-    if (selected.length === 0) return;
-    const name = selected.length === 1 
-      ? members.find(m => m.id === selected[0])?.name 
-      : `${selected.length} members`;
       
-    const firstSelected = members.find(m => m.id === selected[0]);
-    const isCurrentlySuspended = firstSelected?.isSuspended;
-
-    setBlockConfirm({ count: selected.length, name, block: !isCurrentlySuspended });
-  };
-
-  const confirmBlock = async () => {
-    if (!blockConfirm) return;
-    setSaving(true);
-    setMessage(null);
-    
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/admin/blockuser`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userIds: selected, block: blockConfirm.block }),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Failed to block/unblock members");
-
-      fetchMembers();
-      setMessage({ type: "success", text: `Member(s) ${blockConfirm.block ? 'suspended' : 'reactivated'} successfully.` });
-      setSelected([]);
-    } catch {
-      setMessage({ type: "error", text: "Failed to update member status. Please try again." });
-    } finally {
-      setSaving(false);
-      setBlockConfirm(null);
-    }
-  };
 
   // Filter members that actually need updating
     const membersToUpdate = members.filter(m => 
@@ -218,6 +219,44 @@ export default function PresidentRoleManagement({ chapterId = null }) {
   };
 
   // Filter
+
+  const initiateBlock = () => {
+    if (selected.length === 0) return;
+    const name = selected.length === 1 
+      ? members.find(m => m.id === selected[0])?.name 
+      : `${selected.length} members`;
+      
+    const firstSelected = members.find(m => m.id === selected[0]);
+    const isCurrentlySuspended = firstSelected?.isSuspended;
+
+    setBlockConfirm({ count: selected.length, name, block: !isCurrentlySuspended });
+  };
+
+  const confirmBlock = async () => {
+    if (!blockConfirm) return;
+    setSaving(true);
+    setMessage(null);
+    
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/admin/blockuser`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userIds: selected, block: blockConfirm.block }),
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Failed to block/unblock members");
+
+      fetchMembers();
+      setMessage({ type: "success", text: `Member(s) ${blockConfirm.block ? 'suspended' : 'reactivated'} successfully.` });
+      setSelected([]);
+    } catch {
+      setMessage({ type: "error", text: "Failed to update member status. Please try again." });
+    } finally {
+      setSaving(false);
+      setBlockConfirm(null);
+    }
+  };
+
   const filteredMembers = members.filter(m =>
     m.name.toLowerCase().includes(search.trim().toLowerCase()) ||
     m.email.toLowerCase().includes(search.trim().toLowerCase()) ||
@@ -225,7 +264,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
   );
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 space-y-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 relative">
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 space-y-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 relative">
       
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
@@ -287,6 +326,49 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                   className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium shadow-sm transition-colors"
                 >
                   {blockConfirm.block ? 'Suspend' : 'Reactivate'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      
+      {/* Change Username Modal */}
+      {changeUsernameConfirm && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-4">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-md w-full animate-in zoom-in-95 duration-200">
+            <div className="flex flex-col gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Change Username</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Update the system username for this member. This will safely update their name on all past slips.
+                </p>
+              </div>
+              <div className="mt-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Username</label>
+                <input
+                  type="text"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  placeholder="Enter new username"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-3 w-full mt-4">
+                <button 
+                  onClick={() => setChangeUsernameConfirm(null)}
+                  className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmChangeUsername}
+                  disabled={saving || !newUsername.trim() || newUsername.trim() === changeUsernameConfirm.currentName}
+                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg font-medium shadow-sm transition-colors"
+                >
+                  {saving ? "Saving..." : "Update Name"}
                 </button>
               </div>
             </div>
@@ -447,7 +529,12 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                           {member.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px] lg:max-w-xs">{member.name}</p>
+                          <div className="flex items-center gap-2">
+                              <p className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px] lg:max-w-xs">{member.name}</p>
+                              <button type="button" onClick={(e) => { e.preventDefault(); initiateChangeUsername(member.userId, member.name, e); }} className="relative z-10 text-gray-400 hover:text-emerald-500 transition-colors p-1 cursor-pointer" title="Change Username">
+                                <Edit2 size={14} />
+                              </button>
+                            </div>
                           <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px] lg:max-w-xs">{member.email}</p>
                         </div>
                       </div>
@@ -462,6 +549,13 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                       </span>
                     </td>
                     <td className="p-4 text-center">
+                      {member.isSuspended && (
+                        <div className="flex justify-center mb-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                            Suspended
+                          </span>
+                        </div>
+                      )}
                       {member.isPresident && (
                         <div className="flex justify-center">
                           <ShieldCheck className="text-emerald-500 drop-shadow-sm" size={20} />
@@ -532,13 +626,25 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                             {member.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{member.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">{member.name}</p>
+                              <button type="button" onClick={(e) => { e.preventDefault(); initiateChangeUsername(member.userId, member.name, e); }} className="relative z-10 text-gray-400 hover:text-emerald-500 transition-colors p-1 cursor-pointer" title="Change Username">
+                                <Edit2 size={14} />
+                              </button>
+                            </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{member.email}</p>
                           </div>
                         </div>
-                        {member.isPresident && (
-                          <ShieldCheck className="text-emerald-500 shrink-0" size={18} />
-                        )}
+                        <div className="flex items-center gap-1">
+                          {member.isSuspended && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                              Suspended
+                            </span>
+                          )}
+                          {member.isPresident && (
+                            <ShieldCheck className="text-emerald-500 shrink-0" size={18} />
+                          )}
+                        </div>
                       </div>
                       
                       <div className="flex items-center justify-between pl-12">
