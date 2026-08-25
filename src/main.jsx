@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { StrictMode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { inject } from '@vercel/analytics';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -99,6 +100,8 @@ const router = createBrowserRouter([
   {path:'/events-meetings', element:<EventsMeetingsPage />},
   { path: '*', element: <NotFound404 /> },
 ]);
+
+inject();
 
 const rootEl = document.getElementById('root');
 if (!rootEl) throw new Error('Root element not found');
