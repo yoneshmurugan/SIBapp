@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { StrictMode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Analytics } from '@vercel/analytics/react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -107,6 +108,7 @@ createRoot(rootEl).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <Analytics />
     </QueryClientProvider>
   </StrictMode>
 );
