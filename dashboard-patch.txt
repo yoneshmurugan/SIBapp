@@ -1,15 +1,3 @@
-import ChapterOverview from './ChapterOverview.jsx'
-import Header from './Header.jsx'
-import Activity from './Activity.jsx'
-import Siteinfo from './SiteInfo.jsx'
-import UpcomingEvents from './UpcomingEvents.jsx'
-import Graphs from './Graphs.jsx'
-import SubmitButtons from './SubmitButtons.jsx'
-import { User } from 'lucide-react'
-import UserInfo from './UserInfo.jsx'
-import LeaderboardTeaser from './LeaderboardTeaser.jsx'
-
-
 import TransferChapterAdmin from './TransferChapterAdmin.jsx'
 import useFetch from '../hooks/useFetch.jsx'
 
@@ -18,7 +6,7 @@ function Dashboard() {
     `${import.meta.env.VITE_BACKEND_SERVER}/dashboard/isadmin`,
     { credentials: "include" }
   );
-
+  
   return (
     <div className="w-full min-h-screen bg-gray-100 dark:bg-gray-950">
       <div className="
@@ -42,28 +30,3 @@ function Dashboard() {
             <TransferChapterAdmin />
           )}
           <ChapterOverview />
-          <LeaderboardTeaser />
-          <Graphs />
-          <div className="lg:hidden">
-            <SubmitButtons />
-          </div>
-          <UpcomingEvents />
-        </div>
-
-        {/* Sidebar Area (Right Column on Desktop) */}
-        <div className="col-span-1 md:col-span-12 lg:col-span-4 flex flex-col gap-4 lg:gap-6">
-          <div className="hidden lg:block">
-            <UserInfo />
-          </div>
-          <div className="hidden lg:block">
-            <SubmitButtons />
-          </div>
-          <Activity />
-          <Siteinfo />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default Dashboard;
