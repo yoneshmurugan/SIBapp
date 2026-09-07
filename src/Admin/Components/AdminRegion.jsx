@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import TransferChapterAdmin from '../../MainPage/TransferChapterAdmin.jsx';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus,
@@ -387,6 +388,7 @@ export default function RegionChapterManager() {
       <div className="text-gray-900 dark:text-gray-100 font-sans selection:bg-yellow-200 dark:selection:bg-yellow-900 transition-colors duration-200 mb-10">
         {/* --- Main Dashboard Container --- */}
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+          <TransferChapterAdmin />
           {/* --- Heading Section (Formerly Header) --- */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 border-b border-gray-200 dark:border-gray-700 pb-8">
             {/* Title & Stats */}

@@ -10,9 +10,6 @@ import UserInfo from './UserInfo.jsx'
 import LeaderboardTeaser from './LeaderboardTeaser.jsx'
 
 
-import TransferChapterAdmin from './TransferChapterAdmin.jsx'
-import useFetch from '../hooks/useFetch.jsx'
-
 function Dashboard() {
   const { data: adminAccess } = useFetch(
     `${import.meta.env.VITE_BACKEND_SERVER}/dashboard/isadmin`,
@@ -38,9 +35,6 @@ function Dashboard() {
           <div className="lg:hidden">
             <UserInfo />
           </div>
-          {adminAccess?.hasaccess && (
-            <TransferChapterAdmin />
-          )}
           <ChapterOverview />
           <LeaderboardTeaser />
           <Graphs />
