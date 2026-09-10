@@ -548,6 +548,15 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                         {member.role}
                       </span>
                     </td>
+                    <td className="p-4">
+                      {member.lastSignedIn ? (
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
+                          {new Date(member.lastSignedIn).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">-</span>
+                      )}
+                    </td>
                     <td className="p-4 text-center">
                       {member.isSuspended && (
                         <div className="flex justify-center mb-1">
