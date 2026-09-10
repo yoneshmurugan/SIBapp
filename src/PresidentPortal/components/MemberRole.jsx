@@ -35,7 +35,8 @@ export default function MemberRoleManagement() {
                 originalRole: item.role ? capitalize(item.role) : "Member",
                 isCoordinator: /coordinator/i.test(item.role || ""),
                 chapter_id: item.chapter?._id,
-                user_id: item.user?._id
+                user_id: item.user?._id,
+                lastSignedIn: item.user?.last_signed_in
               }))
             : []
         );
@@ -220,13 +221,14 @@ export default function MemberRoleManagement() {
               </th>
               <th className="py-2 px-4">Username</th>
               <th className="py-2 px-4">Role</th>
+              <th className="py-2 px-4">Last Signed In</th>
               <th className="py-2 px-4">Coordinator</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={4}>
+                <td colSpan={5}>
                   <div className="py-8 text-center text-gray-500 dark:text-gray-400">
                     Loading members...
                   </div>
@@ -254,6 +256,15 @@ export default function MemberRoleManagement() {
                     {member.role}
                   </td>
                   <td className="py-2 px-4">
+                    {member.lastSignedIn ? (
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {new Date(member.lastSignedIn).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-400 italic">-</span>
+                    )}
+                  </td>
+                  <td className="py-2 px-4">
                     {member.isCoordinator ? (
                       <span className="px-3 py-1 rounded-full bg-amber-300 text-xs font-bold text-gray-900 dark:bg-amber-400 dark:text-gray-900 select-none">
                         YES
@@ -268,7 +279,7 @@ export default function MemberRoleManagement() {
               ))
             ) : (
               <tr>
-                <td colSpan={4}>
+                <td colSpan={5}>
                   <div className="py-8 text-center text-gray-500 dark:text-gray-400">
                     No matching members found
                   </div>
