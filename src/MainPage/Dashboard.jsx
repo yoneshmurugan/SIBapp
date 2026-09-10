@@ -11,10 +11,7 @@ import LeaderboardTeaser from './LeaderboardTeaser.jsx'
 
 
 function Dashboard() {
-  const { data: adminAccess } = useFetch(
-    `${import.meta.env.VITE_BACKEND_SERVER}/dashboard/isadmin`,
-    { credentials: "include" }
-  );
+
 
   return (
     <div className="w-full min-h-screen bg-gray-100 dark:bg-gray-950">
