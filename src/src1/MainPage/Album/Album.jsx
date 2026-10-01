@@ -76,7 +76,7 @@ const Lightbox = ({ isOpen, image, onClose, onNext, onPrev, hasNext, hasPrev, m2
           onClick={onClose}
         >
           <img 
-            src={image.src || image} 
+            src={image.src} 
             alt="Gallery Image"
             className="max-w-full max-h-full object-contain shadow-2xl rounded-lg select-none"
             onClick={(e) => e.stopPropagation()}
@@ -240,7 +240,7 @@ const Album = () => {
 
   // Match current lightbox photo to an M2M slip
   const currentM2mSlip = lightboxOpen && currentPhotos[currentImageIndex]
-    ? m2mSlips.find(slip => slip.image_url === (currentPhotos[currentImageIndex].src || currentPhotos[currentImageIndex])) || null
+    ? m2mSlips.find(slip => slip.image_url === currentPhotos[currentImageIndex].src) || null
     : null;
 
   const nextImage = useCallback(() => {
@@ -448,7 +448,7 @@ const Album = () => {
                   }}
                 >
                   <img 
-                    src={photo.src || photo} 
+                    src={photo.src} 
                     alt={`Gallery item ${index}`} 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy" 
