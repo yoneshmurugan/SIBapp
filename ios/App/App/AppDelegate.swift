@@ -11,7 +11,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Firebase initialization
-        FirebaseApp.configure()
+        if let filePath = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+           let options = FirebaseOptions(contentsOfFile: filePath) {
+            FirebaseApp.configure(options: options)
+            print("✅ Firebase initialized successfully")
+        } else {
+            print("⚠️ GoogleService-Info.plist not found in bundle, skipping FirebaseApp.configure()")
+        }
 
         // Set delegates for push notification handling
         UNUserNotificationCenter.current().delegate = self

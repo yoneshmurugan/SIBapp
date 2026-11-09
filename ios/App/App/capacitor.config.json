@@ -8,6 +8,13 @@
 		},
 		"CapacitorCookies": {
 			"enabled": true
+		},
+		"FirebaseMessaging": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
 		}
 	},
 	"packageClassList": [

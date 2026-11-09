@@ -4,16 +4,6 @@
 <dict>
 	<key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
-	<key>NSContactsUsageDescription</key>
-    <string>This app requires access to your contacts to help you invite colleagues or share business information with your network.</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>This app requires access to your photo library to allow you to upload profile pictures or business documents.</string>
-    <key>NSCameraUsageDescription</key>
-    <string>This app requires camera access to take profile pictures and scan documents.</string>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>This app requires access to save images to your photo library.</string>
-    <key>NSFaceIDUsageDescription</key>
-    <string>This app requires Face ID to securely log you in without a password.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -34,6 +24,20 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to take profile pictures and scan documents.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>This app requires access to your contacts to help you invite colleagues or share business information with your network.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>This app requires Face ID to securely log you in without a password.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app requires access to save images to your photo library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to allow you to upload profile pictures or business documents.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -57,9 +61,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-	</array>
 </dict>
 </plist>
