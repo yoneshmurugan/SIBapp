@@ -16,6 +16,7 @@ Tracks changes across the 3 production workspaces:
 | #3 | 2026-11-13 | Coordinators Portal | [x] Synced | [ ] Pending | [ ] Pending |
 | #4 | 2026-11-13 | Authentication (Sign In & Password Recovery) | [x] Synced | [ ] Pending | [ ] Pending |
 | #5 | 2026-11-13 | Wall of Wishes | [x] Synced | [ ] Pending | [ ] Pending |
+| #6 | 2026-11-13 | Settings (Update Password) | [x] Synced | [ ] Pending | [ ] Pending |
 
 ---
 
@@ -124,5 +125,27 @@ Tracks changes across the 3 production workspaces:
 #### Summary:
 1. Added member celebration date (e.g. "14th Nov") with a calendar icon to WishCard alongside event type and relative status (Today / Tomorrow / In X days).
 2. Passed celebration target dates from both today's celebrants and upcoming events in Wall of Wishes directly to WishCard with profile data fallback.
+
+---
+
+### #6 [2026-11-13] - Settings: Update Password
+- **Type:** Feature / UI / Security / Error Handling
+- **Origin:** Web
+- **Files:** `src/Settings/components/SecurityPanel.jsx`, `src/Settings/components/SettingsHeader.jsx`, `src/Settings/components/SettingsSidebar.jsx`, `src/Settings/Settings.jsx`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [ ] **Android (`SIB_app_android`):** Pending
+
+#### Summary:
+1. Redesigned `SecurityPanel.jsx` with full dark/gold theme cohesion, encrypted badge, Lucide icons (`Lock`, `KeyRound`, `ShieldCheck`), and an amber gradient action button.
+2. Auto-populated account email from session cache/backend (`localStorage.getItem('header_auth_user')` / `/auth/getuser`) to eliminate manual typing.
+3. Added individual show/hide password visibility toggles (`Eye` / `EyeOff`) to Current Password, New Password, and Confirm Password fields.
+4. Added real-time 5-point password requirement criteria checklist (8+ chars, upper, lower, number, symbol) and a 5-step visual strength meter (Weak / Fair / Good / Strong).
+5. Added real-time confirm password match indicator ("✓ Passwords match" vs "Passwords do not match yet").
+6. Added inline field error highlighting and clean banner feedback (green `CheckCircle2` success card and red `AlertCircle` error card).
+7. Added seamless fallback to Firebase Client SDK (`signInWithEmailAndPassword` + `updatePassword`) if backend API returns network failure or server error.
+8. Upgraded `SettingsHeader.jsx` and `SettingsSidebar.jsx` with themed navigation, removing outdated red save alert button.
 
 ---
