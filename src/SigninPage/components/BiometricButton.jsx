@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 // Ensure this import path matches where you placed the service file
 import { checkBiometricAvailability, getCredentialsFromBiometric } from '../services/biometricService';
 
-export default function BiometricButton({ onBiometricAuthSuccess }) {
+export default function BiometricButton({ onBiometricAuthSuccess, onBiometricAuthError }) {
   const [isAvailable, setIsAvailable] = useState(false);
 
   useEffect(() => {
@@ -20,7 +20,10 @@ export default function BiometricButton({ onBiometricAuthSuccess }) {
       // Pass the retrieved credentials back to the form
       onBiometricAuthSuccess(credentials);
     } catch (error) {
-      console.log("Biometric cancelled or failed");
+      console.log("Biometric cancelled or failed", error);
+      if (onBiometricAuthError) {
+        onBiometricAuthError(error);
+      }
     }
   };
 

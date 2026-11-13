@@ -2,6 +2,8 @@ import { useState } from "react";
 import TextField from "./components/TextField";
 import PasswordField from "./components/PasswordField";
 import Alert from "./components/Alert";
+import BiometricButton from "./components/BiometricButton";
+import { saveCredentialsForBiometric } from "./services/biometricService";
 import { validateIdentifier, validatePassword } from "./utils/validators";
 
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -30,16 +32,13 @@ export default function SignInForm() {
     return !idErr && !passErr;
   };
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
+  const executeLogin = async (rawIdentifier, password) => {
     setGlobalError("");
-    if (!validate()) return;
-
     try {
       setLoading(true);
-      
+
       // 1. Lookup Email if it's a phone number
-      let loginEmail = values.identifier.trim();
+      let loginEmail = rawIdentifier.trim();
       if (!loginEmail.includes('@')) {
         const lookupRes = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/lookup-email`, {
           method: "POST",
@@ -54,7 +53,7 @@ export default function SignInForm() {
       }
 
       // 2. Sign in with Firebase
-      const userCredential = await signInWithEmailAndPassword(auth, loginEmail, values.password);
+      const userCredential = await signInWithEmailAndPassword(auth, loginEmail, password);
       const user_id = userCredential.user.uid;
       const idToken = await userCredential.user.getIdToken(true);
 
@@ -71,6 +70,10 @@ export default function SignInForm() {
         throw new Error(data.error || "Login failed");
       }
       console.log("Login successful", data);
+
+      // 4. Save credentials locally for biometric access
+      await saveCredentialsForBiometric(rawIdentifier.trim(), password);
+
       if (user_id && data.isadmin === true) {
         navigate("/admin");
       } else {
@@ -82,6 +85,31 @@ export default function SignInForm() {
       setGlobalError(err.message || "Invalid credentials");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    await executeLogin(values.identifier, values.password);
+  };
+
+  const handleBiometricAuthSuccess = async (credentials) => {
+    if (!credentials || !credentials.username || !credentials.password) {
+      setGlobalError("No saved credentials found. Please sign in with your email or phone and password once first.");
+      return;
+    }
+    setValues({
+      identifier: credentials.username,
+      password: credentials.password,
+    });
+    setErrors({ identifier: "", password: "" });
+    await executeLogin(credentials.username, credentials.password);
+  };
+
+  const handleBiometricAuthError = (err) => {
+    if (err?.message?.includes("No saved credentials")) {
+      setGlobalError("No saved biometric credentials found. Please sign in with your email or phone and password once first.");
     }
   };
 
@@ -137,11 +165,10 @@ export default function SignInForm() {
         {loading ? "Please wait…" : "Sign in"}
       </button>
 
-      <div className="relative my-4">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-        </div>
-      </div>
+      <BiometricButton 
+        onBiometricAuthSuccess={handleBiometricAuthSuccess}
+        onBiometricAuthError={handleBiometricAuthError}
+      />
     </form>
   );
 }
