@@ -111,6 +111,7 @@ Tracks changes across the 3 production workspaces:
 2. Redesigned Reset Password page with dual Email/Phone support, Firebase Client SDK fallback for failed Admin action links, resend cooldown timer, and descriptive error messaging.
 3. Cleaned up both authentication pages by removing extraneous badges ("Password Recovery" pill and "Protected by SIB Secure Authentication" footer note).
 4. Fixed non-registered email addresses falsely reporting success in Reset Password by adding strict MongoDB account verification in `/auth/lookup-email` and `/auth/resetPassword` before attempting dispatch.
+5. Fixed `normalizeEmail()` dot-stripping bug: Express-validator's `normalizeEmail()` was stripping dots from Gmail addresses (`kavinkumar.engg@gmail.com` became `kavinkumarengg@gmail.com`), causing valid users with dots in their email to fail DB & Firebase lookup. Replaced with `.trim().toLowerCase()` and added flexible dot-tolerant MongoDB queries.
 
 ---
 
