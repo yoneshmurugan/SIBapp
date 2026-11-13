@@ -110,6 +110,7 @@ Tracks changes across the 3 production workspaces:
 1. Redesigned Member Sign In page into a polished professional portal card with SIB branding, official logo header, Eye password toggle icon, and amber accent buttons.
 2. Redesigned Reset Password page with dual Email/Phone support, Firebase Client SDK fallback for failed Admin action links, resend cooldown timer, and descriptive error messaging.
 3. Cleaned up both authentication pages by removing extraneous badges ("Password Recovery" pill and "Protected by SIB Secure Authentication" footer note).
+4. Fixed non-registered email addresses falsely reporting success in Reset Password by adding strict MongoDB account verification in `/auth/lookup-email` and `/auth/resetPassword` before attempting dispatch.
 
 ---
 

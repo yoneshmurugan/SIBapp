@@ -63,25 +63,21 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      let targetEmail = input;
-
-      // 1. If input is a phone number (does not contain @), look up corresponding email
-      if (!input.includes('@')) {
-        const lookupRes = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/lookup-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ identifier: input }),
-        });
-        const lookupData = await lookupRes.json();
-        if (!lookupRes.ok || !lookupData.email) {
-          throw new Error(lookupData.error || 'No account found matching this phone number.');
-        }
-        targetEmail = lookupData.email.trim();
+      // 1. Verify that the account exists in MongoDB (validates both email and phone number)
+      const lookupRes = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/lookup-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: input }),
+      });
+      const lookupData = await lookupRes.json();
+      if (!lookupRes.ok || !lookupData.email) {
+        throw new Error(lookupData.error || `No registered account found for "${input}". Please verify your email or check with your chapter coordinator.`);
       }
 
+      const targetEmail = lookupData.email.trim();
       setSentEmail(targetEmail);
 
-      // 2. Attempt via backend endpoint first
+      // 2. Attempt via backend endpoint
       let sentSuccess = false;
       try {
         const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/resetPassword`, {
@@ -93,14 +89,20 @@ export default function ResetPassword() {
         const data = await res.json();
         if (res.ok && data.message === 'Password reset email sent successfully') {
           sentSuccess = true;
+        } else if (res.status === 404 || data.error?.includes("No registered account") || data.error?.includes("user-not-found")) {
+          // Explicit user not found error - DO NOT fallback
+          throw new Error(data.error);
         } else {
           console.warn('Backend resetPassword returned error, falling back to Firebase Client SDK:', data);
         }
       } catch (backendErr) {
+        if (backendErr.message?.includes("No registered account") || backendErr.message?.includes("user-not-found")) {
+          throw backendErr;
+        }
         console.warn('Backend resetPassword request failed, falling back to Firebase Client SDK:', backendErr);
       }
 
-      // 3. Fallback to Firebase Client SDK directly (bypasses Admin SDK action link issues)
+      // 3. Fallback to Firebase Client SDK directly (only for verified users when Admin action link fails)
       if (!sentSuccess) {
         const auth = getAuth(app);
         await sendPasswordResetEmail(auth, targetEmail);
