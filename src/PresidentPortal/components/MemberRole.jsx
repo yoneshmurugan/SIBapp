@@ -67,8 +67,14 @@ export default function MemberRoleManagement() {
     setError("");
     try {
       const toUpdate = members
-        .filter(m => selected.includes(m.id) && m.role !== "coordinator")
+        .filter(m => selected.includes(m.id) && !m.isCoordinator)
         .map(m => ({ id: m.membership_id, newRole: "coordinator" }));
+
+      if (toUpdate.length === 0) {
+        setSelected([]);
+        return;
+      }
+
       await Promise.all(
         toUpdate.map(async ({ id }) => {
           const res = await fetch(
@@ -87,10 +93,12 @@ export default function MemberRoleManagement() {
           }
         })
       );
+
+      const updatedIds = toUpdate.map(u => u.id);
       setMembers(members =>
         members.map(m =>
-          selected.includes(m.id)
-            ? { ...m, role: "coordinator", isCoordinator: true }
+          updatedIds.includes(m.membership_id)
+            ? { ...m, role: "Coordinator", isCoordinator: true }
             : m
         )
       );
@@ -107,8 +115,14 @@ export default function MemberRoleManagement() {
     setError("");
     try {
       const toUpdate = members
-        .filter(m => selected.includes(m.id) && m.role === "coordinator")
+        .filter(m => selected.includes(m.id) && (m.isCoordinator || /coordinator/i.test(m.role || "")))
         .map(m => ({ id: m.membership_id, newRole: "Member" }));
+
+      if (toUpdate.length === 0) {
+        setSelected([]);
+        return;
+      }
+
       await Promise.all(
         toUpdate.map(async ({ id }) => {
           const res = await fetch(
@@ -127,9 +141,11 @@ export default function MemberRoleManagement() {
           }
         })
       );
+
+      const updatedIds = toUpdate.map(u => u.id);
       setMembers(members =>
         members.map(m =>
-          selected.includes(m.id)
+          updatedIds.includes(m.membership_id)
             ? { ...m, role: "Member", isCoordinator: false }
             : m
         )
