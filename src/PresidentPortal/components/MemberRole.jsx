@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { HiSearch } from "react-icons/hi";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 function capitalize(str) {
   if (!str) return "";
@@ -166,13 +167,52 @@ export default function MemberRoleManagement() {
     setSearch("");
   }
 
+  const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
+
+  function handleSort(key) {
+    setSortConfig(current => {
+      if (current.key === key) {
+        return {
+          key,
+          direction: current.direction === "asc" ? "desc" : "asc"
+        };
+      }
+      return { key, direction: "asc" };
+    });
+  }
+
   const filteredMembers = members.filter(m =>
     m.name.toLowerCase().includes(search.trim().toLowerCase()) ||
     m.email.toLowerCase().includes(search.trim().toLowerCase()) ||
     m.role.toLowerCase().includes(search.trim().toLowerCase())
   );
 
-  const selectableMembers = filteredMembers.filter(m => !m.isPresident);
+  const sortedMembers = useMemo(() => {
+    let result = [...filteredMembers];
+    if (!sortConfig.key) return result;
+
+    return result.sort((a, b) => {
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+
+      if (sortConfig.key === "name" || sortConfig.key === "role") {
+        aVal = (aVal || "").toString().toLowerCase();
+        bVal = (bVal || "").toString().toLowerCase();
+      } else if (sortConfig.key === "lastSignedIn") {
+        aVal = aVal ? new Date(aVal).getTime() : 0;
+        bVal = bVal ? new Date(bVal).getTime() : 0;
+      } else if (sortConfig.key === "isCoordinator") {
+        aVal = aVal ? 1 : 0;
+        bVal = bVal ? 1 : 0;
+      }
+
+      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredMembers, sortConfig]);
+
+  const selectableMembers = sortedMembers.filter(m => !m.isPresident);
 
   return (
     <div className="max-w-2xl h-[730px] mx-auto rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 sm:p-8 flex flex-col">
@@ -240,10 +280,78 @@ export default function MemberRoleManagement() {
                   disabled={saving || loading || selectableMembers.length === 0}
                 />
               </th>
-              <th className="py-2 px-4">Username</th>
-              <th className="py-2 px-4">Role</th>
-              <th className="py-2 px-4">Last Signed In</th>
-              <th className="py-2 px-4">Coordinator</th>
+              <th
+                onClick={() => handleSort("name")}
+                className="py-2 px-4 cursor-pointer select-none hover:bg-amber-100 dark:hover:bg-amber-800/60 transition-colors"
+                title="Sort by Username"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>Username</span>
+                  {sortConfig.key === "name" ? (
+                    sortConfig.direction === "asc" ? (
+                      <ArrowUp size={14} className="text-amber-600 dark:text-amber-300" />
+                    ) : (
+                      <ArrowDown size={14} className="text-amber-600 dark:text-amber-300" />
+                    )
+                  ) : (
+                    <ArrowUpDown size={14} className="text-gray-400 opacity-60" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort("role")}
+                className="py-2 px-4 cursor-pointer select-none hover:bg-amber-100 dark:hover:bg-amber-800/60 transition-colors"
+                title="Sort by Role"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>Role</span>
+                  {sortConfig.key === "role" ? (
+                    sortConfig.direction === "asc" ? (
+                      <ArrowUp size={14} className="text-amber-600 dark:text-amber-300" />
+                    ) : (
+                      <ArrowDown size={14} className="text-amber-600 dark:text-amber-300" />
+                    )
+                  ) : (
+                    <ArrowUpDown size={14} className="text-gray-400 opacity-60" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort("lastSignedIn")}
+                className="py-2 px-4 cursor-pointer select-none hover:bg-amber-100 dark:hover:bg-amber-800/60 transition-colors"
+                title="Sort by Last Signed In"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>Last Signed In</span>
+                  {sortConfig.key === "lastSignedIn" ? (
+                    sortConfig.direction === "asc" ? (
+                      <ArrowUp size={14} className="text-amber-600 dark:text-amber-300" />
+                    ) : (
+                      <ArrowDown size={14} className="text-amber-600 dark:text-amber-300" />
+                    )
+                  ) : (
+                    <ArrowUpDown size={14} className="text-gray-400 opacity-60" />
+                  )}
+                </div>
+              </th>
+              <th
+                onClick={() => handleSort("isCoordinator")}
+                className="py-2 px-4 cursor-pointer select-none hover:bg-amber-100 dark:hover:bg-amber-800/60 transition-colors"
+                title="Sort by Coordinator"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>Coordinator</span>
+                  {sortConfig.key === "isCoordinator" ? (
+                    sortConfig.direction === "asc" ? (
+                      <ArrowUp size={14} className="text-amber-600 dark:text-amber-300" />
+                    ) : (
+                      <ArrowDown size={14} className="text-amber-600 dark:text-amber-300" />
+                    )
+                  ) : (
+                    <ArrowUpDown size={14} className="text-gray-400 opacity-60" />
+                  )}
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -255,8 +363,8 @@ export default function MemberRoleManagement() {
                   </div>
                 </td>
               </tr>
-            ) : filteredMembers.length > 0 ? (
-              filteredMembers.map(member => (
+            ) : sortedMembers.length > 0 ? (
+              sortedMembers.map(member => (
                 <tr
                   key={member.id}
                   className={`border-b border-gray-200 dark:border-gray-800 last:border-none transition-colors ${

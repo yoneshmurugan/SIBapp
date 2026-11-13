@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Image, ClipboardCheck, BarChart2, ChevronRight, Users, Activity, Clock, ShieldCheck, FileText } from "lucide-react";
+import { Image, ClipboardCheck, BarChart2, ChevronRight, Clock, ShieldCheck, FileText } from "lucide-react";
 import Header from "../MainPage/Header";
 import MemberActivityReport from "./components/MemberActivityReport";
 import AttendanceOverview from './components/AttendanceReport';
@@ -34,31 +34,6 @@ function Coordinatorsportal() {
         <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Coordinator Dashboard</h1>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">Manage operations and monitor chapter activity.</p>
-        </div>
-
-        {/* Dashboard Statistics */}
-        <div className="grid grid-cols-2 gap-3 mb-8">
-            <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col">
-                <div className="flex items-center gap-2 mb-2">
-                    <div className="p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-                        <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Network</span>
-                </div>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">Active</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">Chapter Members</p>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col">
-                <div className="flex items-center gap-2 mb-2">
-                    <div className="p-1.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-md">
-                        <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Status</span>
-                </div>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">Online</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">System Operations</p>
-            </div>
         </div>
 
         <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-3 uppercase tracking-wider">Primary Actions</h2>

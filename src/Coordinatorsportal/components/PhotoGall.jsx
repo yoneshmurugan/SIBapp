@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   X, ChevronLeft, ChevronRight, ZoomIn, Image as ImageIcon, 
-  Plus, Trash2, Upload, FolderPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2,
+  Plus, Upload, FolderPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2,
   Calendar, ArrowLeftIcon, Star, GripHorizontal, Save, Users, MapPin, MessageSquare, Info
 } from 'lucide-react';
 
@@ -235,7 +235,6 @@ const Lightbox = ({ isOpen, image, onClose, onNext, onPrev, hasNext, hasPrev, m2
 const AlbumCard = ({ 
   album, 
   onClick, 
-  onDelete, 
   onLongPress, 
   isReordering,
   onDragStart,
@@ -299,17 +298,6 @@ const AlbumCard = ({
           </span>
         </div>
       </div>
-
-      {/* Delete Button (Hidden during reorder) */}
-      {!isReordering && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(album); }}
-          className="absolute top-2 right-2 p-2 bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
-          title="Delete Album"
-        >
-          <Trash2 size={16} />
-        </button>
-      )}
 
       {/* Reorder Indicator */}
       {isReordering && (
@@ -892,7 +880,6 @@ export default function PhotoGallery({ onBack }) {
                     index={index}
                     album={album} 
                     onClick={() => !isReordering && setSelectedAlbumId(album.id)}
-                    onDelete={handleDeleteAlbum}
                     onLongPress={handleLongPress}
                     isReordering={isReordering}
                     onDragStart={handleDragStart}
@@ -988,7 +975,7 @@ export default function PhotoGallery({ onBack }) {
                     </div>
 
                     {/* Actions Overlay (Always visible on hover) */}
-                    <div className="absolute top-0 w-full p-2 flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-0 w-full p-2 flex justify-start items-start opacity-0 group-hover:opacity-100 transition-opacity">
                         {/* Set Cover Button */}
                         <button
                           onClick={(e) => { 
@@ -1003,15 +990,6 @@ export default function PhotoGallery({ onBack }) {
                           title="Set as Album Cover"
                         >
                            <Star size={14} fill={selectedAlbum.coverImg === photo.src ? "currentColor" : "none"} />
-                        </button>
-
-                        {/* Delete Image Button */}
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDeletePhoto(photo); }}
-                          className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors"
-                          title="Delete Image"
-                        >
-                          <Trash2 size={14} />
                         </button>
                     </div>
                   </div>

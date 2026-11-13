@@ -13,6 +13,9 @@ Tracks changes across the 3 production workspaces:
 |---|---|---|:---:|:---:|:---:|
 | #1 | 2026-11-13 | President Portal | [x] Synced | [ ] Pending | [ ] Pending |
 | #2 | 2026-11-13 | Members Analytics | [x] Synced | [ ] Pending | [ ] Pending |
+| #3 | 2026-11-13 | Coordinators Portal | [x] Synced | [ ] Pending | [ ] Pending |
+| #4 | 2026-11-13 | Authentication: Password Recovery | [x] Synced | [ ] Pending | [ ] Pending |
+| #5 | 2026-11-13 | Authentication: Member Sign In | [x] Synced | [ ] Pending | [ ] Pending |
 
 ---
 
@@ -56,6 +59,7 @@ Tracks changes across the 3 production workspaces:
 3. Added "Last Signed In" column displaying formatted last login timestamps (`user.last_signed_in`) for each member.
 4. Removed "President" option from role selection dropdown in Create Member Form (restricted to regional admin panel).
 5. Added Location field and validation when creating "Others" meeting type in Create Meeting modal.
+6. Added interactive ascending/descending column sorting to the table header (Username, Role, Last Signed In, Coordinator).
 
 ---
 
@@ -71,5 +75,51 @@ Tracks changes across the 3 production workspaces:
 
 #### Summary:
 1. Split heavy M2M, TYFTB, and Referrals overview tables into lazy-loaded dedicated views accessible via coordinator action buttons ("M to M Coordinator", "TYB Coordinator", "Referrals Coordinator") for much faster initial page loads.
+
+---
+
+### #3 [2026-11-13] - Coordinators Portal
+- **Type:** UI
+- **Origin:** Web
+- **Files:** `src/Coordinatorsportal/Coordinatorsportalpage.jsx`, `src/Coordinatorsportal/components/PhotoGall.jsx`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [ ] **Android (`SIB_app_android`):** Pending
+
+#### Summary:
+1. Removed static "Network" (Active Chapter Members) and "Status" (Online System Operations) statistic cards from the Coordinator Dashboard.
+2. Removed delete album and delete photo options from Events Gallery in Coordinators Portal.
+
+---
+
+### #4 [2026-11-13] - Authentication: Password Recovery
+- **Type:** Feature / Bug Fix / UI
+- **Origin:** Web
+- **Files:** `src/ResetPassword/ResetPassword.jsx`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [ ] **Android (`SIB_app_android`):** Pending
+
+#### Summary:
+1. Redesigned Reset Password page into a modern branded portal card with dual Email/Phone support, Firebase Client SDK fallback for failed Admin action links, resend cooldown timer, and descriptive error messaging.
+
+---
+
+### #5 [2026-11-13] - Authentication: Member Sign In
+- **Type:** UI / Style
+- **Origin:** Web
+- **Files:** `src/SigninPage/SignInPage.jsx`, `src/SigninPage/SignInForm.jsx`, `src/SigninPage/components/FormHeader.jsx`, `src/SigninPage/components/TextField.jsx`, `src/SigninPage/components/PasswordField.jsx`, `src/SigninPage/components/Alert.jsx`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [ ] **Android (`SIB_app_android`):** Pending
+
+#### Summary:
+1. Redesigned Sign In page into a polished professional portal card with SIB branding, official logo header, Eye password toggle icon, amber accent buttons, and security footer note.
 
 ---
