@@ -17,6 +17,7 @@ Tracks changes across the 3 production workspaces:
 | #4 | 2026-11-13 | Authentication (Sign In & Password Recovery) | [x] Synced | [ ] Pending | [ ] Pending |
 | #5 | 2026-11-13 | Wall of Wishes | [x] Synced | [ ] Pending | [ ] Pending |
 | #6 | 2026-11-13 | Settings (Update Password) | [x] Synced | [ ] Pending | [ ] Pending |
+| #7 | 2026-11-13 | Settings (Sessions, Badge & Blood Donor) | [x] Synced | [ ] Pending | [ ] Pending |
 
 ---
 
@@ -147,5 +148,6 @@ Tracks changes across the 3 production workspaces:
 6. Added inline field error highlighting and clean banner feedback (green `CheckCircle2` success card and red `AlertCircle` error card).
 7. Added seamless fallback to Firebase Client SDK (`signInWithEmailAndPassword` + `updatePassword`) if backend API returns network failure or server error.
 8. Upgraded `SettingsHeader.jsx` and `SettingsSidebar.jsx` with themed navigation, removing outdated red save alert button.
+9. Removed the boxed icons beside "Account Settings" and "Update Password" for a cleaner, streamlined header layout.
 
 ---

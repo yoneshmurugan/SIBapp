@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import SettingsHeader from "./components/SettingsHeader";
 import SettingsSidebar from "./components/SettingsSidebar";
 import SecurityPanel from "./components/SecurityPanel";
-import NotificationsPanel from "./components/NotificationsPanel";
+import MembershipBadgePanel from "./components/MembershipBadgePanel";
 import PrivacyPanel from "./components/PrivacyPanel";
 import Header from "../MainPage/Header";
 
 const PANELS = {
   security: SecurityPanel,
-  notifications: NotificationsPanel,
+  membership: MembershipBadgePanel,
   privacy: PrivacyPanel,
 };
 
