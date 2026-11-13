@@ -34,6 +34,7 @@ export default function MemberRoleManagement() {
                 role: item.role ? capitalize(item.role) : "Member",
                 originalRole: item.role ? capitalize(item.role) : "Member",
                 isCoordinator: /coordinator/i.test(item.role || ""),
+                isPresident: /president/i.test(item.role || ""),
                 chapter_id: item.chapter?._id,
                 user_id: item.user?._id,
                 lastSignedIn: item.user?.last_signed_in
@@ -49,16 +50,18 @@ export default function MemberRoleManagement() {
   }, []);
 
   function handleSelect(id) {
+    const member = members.find(m => m.id === id);
+    if (member?.isPresident) return;
     setSelected(s =>
       s.includes(id) ? s.filter(x => x !== id) : [...s, id]
     );
   }
 
   function handleSelectAll() {
-    if (selected.length === filteredMembers.length) {
+    if (selected.length === selectableMembers.length && selectableMembers.length > 0) {
       setSelected([]);
     } else {
-      setSelected(filteredMembers.map(m => m.id));
+      setSelected(selectableMembers.map(m => m.id));
     }
   }
 
@@ -67,7 +70,7 @@ export default function MemberRoleManagement() {
     setError("");
     try {
       const toUpdate = members
-        .filter(m => selected.includes(m.id) && !m.isCoordinator)
+        .filter(m => selected.includes(m.id) && !m.isCoordinator && !m.isPresident)
         .map(m => ({ id: m.membership_id, newRole: "coordinator" }));
 
       if (toUpdate.length === 0) {
@@ -115,7 +118,7 @@ export default function MemberRoleManagement() {
     setError("");
     try {
       const toUpdate = members
-        .filter(m => selected.includes(m.id) && (m.isCoordinator || /coordinator/i.test(m.role || "")))
+        .filter(m => selected.includes(m.id) && (m.isCoordinator || /coordinator/i.test(m.role || "")) && !m.isPresident)
         .map(m => ({ id: m.membership_id, newRole: "Member" }));
 
       if (toUpdate.length === 0) {
@@ -168,6 +171,8 @@ export default function MemberRoleManagement() {
     m.email.toLowerCase().includes(search.trim().toLowerCase()) ||
     m.role.toLowerCase().includes(search.trim().toLowerCase())
   );
+
+  const selectableMembers = filteredMembers.filter(m => !m.isPresident);
 
   return (
     <div className="max-w-2xl h-[730px] mx-auto rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 sm:p-8 flex flex-col">
@@ -229,10 +234,10 @@ export default function MemberRoleManagement() {
               <th className="pl-4 pr-2 py-2">
                 <input
                   type="checkbox"
-                  checked={selected.length === filteredMembers.length && filteredMembers.length > 0}
+                  checked={selected.length === selectableMembers.length && selectableMembers.length > 0}
                   onChange={handleSelectAll}
                   className="accent-amber-400 rounded"
-                  disabled={saving || loading}
+                  disabled={saving || loading || selectableMembers.length === 0}
                 />
               </th>
               <th className="py-2 px-4">Username</th>
@@ -254,15 +259,21 @@ export default function MemberRoleManagement() {
               filteredMembers.map(member => (
                 <tr
                   key={member.id}
-                  className={`border-b border-gray-200 dark:border-gray-800 last:border-none`}
+                  className={`border-b border-gray-200 dark:border-gray-800 last:border-none transition-colors ${
+                    member.isPresident
+                      ? "opacity-50 grayscale bg-gray-100/70 dark:bg-gray-800/50 cursor-not-allowed select-none"
+                      : ""
+                  }`}
+                  title={member.isPresident ? "Presidents cannot be assigned as coordinator" : undefined}
                 >
                   <td className="pl-4 pr-2 py-2">
                     <input
                       type="checkbox"
                       checked={selected.includes(member.id)}
                       onChange={() => handleSelect(member.id)}
-                      className="accent-amber-400 rounded"
-                      disabled={saving || loading}
+                      className="accent-amber-400 rounded disabled:cursor-not-allowed"
+                      disabled={saving || loading || member.isPresident}
+                      title={member.isPresident ? "Presidents cannot be assigned as coordinator" : undefined}
                     />
                   </td>
                   <td className="py-2 px-4 font-medium text-gray-900 dark:text-gray-100">

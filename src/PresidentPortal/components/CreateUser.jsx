@@ -233,7 +233,6 @@ export default function CreateMemberForm() {
                         <option value="">Select a role</option>
                         <option value="member">Member</option>
                         <option value="coordinator">Coordinator</option>
-                        <option value="president">President</option>
                     </select>
                 </div>
 
