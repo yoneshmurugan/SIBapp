@@ -154,10 +154,10 @@ Tracks changes across the 3 production workspaces:
 
 ---
 
-### #7 [2026-11-13] - Settings: Session History, Membership Badge & Blood Donor Opt-in
+### #7 [2026-11-13] - Settings: Session History, Membership Badge
 - **Type:** Feature / UI / Security / Community
 - **Origin:** Web
-- **Files:** `src/Settings/components/SecurityPanel.jsx`, `src/Settings/components/MembershipBadgePanel.jsx`, `src/Settings/components/PrivacyPanel.jsx`, `src/Settings/components/SettingsSidebar.jsx`, `src/Settings/Settings.jsx`, `SIB_backend/src/schemas.mjs`, `SIB_backend/src/validators.mjs`, `SIB_backend/src/pages/profile/profileRoute.mjs`, `SIB_backend/src/pages/Auth/routes.mjs`
+- **Files:** `src/Settings/components/SecurityPanel.jsx`, `src/Settings/components/MembershipBadgePanel.jsx`, `src/Settings/components/SessionsPanel.jsx`, `src/Settings/components/SettingsSidebar.jsx`, `src/Settings/Settings.jsx`, `SIB_backend/src/schemas.mjs`, `SIB_backend/src/validators.mjs`, `SIB_backend/src/pages/profile/profileRoute.mjs`, `SIB_backend/src/pages/Auth/routes.mjs`
 
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
@@ -165,9 +165,9 @@ Tracks changes across the 3 production workspaces:
 - [ ] **Android (`SIB_app_android`):** Pending
 
 #### Summary:
-1. **Session & Device History:** Added dedicated history section in `SecurityPanel.jsx` displaying the active device type and browser, IP address, and formatted `last_signed_in` timestamp so members can verify if anyone else accessed their account.
-2. **Membership Badge:** Created `MembershipBadgePanel.jsx` displaying a luxury SIB digital membership badge with SIB Member ID (`idno`) and copy button, Chapter Name & Chapter Code, Member Role badge (President / Coordinator / Member), Joining Date, and dynamic Renewal Date countdown badge with days remaining.
-3. **Emergency Blood Donor Opt-in:** Built an interactive toggle in `PrivacyPanel.jsx` allowing members to enroll as emergency blood donors using their blood group from their profile (`blood_group`), directly connected to `PUT /profile/updateprofile` and persisted in MongoDB (`emergency_blood_donor`).
-4. **Backend Integration:** Added `emergency_blood_donor` field to `MemberProfile` schema and validators, projected membership details and chapter code in `/profile/getprofile`, and exposed client IP in `/auth/getuser`.
+1. **Dedicated Session & Device History Panel:** Moved session history out of Update Password into its own separate panel (`src/Settings/components/SessionsPanel.jsx`) with dedicated sidebar item "Session & Devices".
+2. **Fixed Dark Mode Visibility:** Resolved the issue where session and device cards had illegible text on bright white containers in dark mode. Restructured with dark theme classes (`bg-gray-50 dark:bg-gray-850/60` fixed to `dark:bg-gray-800/70 border-gray-200 dark:border-gray-800`), bold high-contrast text (`text-gray-900 dark:text-gray-100`), amber badge icons, and active session pulse indicator.
+3. **Membership Badge:** Created `MembershipBadgePanel.jsx` displaying a luxury SIB digital membership badge with SIB Member ID (`idno`) and copy button, Chapter Name & Chapter Code, Member Role badge (President / Coordinator / Member), Joining Date, and dynamic Renewal Date countdown badge with days remaining.
+4. **Reverted Emergency Blood Donor:** Completely removed the Emergency Blood Donor opt-in and all associated schemas and routes per request to keep settings streamlined.
 
 ---

@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import SettingsHeader from "./components/SettingsHeader";
 import SettingsSidebar from "./components/SettingsSidebar";
 import SecurityPanel from "./components/SecurityPanel";
+import SessionsPanel from "./components/SessionsPanel";
 import MembershipBadgePanel from "./components/MembershipBadgePanel";
-import PrivacyPanel from "./components/PrivacyPanel";
 import Header from "../MainPage/Header";
 
 const PANELS = {
   security: SecurityPanel,
+  sessions: SessionsPanel,
   membership: MembershipBadgePanel,
-  privacy: PrivacyPanel,
 };
 
 export default function Settings() {
@@ -26,7 +26,7 @@ export default function Settings() {
             <SettingsSidebar active={active} onChange={setActive} />
           </aside>
           <div className="md:col-span-8 lg:col-span-9">
-            <ActivePanel />
+            <ActivePanel onNavigateToPassword={() => setActive("security")} />
           </div>
         </section>
       </div>

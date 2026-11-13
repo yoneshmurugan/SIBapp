@@ -9,43 +9,10 @@ import {
   CheckCircle2, 
   AlertCircle, 
   Loader2, 
-  Check, 
-  ShieldAlert,
-  Laptop,
-  Smartphone,
-  Globe,
-  Clock
+  Check 
 } from "lucide-react";
 import { getAuth, signInWithEmailAndPassword, updatePassword as updateFirebasePassword } from "firebase/auth";
 import { app } from "../../firebase.mjs";
-
-function getDeviceInfo() {
-  const ua = (typeof navigator !== "undefined" && navigator.userAgent) || "";
-  let browser = "Web Browser";
-  let os = "Desktop";
-  let isMobile = false;
-
-  if (/iPad|iPhone|iPod/.test(ua)) {
-    os = "iOS";
-    isMobile = true;
-  } else if (/Android/.test(ua)) {
-    os = "Android";
-    isMobile = true;
-  } else if (/Macintosh|Mac OS X/.test(ua)) {
-    os = "macOS";
-  } else if (/Windows/.test(ua)) {
-    os = "Windows";
-  } else if (/Linux/.test(ua)) {
-    os = "Linux";
-  }
-
-  if (/Edg/.test(ua)) browser = "Microsoft Edge";
-  else if (/Chrome/.test(ua)) browser = "Google Chrome";
-  else if (/Safari/.test(ua)) browser = "Apple Safari";
-  else if (/Firefox/.test(ua)) browser = "Mozilla Firefox";
-
-  return { os, browser, isMobile, deviceName: `${os} • ${browser}` };
-}
 
 function getFriendlyAuthError(err, fallbackMsg) {
   if (!err) return fallbackMsg || "Failed to update password. Please try again.";
@@ -94,22 +61,8 @@ export default function SecurityPanel() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [sessionInfo, setSessionInfo] = useState({
-    lastSignedIn: null,
-    ip: "Detecting...",
-    device: "Current Device",
-    isMobile: false
-  });
-
-  // Auto-fill logged-in user email and session info
+  // Auto-fill logged-in user email
   useEffect(() => {
-    const dev = getDeviceInfo();
-    setSessionInfo((prev) => ({
-      ...prev,
-      device: dev.deviceName,
-      isMobile: dev.isMobile,
-    }));
-
     try {
       const cached = localStorage.getItem("header_auth_user");
       if (cached) {
@@ -117,46 +70,23 @@ export default function SecurityPanel() {
         if (parsed?.email) {
           setValues((v) => ({ ...v, email: parsed.email }));
         }
-        if (parsed?.last_signed_in) {
-          setSessionInfo((prev) => ({ ...prev, lastSignedIn: new Date(parsed.last_signed_in) }));
-        }
       }
     } catch (e) {
       console.warn("Failed to read cached user info", e);
     }
 
-    // Fetch user profile from backend for live last_signed_in & IP
+    // Fetch user profile from backend for live email
     fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/getuser`, {
       method: "GET",
       credentials: "include",
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data) {
-          if (data.email) {
-            setValues((v) => ({ ...v, email: data.email }));
-          }
-          setSessionInfo((prev) => ({
-            ...prev,
-            lastSignedIn: data.last_signed_in ? new Date(data.last_signed_in) : prev.lastSignedIn || new Date(),
-            ip: data.current_ip || prev.ip,
-          }));
+        if (data?.email) {
+          setValues((v) => ({ ...v, email: data.email }));
         }
       })
-      .catch((err) => console.warn("Failed to fetch user session info:", err));
-
-    // Fallback public IP check if backend IP is private/loopback
-    fetch("https://api.ipify.org?format=json")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.ip) {
-          setSessionInfo((prev) => ({
-            ...prev,
-            ip: prev.ip === "Detecting..." || prev.ip === "::1" || prev.ip === "127.0.0.1" ? data.ip : prev.ip,
-          }));
-        }
-      })
-      .catch(() => {});
+      .catch((err) => console.warn("Failed to fetch user email:", err));
   }, []);
 
   // Validation criteria definition
@@ -625,81 +555,6 @@ export default function SecurityPanel() {
           </button>
         </div>
       </form>
-
-      {/* Session & Device History */}
-      <div className="mt-10 pt-8 border-t border-gray-200 dark:border-gray-800">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
-          <div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <Laptop className="w-4 h-4 text-amber-500" />
-              Session & Device History
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              Review current and past account sign-in details to verify account access.
-            </p>
-          </div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 self-start sm:self-auto">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Active Session
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Device Type */}
-          <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-850/60 border border-gray-200 dark:border-gray-800 flex items-start gap-3">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
-              {sessionInfo.isMobile ? <Smartphone className="w-5 h-5" /> : <Laptop className="w-5 h-5" />}
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Device & Browser</span>
-              <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate mt-0.5">
-                {sessionInfo.device}
-              </p>
-              <span className="text-[11px] text-emerald-400 font-medium mt-0.5 block">Current Active Device</span>
-            </div>
-          </div>
-
-          {/* IP Address */}
-          <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-850/60 border border-gray-200 dark:border-gray-800 flex items-start gap-3">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
-              <Globe className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">IP Address</span>
-              <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate mt-0.5 font-mono">
-                {sessionInfo.ip}
-              </p>
-              <span className="text-[11px] text-gray-500 block mt-0.5">Logged-in Network IP</span>
-            </div>
-          </div>
-
-          {/* Last Signed In */}
-          <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-850/60 border border-gray-200 dark:border-gray-800 flex items-start gap-3">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
-              <Clock className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Last Signed In</span>
-              <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate mt-0.5">
-                {sessionInfo.lastSignedIn ? new Date(sessionInfo.lastSignedIn).toLocaleString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hour12: true
-                }) : "Active Now"}
-              </p>
-              <span className="text-[11px] text-gray-500 block mt-0.5">Timestamp (last_signed_in)</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-300/90 flex items-center gap-2.5">
-          <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>Members can see if anyone else accessed their account. If you ever notice an unfamiliar device or IP address, update your password above immediately.</span>
-        </div>
-      </div>
     </section>
   );
 }

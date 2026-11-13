@@ -1,10 +1,10 @@
 import React from "react";
-import { KeyRound, BadgeCheck, HeartHandshake } from "lucide-react";
+import { KeyRound, BadgeCheck, Laptop } from "lucide-react";
 
 const items = [
-  { key: "security", label: "Security & Sessions", icon: KeyRound },
+  { key: "security", label: "Update Password", icon: KeyRound },
+  { key: "sessions", label: "Session & Devices", icon: Laptop },
   { key: "membership", label: "Membership Badge", icon: BadgeCheck },
-  { key: "privacy", label: "Emergency Blood Donor", icon: HeartHandshake },
 ];
 
 export default function SettingsSidebar({ active, onChange }) {
