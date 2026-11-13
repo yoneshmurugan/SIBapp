@@ -151,3 +151,21 @@ Tracks changes across the 3 production workspaces:
 9. Removed the boxed icons beside "Account Settings" and "Update Password" for a cleaner, streamlined header layout.
 
 ---
+
+### #7 [2026-11-13] - Settings: Session History, Membership Badge & Blood Donor Opt-in
+- **Type:** Feature / UI / Security / Community
+- **Origin:** Web
+- **Files:** `src/Settings/components/SecurityPanel.jsx`, `src/Settings/components/MembershipBadgePanel.jsx`, `src/Settings/components/PrivacyPanel.jsx`, `src/Settings/components/SettingsSidebar.jsx`, `src/Settings/Settings.jsx`, `SIB_backend/src/schemas.mjs`, `SIB_backend/src/validators.mjs`, `SIB_backend/src/pages/profile/profileRoute.mjs`, `SIB_backend/src/pages/Auth/routes.mjs`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [ ] **Android (`SIB_app_android`):** Pending
+
+#### Summary:
+1. **Session & Device History:** Added dedicated history section in `SecurityPanel.jsx` displaying the active device type and browser, IP address, and formatted `last_signed_in` timestamp so members can verify if anyone else accessed their account.
+2. **Membership Badge:** Created `MembershipBadgePanel.jsx` displaying a luxury SIB digital membership badge with SIB Member ID (`idno`) and copy button, Chapter Name & Chapter Code, Member Role badge (President / Coordinator / Member), Joining Date, and dynamic Renewal Date countdown badge with days remaining.
+3. **Emergency Blood Donor Opt-in:** Built an interactive toggle in `PrivacyPanel.jsx` allowing members to enroll as emergency blood donors using their blood group from their profile (`blood_group`), directly connected to `PUT /profile/updateprofile` and persisted in MongoDB (`emergency_blood_donor`).
+4. **Backend Integration:** Added `emergency_blood_donor` field to `MemberProfile` schema and validators, projected membership details and chapter code in `/profile/getprofile`, and exposed client IP in `/auth/getuser`.
+
+---
