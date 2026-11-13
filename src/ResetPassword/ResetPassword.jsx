@@ -3,14 +3,12 @@ import { Link } from 'react-router-dom';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 import { app } from '../firebase';
 import { 
-  KeyRound, 
   Mail, 
   ArrowLeft, 
   CheckCircle2, 
   AlertCircle, 
   Loader2, 
-  RotateCw,
-  ShieldCheck
+  RotateCw
 } from 'lucide-react';
 
 function getFriendlyErrorMessage(err, identifier) {
@@ -139,11 +137,6 @@ export default function ResetPassword() {
               />
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 text-xs font-bold mb-2">
-              <KeyRound size={13} />
-              <span>Password Recovery</span>
-            </div>
-
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
               Reset Your Password
             </h1>
@@ -264,11 +257,7 @@ export default function ResetPassword() {
             </form>
           )}
 
-          {/* Security Note Footer */}
-          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-center gap-2 text-[11px] text-gray-400 dark:text-gray-500">
-            <ShieldCheck size={14} className="text-gray-400" />
-            <span>Protected by SIB Secure Authentication</span>
-          </div>
+
 
         </div>
       </div>

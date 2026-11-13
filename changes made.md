@@ -14,8 +14,8 @@ Tracks changes across the 3 production workspaces:
 | #1 | 2026-11-13 | President Portal | [x] Synced | [ ] Pending | [ ] Pending |
 | #2 | 2026-11-13 | Members Analytics | [x] Synced | [ ] Pending | [ ] Pending |
 | #3 | 2026-11-13 | Coordinators Portal | [x] Synced | [ ] Pending | [ ] Pending |
-| #4 | 2026-11-13 | Authentication: Password Recovery | [x] Synced | [ ] Pending | [ ] Pending |
-| #5 | 2026-11-13 | Authentication: Member Sign In | [x] Synced | [ ] Pending | [ ] Pending |
+| #4 | 2026-11-13 | Authentication (Sign In & Password Recovery) | [x] Synced | [ ] Pending | [ ] Pending |
+| #5 | 2026-11-13 | Wall of Wishes | [x] Synced | [ ] Pending | [ ] Pending |
 
 ---
 
@@ -94,10 +94,10 @@ Tracks changes across the 3 production workspaces:
 
 ---
 
-### #4 [2026-11-13] - Authentication: Password Recovery
+### #4 [2026-11-13] - Authentication (Sign In & Password Recovery)
 - **Type:** Feature / Bug Fix / UI
 - **Origin:** Web
-- **Files:** `src/ResetPassword/ResetPassword.jsx`
+- **Files:** `src/SigninPage/SignInPage.jsx`, `src/SigninPage/SignInForm.jsx`, `src/SigninPage/components/FormHeader.jsx`, `src/SigninPage/components/TextField.jsx`, `src/SigninPage/components/PasswordField.jsx`, `src/SigninPage/components/Alert.jsx`, `src/ResetPassword/ResetPassword.jsx`
 
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
@@ -105,14 +105,16 @@ Tracks changes across the 3 production workspaces:
 - [ ] **Android (`SIB_app_android`):** Pending
 
 #### Summary:
-1. Redesigned Reset Password page into a modern branded portal card with dual Email/Phone support, Firebase Client SDK fallback for failed Admin action links, resend cooldown timer, and descriptive error messaging.
+1. Redesigned Member Sign In page into a polished professional portal card with SIB branding, official logo header, Eye password toggle icon, and amber accent buttons.
+2. Redesigned Reset Password page with dual Email/Phone support, Firebase Client SDK fallback for failed Admin action links, resend cooldown timer, and descriptive error messaging.
+3. Cleaned up both authentication pages by removing extraneous badges ("Password Recovery" pill and "Protected by SIB Secure Authentication" footer note).
 
 ---
 
-### #5 [2026-11-13] - Authentication: Member Sign In
-- **Type:** UI / Style
+### #5 [2026-11-13] - Wall of Wishes
+- **Type:** Feature / UI
 - **Origin:** Web
-- **Files:** `src/SigninPage/SignInPage.jsx`, `src/SigninPage/SignInForm.jsx`, `src/SigninPage/components/FormHeader.jsx`, `src/SigninPage/components/TextField.jsx`, `src/SigninPage/components/PasswordField.jsx`, `src/SigninPage/components/Alert.jsx`
+- **Files:** `src/WallOfWishes/WishCard.jsx`, `src/WallOfWishes/WallOfWishes.jsx`
 
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
@@ -120,6 +122,7 @@ Tracks changes across the 3 production workspaces:
 - [ ] **Android (`SIB_app_android`):** Pending
 
 #### Summary:
-1. Redesigned Sign In page into a polished professional portal card with SIB branding, official logo header, Eye password toggle icon, amber accent buttons, and security footer note.
+1. Added member celebration date (e.g. "14th Nov") with a calendar icon to WishCard alongside event type and relative status (Today / Tomorrow / In X days).
+2. Passed celebration target dates from both today's celebrants and upcoming events in Wall of Wishes directly to WishCard with profile data fallback.
 
 ---

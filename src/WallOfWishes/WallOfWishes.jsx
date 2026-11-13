@@ -204,6 +204,7 @@ export default function WallOfWishes() {
                     profileImage={celebrant.profileImage}
                     type={celebrant.type}
                     date="Today"
+                    targetDate={celebrant.targetDate}
                     chapterName={celebrant.chapterName}
                     index={i}
                   />
@@ -277,6 +278,7 @@ export default function WallOfWishes() {
                       profileImage={event.profileImage}
                       type={event.type}
                       date={dateLabel}
+                      targetDate={event.targetDate}
                       chapterName={event.chapterName}
                       index={i}
                     />

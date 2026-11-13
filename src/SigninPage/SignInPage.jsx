@@ -1,7 +1,6 @@
 import AuthLayout from './components/AuthLayout';
 import FormHeader from './components/FormHeader';
 import SignInForm from './SignInForm';
-import { ShieldCheck } from 'lucide-react';
 
 export default function SignInPage() {
   return (
@@ -12,12 +11,6 @@ export default function SignInPage() {
           subtitle="Welcome back! Sign in to access your portal"
         />
         <SignInForm />
-
-        {/* Security Footer Note */}
-        <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-center gap-2 text-[11px] text-gray-400 dark:text-gray-500">
-          <ShieldCheck size={14} className="text-amber-500 dark:text-amber-400" />
-          <span>Protected by SIB Secure Authentication</span>
-        </div>
       </div>
     </AuthLayout>
   );
