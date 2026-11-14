@@ -1,0 +1,36 @@
+# robots.txt for Sengunthar In Business (senguntharinbusiness.com & senguntharinbusiness.in)
+User-agent: *
+Allow: /
+Allow: /public-members
+Allow: /events-meetings
+Allow: /album
+Allow: /privacy-policy
+Allow: /child-safety-standards
+Allow: /signin
+Allow: /assets/
+Allow: /logo.webp
+Allow: /og-image.png
+Allow: /sibiso.png
+Allow: /hero.avif
+
+# Disallow private/authenticated member portals and admin routes from web indexing
+Disallow: /dashboard
+Disallow: /members
+Disallow: /myactivity
+Disallow: /meetings
+Disallow: /mychapter
+Disallow: /settings
+Disallow: /slips
+Disallow: /profile
+Disallow: /allnotifications
+Disallow: /wall-of-wishes
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /presidentportal
+Disallow: /coordinatorsportal
+Disallow: /memberdetailedanalytics
+Disallow: /reset-password
+Disallow: /noteligible
+
+Sitemap: https://senguntharinbusiness.com/sitemap.xml
+Sitemap: https://senguntharinbusiness.in/sitemap.xml

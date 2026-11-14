@@ -212,3 +212,36 @@ Tracks changes across the 3 production workspaces:
    - Replaced broken nested search with an auto-filled and editable `EntryField` for Chapter.
 
 ---
+
+### #10 [2026-11-14] - Comprehensive Dual-Domain SEO & Asset Optimization
+- **Type:** Feature / SEO / PWA
+- **Origin:** Web (`senguntharinbusiness.com` & `senguntharinbusiness.in`)
+- **Files:** `index.html`, `public/robots.txt`, `public/sitemap.xml`, `public/manifest.json`, `public/favicon.ico`, `public/favicon-16x16.png`, `public/favicon-32x32.png`, `public/apple-touch-icon.png`, `public/android-chrome-192x192.png`, `public/android-chrome-512x512.png`, `public/og-image.png`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** N/A (Web metadata & sitemaps)
+- [ ] **Android (`SIB_app_android`):** Icons available
+
+#### Summary:
+1. **Dual-Domain SEO Architecture (`.com` and `.in`):**
+   - Implemented internationalization and canonicalization with `hreflang="en"` (`senguntharinbusiness.com`), `hreflang="en-IN"` (`senguntharinbusiness.in`), and `hreflang="x-default"`.
+   - Added lightweight inline dynamic canonical and OpenGraph host resolver script ensuring whichever domain is visited, search crawlers verify exact canonical matches without cross-domain duplicate penalties.
+2. **Metadata & Targeted Keyword Enhancement:**
+   - Optimized high-CTR page title: `SIB - Sengunthar In Business | Premier Business Network & Community`.
+   - Added high-impact meta description highlighting ISO 9001:2015 certification, Sengunthar Kaikolar entrepreneurship, and business referrals.
+   - Comprehensive meta keywords targeting regional hubs (Erode, Salem, Coimbatore, Tirupur, Chennai), industry verticals (textiles, silk weaving, manufacturing), and networking terms.
+   - Added regional geo-targeting tags (`IN-TN`, `Tamil Nadu, India`, coordinates).
+3. **OpenGraph & Twitter Cards:**
+   - Complete social graph metadata (`og:title`, `og:description`, `og:image`, `og:image:width`, `og:image:height`, `og:site_name`, `og:locale`).
+   - Generated a high-resolution 1200x630 social sharing card (`/og-image.png`) with SIB logo, ISO badge, tagline, and dual domain references.
+4. **Structured Data (Schema.org JSON-LD):**
+   - Implemented `@graph` containing `Organization` (address, phone, contact email, social channels, official logos) and `WebSite` with `SearchAction` pointing to the public member directory.
+5. **Favicon Suite & Web App Manifest:**
+   - Generated multi-size `favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180x180), and Android icons (192x192, 512x512).
+   - Created `manifest.json` for PWA capabilities with theme color `#0a2342`.
+6. **Robots.txt & Sitemap.xml:**
+   - Created `sitemap.xml` with XHTML alternate links covering both domains for all public routes (`/`, `/public-members`, `/events-meetings`, `/album`, `/signin`, `/privacy-policy`, `/child-safety-standards`).
+   - Configured `robots.txt` allowing public indexable pages and media while disallowing private authenticated member portals and admin routes.
+
+---
