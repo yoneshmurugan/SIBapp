@@ -84,7 +84,7 @@ const SearchableMobileSelect = ({ label, placeholder, options, value, onChange, 
 }
 
 function CrossChapterSearch({
-  value,
+  value: controlledValue,
   onChange,
   placeholder = "Select a member",
   label = "To *",
@@ -97,6 +97,14 @@ function CrossChapterSearch({
   const [selectedChapter, setSelectedChapter] = useState("");
   const [dropdownLoading, setDropdownLoading] = useState(false);
   const [chaptersLoading, setChaptersLoading] = useState(false);
+  const [internalValue, setInternalValue] = useState(controlledValue || "");
+  const currentValue = controlledValue !== undefined ? controlledValue : internalValue;
+
+  useEffect(() => {
+    if (controlledValue !== undefined) {
+      setInternalValue(controlledValue);
+    }
+  }, [controlledValue]);
 
   // Fetch Dropdown Data
   useEffect(() => {
@@ -117,7 +125,14 @@ function CrossChapterSearch({
               display_name: m.display_name || m.user?.name || "",
               chapter: m.chapter?.chapter_name || "",
               chapter_id: m.chapter?._id || "",
-              rawUser: { ...m.user, phone_number: m.company_phone || m.user?.phone_number }
+              rawUser: { 
+                ...m.user, 
+                display_name: m.display_name || m.user?.name || "",
+                phone_number: m.company_phone || m.user?.phone_number,
+                chapter: m.chapter?.chapter_name || "",
+                chapter_name: m.chapter?.chapter_name || "",
+                chapter_id: m.chapter?._id || ""
+              }
             })).filter(m => m.username);
             setAvailableMembers(list);
           }
@@ -168,7 +183,14 @@ function CrossChapterSearch({
                 display_name: m.display_name || m.user?.name || "",
                 chapter: m.chapter?.chapter_name || "",
                 chapter_id: m.chapter?._id || "",
-                rawUser: { ...m.user, phone_number: m.company_phone || m.user?.phone_number }
+                rawUser: { 
+                  ...m.user, 
+                  display_name: m.display_name || m.user?.name || "",
+                  phone_number: m.company_phone || m.user?.phone_number,
+                  chapter: m.chapter?.chapter_name || "",
+                  chapter_name: m.chapter?.chapter_name || "",
+                  chapter_id: m.chapter?._id || ""
+                }
               })).filter(m => m.username);
               setAvailableMembers(list);
            }
@@ -186,10 +208,18 @@ function CrossChapterSearch({
   }, [crossChapter, selectedChapter]);
 
   const handleMemberChange = (val) => {
-     onChange(val);
+     setInternalValue(val);
+     if (onChange) onChange(val);
      const mem = availableMembers.find(m => m.username === val);
-     if (mem && userstate && mem.rawUser) {
-        userstate(mem.rawUser);
+     if (mem && userstate) {
+        userstate({
+          ...(mem.rawUser || {}),
+          chapter: mem.chapter || mem.rawUser?.chapter || "",
+          chapter_name: mem.chapter || mem.rawUser?.chapter_name || "",
+          chapter_id: mem.chapter_id || mem.rawUser?.chapter_id || "",
+          display_name: mem.display_name || "",
+          username: mem.username
+        });
      }
   };
 
@@ -201,7 +231,8 @@ function CrossChapterSearch({
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" className="sr-only peer" checked={crossChapter} onChange={(e) => {
                 setCrossChapter(e.target.checked);
-                onChange("");
+                setInternalValue("");
+                if (onChange) onChange("");
                 setSelectedChapter("");
             }} />
             <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-500"></div>
@@ -218,7 +249,8 @@ function CrossChapterSearch({
            value={selectedChapter}
            onChange={(val) => {
               setSelectedChapter(val);
-              onChange("");
+              setInternalValue("");
+              if (onChange) onChange("");
            }}
            options={availableChapters.map(chap => ({
               value: chap._id,
@@ -232,7 +264,7 @@ function CrossChapterSearch({
         placeholder={crossChapter && !selectedChapter ? "Select a chapter first" : placeholder}
         loading={dropdownLoading}
         disabled={dropdownLoading || (crossChapter && !selectedChapter)}
-        value={value}
+        value={currentValue}
         onChange={handleMemberChange}
         options={availableMembers.map(mem => ({
            value: mem.username,

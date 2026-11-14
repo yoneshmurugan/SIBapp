@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
+import SessionLoadingScreen from "../Components/SessionLoadingScreen";
 
 export default function ExistingSession() {
     const [isValid, setIsValid] = useState(null);
     const [isadmin, setIsAdmin] = useState(false);
 
-    const { data: access, loading , error } = useFetch(
+    const { data: access, loading, error } = useFetch(
         `${import.meta.env.VITE_BACKEND_SERVER}/authenticate`,
         {
             method: "GET",
@@ -33,13 +34,11 @@ export default function ExistingSession() {
         }
     }, [access, loading, error]);
 
-    if (isValid === null || loading)
-        return (
-            <div className="w-full min-h-[200px] flex items-center justify-center">
-                Checking for session cookie...
-            </div>
-        );
-    if( isadmin === true){
+    if (isValid === null || loading) {
+        return <SessionLoadingScreen hint="Verifying active session..." />;
+    }
+
+    if (isadmin === true) {
         return <Navigate to="/admin" replace />;
     }
     if (isValid === false) {

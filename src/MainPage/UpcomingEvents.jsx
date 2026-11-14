@@ -38,11 +38,17 @@ const formatDate = (dateString) => {
 };
 
 // --- Coordinator Bulk Edit Modal ---
+const DEFAULT_CORE_ROLES = ['President', 'VP', 'Secretary', 'Treasurer'];
+
 function CoordinatorBulkEditModal({ open, onClose, onSave, initial, loading, allProfiles }) {
   const [coords, setCoords] = useState([]);
 
   useEffect(() => {
-    setCoords([...(initial || [])]);
+    if (initial && initial.length > 0) {
+      setCoords([...initial]);
+    } else {
+      setCoords(DEFAULT_CORE_ROLES.map(role => ({ role, name: "Not Assigned", _selectedUsername: "" })));
+    }
   }, [initial]);
 
   const handleChange = (index, value) => {
@@ -73,7 +79,7 @@ function CoordinatorBulkEditModal({ open, onClose, onSave, initial, loading, all
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
                 <CrossChapterSearch
                   label={`Select member for ${coord.role}`}
-                  value={coord._selectedUsername || ""}
+                  value={coord._selectedUsername || (coord.name && coord.name !== "Not Assigned" ? coord.name : "")}
                   onChange={(val) => {
                     setCoords(prev => prev.map((c, i) => i === idx ? { ...c, _selectedUsername: val } : c));
                   }}
@@ -87,7 +93,7 @@ function CoordinatorBulkEditModal({ open, onClose, onSave, initial, loading, all
                 />
                 <div className="mt-2 text-xs font-bold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-3 py-2 rounded-lg flex items-center justify-between">
                    <span>Selected Name:</span>
-                   <span className="text-gray-900 dark:text-white truncate max-w-[200px]">{coord.name || "None"}</span>
+                   <span className="text-gray-900 dark:text-white truncate max-w-[200px]">{coord.name && coord.name !== "Not Assigned" ? coord.name : "None"}</span>
                 </div>
               </div>
             </div>
@@ -164,7 +170,7 @@ const ScheduleCard = ({ type, title, dateStr, time, location, iconColor }) => {
               {type}
             </span>
           </div>
-          <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+          <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors leading-snug">
             {title}
           </h4>
           <div className="flex flex-col gap-1">
@@ -195,28 +201,39 @@ const TeamMemberCard = ({ name, role, profile }) => {
     }
   };
 
+  const isAssigned = Boolean(name && name.trim() !== "" && name.trim().toLowerCase() !== "not assigned");
+  const displayName = isAssigned ? name : "Not Assigned";
+
   return (
     <div 
-      onClick={profile ? handleClick : undefined}
-      className={`flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 transition-all group ${profile ? "cursor-pointer hover:border-amber-200 dark:hover:border-amber-900/30 hover:shadow-lg hover:shadow-amber-500/5" : ""}`}
+      onClick={profile && isAssigned ? handleClick : undefined}
+      className={`flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800/40 border transition-all group ${
+        isAssigned 
+          ? "border-gray-100 dark:border-gray-800 cursor-pointer hover:border-amber-200 dark:hover:border-amber-900/30 hover:shadow-lg hover:shadow-amber-500/5" 
+          : "border-dashed border-gray-200 dark:border-gray-800 opacity-75"
+      }`}
     >
-      {profile?.profile_image_url && profile.profile_image_url !== "N/A" ? (
+      {profile?.profile_image_url && profile.profile_image_url !== "N/A" && isAssigned ? (
         <img 
           src={profile.profile_image_url} 
-          alt={name} 
+          alt={displayName} 
           className="w-14 h-14 rounded-2xl object-cover border border-gray-200 dark:border-gray-700 shadow-sm shrink-0"
         />
       ) : (
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 font-black text-xl shadow-sm shrink-0">
-          {name?.charAt(0) || "U"}
+          {displayName.charAt(0) || "U"}
         </div>
       )}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         <p className="text-[11px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-1">
           {role}
         </p>
-        <p className="text-base font-bold text-gray-900 dark:text-white truncate group-hover:text-amber-600 transition-colors">
-          {name}
+        <p className={`text-base font-bold truncate transition-colors ${
+          isAssigned 
+            ? "text-gray-900 dark:text-white group-hover:text-amber-600" 
+            : "text-gray-400 dark:text-gray-500 italic"
+        }`}>
+          {displayName}
         </p>
       </div>
     </div>
@@ -339,23 +356,23 @@ function UpcomingEvents() {
     <div className="w-full space-y-6 animate-in fade-in duration-700 pb-10">
       
       {/* ─── Schedule Section ─── */}
-      <section className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/20 dark:shadow-none transition-all">
+      <section className="bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200/80 dark:border-gray-800 shadow-sm dark:shadow-none transition-all">
         {/* Sub-Header */}
-        <div className="px-5 py-4 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-white dark:from-gray-800/20 dark:to-gray-900">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl">
-              <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+        <div className="px-4 py-3 sm:px-5 sm:py-4 border-b border-gray-200/60 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-white dark:from-gray-800/20 dark:to-gray-900 gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="p-1.5 sm:p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl shrink-0">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 dark:text-amber-500" />
             </div>
-            <div>
-              <h3 className="text-base font-black text-gray-900 dark:text-white tracking-tight">Schedule</h3>
-              <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Upcoming Activities</p>
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white tracking-tight truncate">Schedule</h3>
+              <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate">Upcoming Activities</p>
             </div>
           </div>
           
           {!allEventsLoading && allEvents && (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all active:scale-95 group"
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all active:scale-95 group shrink-0 whitespace-nowrap"
             >
               <span>Explore All</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -405,12 +422,12 @@ function UpcomingEvents() {
       </section>
 
       {/* ─── Leadership Team Section ─── */}
-      <section className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/20 dark:shadow-none transition-all">
-        <div className="px-5 py-4 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-white dark:from-gray-800/20 dark:to-gray-900">
-          <div className="flex items-center gap-3">
+      <section className="bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200/80 dark:border-gray-800 shadow-sm dark:shadow-none transition-all">
+        <div className="px-4 py-3 sm:px-5 sm:py-4 border-b border-gray-200/60 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-white dark:from-gray-800/20 dark:to-gray-900">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <div>
-              <h3 className="text-base font-black text-gray-900 dark:text-white tracking-tight">Leadership</h3>
-              <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">The Core Team</p>
+              <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white tracking-tight">Leadership</h3>
+              <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">The Core Team</p>
             </div>
           </div>
           
@@ -492,4 +509,4 @@ function UpcomingEvents() {
   );
 }
 
-export default UpcomingEvents;
+export default UpcomingEvents;

@@ -91,55 +91,57 @@ function Header() {
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
       className="
         relative z-[100]
-        bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl
+        bg-white dark:bg-gray-900
         text-gray-900 dark:text-gray-100
         flex justify-between items-center 
         transition-all duration-300
-        px-4 min-h-[70px] border-b border-gray-100 dark:border-gray-800
+        px-3 sm:px-4 min-h-[64px] border-b border-gray-200/80 dark:border-gray-800
         shadow-sm
       "
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <Sidebar />
 
-        <div className="relative group">
-           <div className="absolute inset-0 bg-amber-400 rounded-full blur-lg opacity-0 group-hover:opacity-20 transition-opacity"></div>
-           <Zoom>
-             <img
-               src="/assets/logo.webp"
-               alt="logo"
-               className="w-[42px] h-[42px] object-contain rounded-full relative z-10"
-             />
-           </Zoom>
+        <div className="relative shrink-0">
+           <img
+             src="/assets/logo.webp"
+             alt="logo"
+             className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] object-contain rounded-full"
+             onError={(e) => {
+               if (e.currentTarget.src.includes("/assets/logo.webp")) {
+                 e.currentTarget.src = "/logo.webp";
+               }
+             }}
+           />
         </div>
 
-        <NavLink to={'/dashboard'} className="flex flex-col">
-          <h1 className="text-[14px] font-black tracking-tight text-gray-900 dark:text-white leading-none">
+        <NavLink to={'/dashboard'} className="flex flex-col min-w-0">
+          <h1 className="text-[13px] sm:text-[14px] font-black tracking-tight text-gray-900 dark:text-white leading-tight">
             SIB APP
           </h1>
-          <span className="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em] mt-1">
+          <span className="text-[8.5px] sm:text-[9px] font-black text-amber-500 uppercase tracking-[0.18em] leading-none mt-0.5">
             Official
           </span>
         </NavLink>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         {/* Chapter Name / Loading */}
-        <div className="flex flex-col items-end mr-1">
-          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">
+        <div className="flex flex-col items-end text-right">
+          <span className="text-[9px] sm:text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none mb-0.5">
             Chapter
           </span>
           {chapterLoading ? (
              <ShimmerText /> 
           ) : (
-            <span className="text-[12px] font-bold text-gray-700 dark:text-gray-300 truncate max-w-[80px]">
+            <span className="text-[11px] sm:text-[12px] font-bold text-gray-800 dark:text-gray-200">
               {getInitials(currentChapterName)}
             </span>
           )}
         </div>
 
         {/* Notifications & Avatar */}
-        <div className="flex items-center gap-2 pl-3 border-l border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-1.5 sm:gap-2 pl-2 sm:pl-3 border-l border-gray-200/80 dark:border-gray-800">
           <NotificationPanel />
 
           <div className="flex-shrink-0 ml-1">

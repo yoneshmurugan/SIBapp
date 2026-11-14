@@ -69,10 +69,9 @@ function MemberActivityReport({ onBack }) {
         let result = memberData.filter(m => {
             const matchesSearch = m.name?.toLowerCase().includes(searchQuery.toLowerCase());
             const isApproved = approvedMembers.has(m.id) || m.approvalStatus === 'APPROVED';
-            const hasActivity = m.referralsGiven > 0 || m.businessMade > 0 || m.mToM > 0 || m.visitorsBrought > 0;
             const matchesStatus = statusFilter === 'ALL' 
                 ? true 
-                : statusFilter === 'APPROVED' ? isApproved : (!isApproved && hasActivity);
+                : statusFilter === 'APPROVED' ? isApproved : !isApproved;
             return matchesSearch && matchesStatus;
         });
 
@@ -196,7 +195,12 @@ function MemberActivityReport({ onBack }) {
             const today = new Date();
             const formattedDate = today.toISOString().split('T')[0];
             const data = {
-                usersdata: memberData, // we pass all members data
+                usersdata: memberData.map(m => ({
+                    id: m.id,
+                    user_id: m.id,
+                    name: m.name,
+                    attendance: m.attendance
+                })),
                 meeting_id: selectedMeeting,
                 date: formattedDate,
             };
@@ -206,7 +210,16 @@ function MemberActivityReport({ onBack }) {
                 body: JSON.stringify(data),
             });
             
-            if (!attendanceRes.ok) throw new Error(await attendanceRes.text());
+            if (!attendanceRes.ok) {
+                let errorMsg = 'Error during attendance submission';
+                try {
+                    const errObj = await attendanceRes.json();
+                    errorMsg = errObj.error || errObj.message || errorMsg;
+                } catch {
+                    errorMsg = await attendanceRes.text() || errorMsg;
+                }
+                throw new Error(errorMsg);
+            }
 
             const confirm_data = { _id: selectedMeeting, attendance_status: true };
             const updateMeetingRes = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/meeting/updatemeeting`, {
@@ -214,7 +227,16 @@ function MemberActivityReport({ onBack }) {
                 body: JSON.stringify(confirm_data),
             });
 
-            if (!updateMeetingRes.ok) throw new Error(await updateMeetingRes.text());
+            if (!updateMeetingRes.ok) {
+                let errorMsg = 'Error updating meeting status';
+                try {
+                    const errJson = await updateMeetingRes.json();
+                    errorMsg = errJson.error || errJson.message || errorMsg;
+                } catch {
+                    errorMsg = await updateMeetingRes.text() || errorMsg;
+                }
+                throw new Error(errorMsg);
+            }
 
             setSubmittedAttendances(new Set(memberData.map(m => m.id)));
             
@@ -249,7 +271,7 @@ function MemberActivityReport({ onBack }) {
     }
 
     return (
-        <div className="w-full pb-32 pt-6 px-3 max-w-lg mx-auto bg-gray-50/50 dark:bg-gray-950 min-h-screen">
+        <div className="w-full pb-32 pt-6 px-3 max-w-5xl mx-auto bg-gray-50/50 dark:bg-gray-950 min-h-screen">
             {/* Top Navigation Bar */}
             <div className="flex items-center justify-between mb-6 bg-white dark:bg-gray-900 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-3">

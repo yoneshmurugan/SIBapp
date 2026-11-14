@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
+import SessionLoadingScreen from "../Components/SessionLoadingScreen";
 
 export default function AdminRoute() {
   const [isValid, setIsValid] = useState(null);
@@ -19,8 +20,15 @@ export default function AdminRoute() {
     }
   }, [access]);
 
-  if (isValid === null || loading)
-    return null;
+  if (isValid === null || loading) {
+    return (
+      <SessionLoadingScreen
+        title="Administration Console"
+        subtitle="Verifying Administrative Privileges"
+        hint="Authenticating security clearance..."
+      />
+    );
+  }
 
   return isValid ? <Outlet /> : <Navigate to="/noteligible" replace />;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
+import SessionLoadingScreen from "../Components/SessionLoadingScreen";
 
 export default function PresidentRoute() {
   const [isValid, setIsValid] = useState(null);
@@ -19,8 +20,15 @@ export default function PresidentRoute() {
     }
   }, [access]);
 
-  if (isValid === null || loading)
-    return null;
+  if (isValid === null || loading) {
+    return (
+      <SessionLoadingScreen
+        title="President Portal"
+        subtitle="Verifying Chapter Presidential Privileges"
+        hint="Verifying permissions..."
+      />
+    );
+  }
 
   return isValid ? <Outlet /> : <Navigate to="/noteligible" replace />;
 }

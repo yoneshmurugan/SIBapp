@@ -7,14 +7,46 @@ const EventCard = ({
   time = "3:00 PM",
   location = null,
   status = "completed",
+  duration = 180,
   onClick = null,
   attendees = null,
   onEdit = null,
   onDelete = null,
 }) => {
+  const effectiveStatus = React.useMemo(() => {
+    if (status === 'completed' || status === 'cancelled') return status;
+    try {
+      if (!date) return status;
+      const d = new Date(date);
+      let hours = 7;
+      let minutes = 0;
+      if (time) {
+        const match = String(time).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+        if (match) {
+          hours = parseInt(match[1], 10);
+          minutes = parseInt(match[2], 10);
+          if (match[3]?.toUpperCase() === 'PM' && hours < 12) hours += 12;
+          if (match[3]?.toUpperCase() === 'AM' && hours === 12) hours = 0;
+        }
+      }
+      const istOffsetMs = 5.5 * 60 * 60 * 1000;
+      const startUtcMs = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), hours, minutes) - istOffsetMs;
+      const dur = Number(duration) > 0 ? Number(duration) : 180;
+      const endUtcMs = startUtcMs + dur * 60 * 1000;
+      const nowMs = Date.now();
+
+      if (nowMs >= endUtcMs) return 'completed';
+      if (nowMs >= startUtcMs) return 'ongoing';
+      return status;
+    } catch (e) {
+      return status;
+    }
+  }, [date, time, status, duration]);
+
   const statusColors = {
     upcoming: 'border-blue-300 bg-blue-50 dark:bg-blue-950 dark:border-blue-800',
     ongoing: 'border-green-300 bg-green-50 dark:bg-green-950 dark:border-green-800',
+    inprogress: 'border-green-300 bg-green-50 dark:bg-green-950 dark:border-green-800',
     completed: 'border-gray-300 bg-gray-100 dark:bg-gray-900 dark:border-gray-800',
     cancelled: 'border-red-300 bg-red-50 dark:bg-red-950 dark:border-red-800',
   }
@@ -22,12 +54,13 @@ const EventCard = ({
   const statusTextColors = {
     upcoming: 'text-blue-700 dark:text-blue-300',
     ongoing: 'text-green-700 dark:text-green-300',
+    inprogress: 'text-green-700 dark:text-green-300',
     completed: 'text-gray-700 dark:text-gray-300',
     cancelled: 'text-red-700 dark:text-red-300',
   }
 
-  const selectedStatusColor = statusColors[status] || statusColors.upcoming
-  const selectedStatusTextColor = statusTextColors[status] || statusTextColors.upcoming
+  const selectedStatusColor = statusColors[effectiveStatus] || statusColors.upcoming
+  const selectedStatusTextColor = statusTextColors[effectiveStatus] || statusTextColors.upcoming
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -54,7 +87,7 @@ const EventCard = ({
           text-xs font-bold uppercase tracking-wide
           ${selectedStatusTextColor}
         `}>
-          {status}
+          {effectiveStatus}
         </span>
         {attendees && (
           <span className="text-xs text-gray-600 dark:text-gray-400">
