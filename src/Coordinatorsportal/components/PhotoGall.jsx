@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   X, ChevronLeft, ChevronRight, ZoomIn, Image as ImageIcon, 
-  Plus, Trash2, Upload, FolderPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2,
+  Plus, Upload, FolderPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2,
   Calendar, ArrowLeftIcon, Star, GripHorizontal, Save, Users, MapPin, MessageSquare, Info
 } from 'lucide-react';
 
@@ -235,7 +235,6 @@ const Lightbox = ({ isOpen, image, onClose, onNext, onPrev, hasNext, hasPrev, m2
 const AlbumCard = ({ 
   album, 
   onClick, 
-  onDelete, 
   onLongPress, 
   isReordering,
   onDragStart,
@@ -277,7 +276,7 @@ const AlbumCard = ({
       {album.coverImg ? (
         <img 
           src={album.coverImg} 
-          alt={album.title}
+          alt={album.title} 
           className={`w-full h-full object-cover transition-transform duration-700 ${isReordering ? 'opacity-60' : 'group-hover:scale-110 opacity-80 group-hover:opacity-100'}`}
         />
       ) : (
@@ -299,17 +298,6 @@ const AlbumCard = ({
           </span>
         </div>
       </div>
-
-      {/* Delete Button (Hidden during reorder) */}
-      {!isReordering && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(album); }}
-          className="absolute top-2 right-2 p-2 bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
-          title="Delete Album"
-        >
-          <Trash2 size={16} />
-        </button>
-      )}
 
       {/* Reorder Indicator */}
       {isReordering && (
@@ -785,7 +773,7 @@ export default function PhotoGallery({ onBack }) {
             {onBack && (
               <button 
                 onClick={onBack}
-                className="mr-1 p-2 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="mr-1 p-2 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
                 title="Back to Portal"
               >
                 <ArrowLeftIcon size={18} />
@@ -826,7 +814,7 @@ export default function PhotoGallery({ onBack }) {
                 <button 
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                  className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
                 >
                   {isUploading ? <Loader2 className="animate-spin" size={15}/> : <Upload size={15} />}
                   <span>{isUploading ? 'Uploading...' : 'Upload'}</span>
@@ -834,7 +822,7 @@ export default function PhotoGallery({ onBack }) {
               ) : isReordering ? (
                 <button 
                   onClick={saveReorder}
-                  className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
+                  className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
                 >
                   <Save size={15} />
                   <span>Done</span>
@@ -842,7 +830,7 @@ export default function PhotoGallery({ onBack }) {
               ) : (
                 <button 
                   onClick={() => setIsCreatingAlbum(true)}
-                  className="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm"
+                  className="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm cursor-pointer"
                 >
                   <Plus size={15} />
                   <span>New Album</span>
@@ -892,7 +880,6 @@ export default function PhotoGallery({ onBack }) {
                     index={index}
                     album={album} 
                     onClick={() => !isReordering && setSelectedAlbumId(album.id)}
-                    onDelete={handleDeleteAlbum}
                     onLongPress={handleLongPress}
                     isReordering={isReordering}
                     onDragStart={handleDragStart}
@@ -930,7 +917,7 @@ export default function PhotoGallery({ onBack }) {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setSelectedAlbumId(null)}
-                  className="p-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl transition-colors text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white"
+                  className="p-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl transition-colors text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white cursor-pointer"
                 >
                   <ArrowLeft size={18} />
                 </button>
@@ -959,7 +946,7 @@ export default function PhotoGallery({ onBack }) {
                  <p className="text-sm text-gray-400 dark:text-neutral-500 mt-1 mb-4">Upload photos to get started.</p>
                  <button 
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-emerald-600 dark:text-emerald-500 hover:text-emerald-500 font-semibold text-sm"
+                  className="text-emerald-600 dark:text-emerald-500 hover:text-emerald-500 font-semibold text-sm cursor-pointer"
                  >
                    Select files
                  </button>
@@ -995,7 +982,7 @@ export default function PhotoGallery({ onBack }) {
                             e.stopPropagation(); 
                             handleSetCoverImage(photo.src); 
                           }}
-                          className={`p-1.5 rounded-md backdrop-blur-md transition-colors ${
+                          className={`p-1.5 rounded-md backdrop-blur-md transition-colors cursor-pointer ${
                              selectedAlbum.coverImg === photo.src 
                              ? 'bg-yellow-500/80 text-white' 
                              : 'bg-black/50 text-white hover:bg-yellow-500/80'
@@ -1003,15 +990,6 @@ export default function PhotoGallery({ onBack }) {
                           title="Set as Album Cover"
                         >
                            <Star size={14} fill={selectedAlbum.coverImg === photo.src ? "currentColor" : "none"} />
-                        </button>
-
-                        {/* Delete Image Button */}
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDeletePhoto(photo); }}
-                          className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors"
-                          title="Delete Image"
-                        >
-                          <Trash2 size={14} />
                         </button>
                     </div>
                   </div>
@@ -1038,7 +1016,7 @@ export default function PhotoGallery({ onBack }) {
           <div className="bg-neutral-900 border border-neutral-800 rounded-xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-white">Create New Album</h3>
-              <button onClick={() => setIsCreatingAlbum(false)} className="text-neutral-400 hover:text-white">
+              <button onClick={() => setIsCreatingAlbum(false)} className="text-neutral-400 hover:text-white cursor-pointer">
                 <X size={20} />
               </button>
             </div>
@@ -1069,16 +1047,16 @@ export default function PhotoGallery({ onBack }) {
               
               <div className="pt-2 flex space-x-3">
                 <button 
-                  type="button"
+                  type="button" 
                   onClick={() => setIsCreatingAlbum(false)}
-                  className="flex-1 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-lg transition-colors font-medium"
+                  className="flex-1 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-lg transition-colors font-medium cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button 
-                  type="submit"
+                  type="submit" 
                   disabled={!newAlbumTitle.trim()}
-                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   Create
                 </button>

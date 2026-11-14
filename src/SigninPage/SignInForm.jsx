@@ -5,6 +5,7 @@ import Alert from "./components/Alert";
 import BiometricButton from "./components/BiometricButton";
 import { saveCredentialsForBiometric } from "./services/biometricService";
 import { validateIdentifier, validatePassword } from "./utils/validators";
+import { Loader2 } from "lucide-react";
 
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app } from "../firebase";
@@ -69,7 +70,6 @@ export default function SignInForm() {
       if (!res.ok) {
         throw new Error(data.error || "Login failed");
       }
-      console.log("Login successful", data);
 
       // 4. Save credentials locally for biometric access
       await saveCredentialsForBiometric(rawIdentifier.trim(), password);
@@ -82,7 +82,15 @@ export default function SignInForm() {
       return;
     } catch (err) {
       console.error(err);
-      setGlobalError(err.message || "Invalid credentials");
+      if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
+        setGlobalError("Invalid email/phone number or password.");
+      } else if (err.code === "auth/user-not-found") {
+        setGlobalError("No account found with this email or phone number.");
+      } else if (err.code === "auth/too-many-requests") {
+        setGlobalError("Too many failed attempts. Please try again later or reset your password.");
+      } else {
+        setGlobalError(err.message || "Invalid credentials");
+      }
     } finally {
       setLoading(false);
     }
@@ -116,9 +124,10 @@ export default function SignInForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-3 text-gray-900 dark:text-gray-100"
+      className="space-y-4 text-gray-900 dark:text-gray-100"
       role="form"
       aria-describedby={globalError ? "form-alert" : undefined}
+      noValidate
     >
       {globalError && <Alert tone="error" message={globalError} id="form-alert" />}
 
@@ -126,15 +135,11 @@ export default function SignInForm() {
         id="identifier"
         label="Email or Phone Number"
         type="text"
-        placeholder="e.g. user@example.com or 9876543210"
+        placeholder="e.g. member@example.com or 9876543210"
         value={values.identifier}
         onChange={onChange}
         error={errors.identifier}
         autoComplete="username"
-        autoCapitalize="none"
-        autoCorrect="off"
-        inputMode="text"
-        className="dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 dark:placeholder-gray-400"
       />
 
       <PasswordField
@@ -144,14 +149,13 @@ export default function SignInForm() {
         onChange={onChange}
         error={errors.password}
         autoComplete="current-password"
-        className="dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 dark:placeholder-gray-400"
       />
 
-      <div className="flex items-center justify-end w-full">
+      <div className="flex items-center justify-end w-full pt-1">
         <button 
           type="button" 
           onClick={() => navigate('/reset-password')} 
-          className="text-sm text-red-600 hover:underline dark:text-red-400 bg-transparent border-none p-0 cursor-pointer"
+          className="text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:underline bg-transparent border-none p-0 cursor-pointer transition-colors"
         >
           Forgot password?
         </button>
@@ -160,9 +164,16 @@ export default function SignInForm() {
       <button
         type="submit"
         disabled={loading}
-        className="mt-4 w-full rounded-md bg-yellow-500 px-4 py-2 text-gray-900 dark:text-gray-900 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60"
+        className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-500 active:bg-amber-600 text-gray-950 font-bold py-2.5 px-4 text-sm transition-all duration-200 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
       >
-        {loading ? "Please wait…" : "Sign in"}
+        {loading ? (
+          <>
+            <Loader2 size={18} className="animate-spin" />
+            <span>Signing in...</span>
+          </>
+        ) : (
+          <span>Sign in</span>
+        )}
       </button>
 
       <BiometricButton 

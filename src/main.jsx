@@ -135,6 +135,9 @@ const router = createBrowserRouter([
     element: <CoordinatorRoute />,
     children: [
       { path: '/memberdetailedanalytics', element: <MembersAnalytics /> },
+      { path: '/memberdetailedanalytics/mtom', element: <MembersAnalytics /> },
+      { path: '/memberdetailedanalytics/tyb', element: <MembersAnalytics /> },
+      { path: '/memberdetailedanalytics/referrals', element: <MembersAnalytics /> },
       { path: '/coordinatorsportal', element: <Coordinatorsportal /> },
     ]
   },

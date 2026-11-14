@@ -1,10 +1,10 @@
-import { Cake, Heart, Sparkles } from 'lucide-react';
+import { Cake, Heart, Sparkles, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { useState } from 'react';
 import useFetch from '../hooks/useFetch';
 
-export default function WishCard({ memberName, profileImage, type, date, chapterName, profileId, userId, index = 0 }) {
+export default function WishCard({ memberName, profileImage, type, date, targetDate, chapterName, profileId, userId, index = 0 }) {
   const isBirthday = type === 'birthday';
   const Icon = isBirthday ? Cake : Heart;
 
@@ -33,6 +33,34 @@ export default function WishCard({ memberName, profileImage, type, date, chapter
     const v = n % 100;
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   };
+
+  const formattedCelebrationDate = (() => {
+    const raw = targetDate || (isBirthday ? profileData?.dob : profileData?.wedding_date);
+    if (!raw) return null;
+
+    let d = null;
+    if (typeof raw === 'string') {
+      const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        d = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+      } else {
+        d = new Date(raw);
+      }
+    } else if (raw instanceof Date) {
+      d = raw;
+    }
+
+    if (!d || isNaN(d.getTime())) return null;
+
+    const day = d.getDate();
+    const month = d.toLocaleString('en-US', { month: 'short' });
+    const currentYear = new Date().getFullYear();
+    const isNextYear = targetDate && d.getFullYear() > currentYear;
+
+    return isNextYear
+      ? `${getOrdinalSuffix(day)} ${month} ${d.getFullYear()}`
+      : `${getOrdinalSuffix(day)} ${month}`;
+  })();
 
   const avatarUrl = profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(memberName)}&background=random&size=256&bold=true`;
 
@@ -160,7 +188,7 @@ export default function WishCard({ memberName, profileImage, type, date, chapter
 
           {/* Event type & date */}
           <div className={clsx(
-            "mt-3 sm:mt-5 flex flex-col sm:flex-row items-center gap-0.5 sm:gap-2 px-2 sm:px-5 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm font-bold border",
+            "mt-3 sm:mt-5 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-2.5 sm:px-5 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm font-bold border",
             isBirthday
               ? "bg-amber-500/10 border-amber-500/20 text-amber-200"
               : "bg-pink-500/10 border-pink-500/20 text-pink-200"
@@ -169,8 +197,31 @@ export default function WishCard({ memberName, profileImage, type, date, chapter
               <Icon size={12} className="animate-bounce sm:w-4 sm:h-4" />
               <span>{years ? `${getOrdinalSuffix(years)} ` : ''}{isBirthday ? 'Birthday' : 'Anniversary'}</span>
             </div>
-            <span className="opacity-40 hidden sm:inline">•</span>
-            <span className="text-white/80 whitespace-nowrap">{date}</span>
+
+            {(formattedCelebrationDate || date) && (
+              <>
+                <span className="opacity-40 hidden sm:inline">•</span>
+                <div className="flex items-center gap-1.5 whitespace-nowrap">
+                  {formattedCelebrationDate && (
+                    <span className="text-white font-extrabold flex items-center gap-1">
+                      <Calendar size={11} className="sm:w-3.5 sm:h-3.5 opacity-80" />
+                      {formattedCelebrationDate}
+                    </span>
+                  )}
+                  {formattedCelebrationDate && date && formattedCelebrationDate !== date && (
+                    <span className="opacity-40">•</span>
+                  )}
+                  {date && formattedCelebrationDate !== date && (
+                    <span className={clsx(
+                      "font-semibold",
+                      date === "Today" ? "text-amber-300 dark:text-amber-300 font-bold" : "text-white/80"
+                    )}>
+                      {date}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Send Wishes Button */}

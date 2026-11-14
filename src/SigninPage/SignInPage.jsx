@@ -5,14 +5,12 @@ import SignInForm from './SignInForm';
 export default function SignInPage() {
   return (
     <AuthLayout>
-      <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md overflow-hidden">
-        <div className="p-6">
-          <FormHeader
-            title="SIB - Sengundhar in Business"
-            subtitle="Welcome back! Sign in to continue"
-          />
-          <SignInForm />
-        </div>
+      <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden p-6 sm:p-8 animate-in fade-in zoom-in-95 duration-200">
+        <FormHeader
+          title="Member Sign In"
+          subtitle="Welcome back! Sign in to access your portal"
+        />
+        <SignInForm />
       </div>
     </AuthLayout>
   );

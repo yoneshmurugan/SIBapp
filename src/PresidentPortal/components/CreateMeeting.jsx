@@ -46,8 +46,8 @@ export default function ModalViewer() {
     if (!date) newErrors.date = "Date is required.";
     if (!time) newErrors.time = "Time is required.";
     if (!duration) newErrors.duration = "Duration is required.";
-    if ((meetingType === "Weekly" || meetingType === "Monthly") && !location.trim())
-      newErrors.location = "Location is required for selected meeting type.";
+    if (!location.trim())
+      newErrors.location = "Location is required.";
     return newErrors;
   };
 
@@ -270,25 +270,23 @@ export default function ModalViewer() {
               </div>
             </div>
 
-            {(meetingType === "Weekly" || meetingType === "Monthly") && (
-              <div>
-                <label htmlFor="location" className="block font-semibold text-gray-800 dark:text-gray-100 mb-2">
-                  <MapPin className="inline w-4 h-4 mr-2" />
-                  Location <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="location"
-                  type="text"
-                  placeholder="Enter meeting location"
-                  className={`w-full rounded-lg border-2 px-4 py-3 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 ${errors.location ? "border-red-500 dark:border-red-400 focus:ring-red-300" : "border-amber-200 dark:border-gray-700 focus:ring-amber-300"
-                    } focus:outline-none focus:ring-2 transition`}
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  aria-invalid={errors.location ? "true" : "false"}
-                />
-                {errors.location && <p className="mt-2 text-red-600 dark:text-red-400 text-sm font-medium">{errors.location}</p>}
-              </div>
-            )}
+            <div>
+              <label htmlFor="location" className="block font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                <MapPin className="inline w-4 h-4 mr-2" />
+                Location <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="location"
+                type="text"
+                placeholder="Enter meeting location"
+                className={`w-full rounded-lg border-2 px-4 py-3 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 ${errors.location ? "border-red-500 dark:border-red-400 focus:ring-red-300" : "border-amber-200 dark:border-gray-700 focus:ring-amber-300"
+                  } focus:outline-none focus:ring-2 transition`}
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                aria-invalid={errors.location ? "true" : "false"}
+              />
+              {errors.location && <p className="mt-2 text-red-600 dark:text-red-400 text-sm font-medium">{errors.location}</p>}
+            </div>
 
             <div>
               <label className="block font-semibold text-gray-800 dark:text-gray-100 mb-2">

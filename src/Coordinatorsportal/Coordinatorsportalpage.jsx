@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Image, ClipboardCheck, BarChart2, ChevronRight, Users, Activity, Clock, ShieldCheck, FileText } from "lucide-react";
+import { Image, ClipboardCheck, BarChart2, ChevronRight, Clock, ShieldCheck, FileText } from "lucide-react";
 import Header from "../MainPage/Header";
 import MemberActivityReport from "./components/MemberActivityReport";
 import AttendanceOverview from './components/AttendanceReport';
@@ -36,31 +36,6 @@ function Coordinatorsportal() {
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">Manage operations and monitor chapter activity.</p>
         </div>
 
-        {/* Dashboard Statistics */}
-        <div className="grid grid-cols-2 gap-3 mb-8">
-            <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col">
-                <div className="flex items-center gap-2 mb-2">
-                    <div className="p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-                        <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Network</span>
-                </div>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">Active</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">Chapter Members</p>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col">
-                <div className="flex items-center gap-2 mb-2">
-                    <div className="p-1.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-md">
-                        <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Status</span>
-                </div>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">Online</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">System Operations</p>
-            </div>
-        </div>
-
         <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-3 uppercase tracking-wider">Primary Actions</h2>
 
         {/* Action Buttons Container */}
@@ -69,7 +44,7 @@ function Coordinatorsportal() {
             {/* Live Check-in Card */}
             <button
                 onClick={() => setShowActivityReport(true)}
-                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex items-center justify-between transition-all active:scale-[0.98] active:bg-gray-50 dark:active:bg-gray-800 shadow-sm hover:shadow-md"
+                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex items-center justify-between transition-all active:scale-[0.98] active:bg-gray-50 dark:active:bg-gray-800 shadow-sm hover:shadow-md cursor-pointer"
             >
                 <div className="flex items-center gap-4 text-left">
                     <div className="w-12 h-12 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center">
@@ -86,7 +61,7 @@ function Coordinatorsportal() {
             {/* Attendance Overview Card */}
             <button
                 onClick={() => setShowAttendanceOverview(true)}
-                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex items-center justify-between transition-all active:scale-[0.98] active:bg-gray-50 dark:active:bg-gray-800 shadow-sm hover:shadow-md"
+                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex items-center justify-between transition-all active:scale-[0.98] active:bg-gray-50 dark:active:bg-gray-800 shadow-sm hover:shadow-md cursor-pointer"
             >
                 <div className="flex items-center gap-4 text-left">
                     <div className="w-12 h-12 rounded-lg bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center">
@@ -103,7 +78,7 @@ function Coordinatorsportal() {
             {/* Event Gallery Card */}
             <button
                 onClick={() => setShowGallery(true)}
-                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex items-center justify-between transition-all active:scale-[0.98] active:bg-gray-50 dark:active:bg-gray-800 shadow-sm hover:shadow-md"
+                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex items-center justify-between transition-all active:scale-[0.98] active:bg-gray-50 dark:active:bg-gray-800 shadow-sm hover:shadow-md cursor-pointer"
             >
                 <div className="flex items-center gap-4 text-left">
                     <div className="w-12 h-12 rounded-lg bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center">
