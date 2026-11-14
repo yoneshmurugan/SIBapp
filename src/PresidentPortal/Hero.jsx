@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import SIBbutton from './components/SIBbutton';
 import CreateMeeting from './components/CreateMeeting';
 import EventCard from './components/EventCard';
@@ -17,6 +17,49 @@ function Hero() {
       credentials: "include",
     }
   );
+
+  const sortedMeetings = useMemo(() => {
+    if (!meetings || !Array.isArray(meetings)) return [];
+    const upcoming = [];
+    const others = [];
+
+    const now = Date.now();
+    meetings.forEach((m) => {
+      let isPast = m.meeting_status === 'completed' || m.meeting_status === 'cancelled';
+      if (!isPast && m.meeting_date) {
+        try {
+          const d = new Date(m.meeting_date);
+          let hours = 7;
+          let minutes = 0;
+          if (m.meeting_time) {
+            const match = String(m.meeting_time).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+            if (match) {
+              hours = parseInt(match[1], 10);
+              minutes = parseInt(match[2], 10);
+              if (match[3]?.toUpperCase() === 'PM' && hours < 12) hours += 12;
+              if (match[3]?.toUpperCase() === 'AM' && hours === 12) hours = 0;
+            }
+          }
+          const istOffsetMs = 5.5 * 60 * 60 * 1000;
+          const endUtcMs = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), hours, minutes) - istOffsetMs + ((Number(m.duration) || 180) * 60 * 1000);
+          if (now >= endUtcMs) isPast = true;
+        } catch (e) {
+          // ignore parsing error
+        }
+      }
+
+      if (!isPast && m.meeting_status !== 'cancelled') {
+        upcoming.push(m);
+      } else {
+        others.push(m);
+      }
+    });
+
+    upcoming.sort((a, b) => new Date(a.meeting_date) - new Date(b.meeting_date));
+    others.sort((a, b) => new Date(b.meeting_date) - new Date(a.meeting_date));
+
+    return [...upcoming, ...others];
+  }, [meetings]);
 
   function reminderHeader(meeting) {
     return `⏰ Meeting Reminder: ${meeting.title}`;
@@ -102,9 +145,9 @@ function Hero() {
                 Error loading meetings: {error.message || error.toString()}
               </p>
             )}
-            {!loading && !error && meetings && meetings.length > 0 ? (
+            {!loading && !error && sortedMeetings && sortedMeetings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {meetings.slice(0,3).map((event, index) => (
+                {sortedMeetings.slice(0,3).map((event, index) => (
                   <EventCard
                     id={event._id || ""}
                     title={event.title}
@@ -112,6 +155,7 @@ function Hero() {
                     time={event.meeting_time}
                     location={event.location}
                     status={event.meeting_status}
+                    duration={event.duration}
                     key={event._id || index}
                   />
                 ))}
@@ -132,7 +176,7 @@ function Hero() {
             onClick={() => setIsOpen(true)}
           />
           <MeetingsModal
-            meetings={meetings}
+            meetings={sortedMeetings}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
           />

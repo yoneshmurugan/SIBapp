@@ -206,3 +206,36 @@ Tracks changes across the 3 production workspaces:
    - Configured `robots.txt` allowing public indexable pages and media while disallowing private authenticated member portals and admin routes.
 
 ---
+
+
+# Session 2: Meetings System Architecture, Lifecycle & Optimization
+
+### #1 [2026-11-14] - Automated Meeting Lifecycle & Status Synchronization
+- **Type:** Feature / Automation / Backend / Frontend / Lifecycle
+- **Origin:** Web & Backend
+- **Files:** `SIB_backend/src/utils/meetingStatusHelper.mjs`, `SIB_backend/src/pages/meetings/meetingRoute.mjs`, `SIB_backend/src/pages/public/public.mjs`, `SIB_backend/src/utils/cronJobs.mjs`, `src/PresidentPortal/Hero.jsx`, `src/PresidentPortal/components/EventCard.jsx`, `src/PresidentPortal/components/MeetingModal.jsx`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced & Deployed (`12c62ca`)
+- [x] **Web (`SIBapp:main`):** Synced
+- [ ] **Android (`SIB_app_android`):** Pending sync of UI priority sorting
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+
+#### Summary:
+1. **Automated Lifecycle Evaluator (`meetingStatusHelper.mjs`):**
+   - Created `autoUpdateMeetingStatuses` utility that calculates exact IST start and finish timestamps (`meeting_date` + `meeting_time` + `duration` minutes).
+   - Dynamically transitions active meetings from `upcoming` -> `inprogress` during the meeting, and automatically transitions to `completed` once the meeting duration has elapsed.
+2. **On-Demand Real-Time Database Sync:**
+   - Wired `autoUpdateMeetingStatuses` into `/meeting/getmeetings`, `/meeting/getfalsemeetings`, `/meeting/getlatestmeeting`, and `/public/getmeetings`.
+   - The instant any user or president accesses meetings, all past meetings are immediately evaluated and updated in MongoDB in real time (< 5ms).
+3. **Scheduled Background Cron Job:**
+   - Registered a 15-minute interval recurring cron job in `cronJobs.mjs` running in `Asia/Kolkata` timezone to proactively update meeting statuses in the database.
+4. **Scope Bug Fix in Latest Meeting Reminder:**
+   - Fixed missing `chapter_id: req.chapter._id` filter in `/meeting/getlatestmeeting` to prevent cross-chapter reminder bleed.
+5. **President Portal Dashboard Sorting & Prioritization:**
+   - Updated `Hero.jsx` to dynamically prioritize **Upcoming Meetings first** (sorted ascending by closest upcoming date), followed by recently completed meetings.
+   - Prevents stale meetings from September/October from filling up the 3 dashboard preview cards when an upcoming meeting exists.
+6. **Client-side Effective Status Fallback:**
+   - Implemented real-time dynamic status evaluation in `EventCard.jsx` and `MeetingModal.jsx` so expired meetings immediately render as `completed` with proper grey styling even before API response transitions finish.
+
+---

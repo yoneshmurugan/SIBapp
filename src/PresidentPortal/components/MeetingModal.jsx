@@ -104,6 +104,38 @@ export function MeetingsModal({ meetings = [], isOpen, onClose }) {
     return date.toISOString().split("T")[0];
   };
 
+  const getEffectiveMeetingStatus = (meeting) => {
+    if (!meeting) return "upcoming";
+    const status = meeting.meeting_status || "upcoming";
+    if (status === "completed" || status === "cancelled") return status;
+    try {
+      if (!meeting.meeting_date) return status;
+      const d = new Date(meeting.meeting_date);
+      let hours = 7;
+      let minutes = 0;
+      if (meeting.meeting_time) {
+        const match = String(meeting.meeting_time).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+        if (match) {
+          hours = parseInt(match[1], 10);
+          minutes = parseInt(match[2], 10);
+          if (match[3]?.toUpperCase() === "PM" && hours < 12) hours += 12;
+          if (match[3]?.toUpperCase() === "AM" && hours === 12) hours = 0;
+        }
+      }
+      const istOffsetMs = 5.5 * 60 * 60 * 1000;
+      const startUtcMs = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), hours, minutes) - istOffsetMs;
+      const durationMins = Number(meeting.duration) > 0 ? Number(meeting.duration) : 180;
+      const endUtcMs = startUtcMs + durationMins * 60 * 1000;
+      const nowMs = Date.now();
+
+      if (nowMs >= endUtcMs) return "completed";
+      if (nowMs >= startUtcMs) return "inprogress";
+      return status;
+    } catch (e) {
+      return status;
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -166,19 +198,24 @@ export function MeetingsModal({ meetings = [], isOpen, onClose }) {
                               <span className="text-xs font-medium px-2.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 capitalize">
                                 {meeting.meeting_type}
                               </span>
-                              <span
-                                className={`text-xs font-medium px-2.5 py-0.5 rounded capitalize ${
-                                  meeting.meeting_status === "completed"
-                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                    : meeting.meeting_status === "cancelled"
-                                    ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                                    : meeting.meeting_status === "upcoming"
-                                    ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                                    : "bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-300"
-                                }`}
-                              >
-                                {meeting.meeting_status}
-                              </span>
+                              {(() => {
+                                const currentStatus = getEffectiveMeetingStatus(meeting);
+                                return (
+                                  <span
+                                    className={`text-xs font-medium px-2.5 py-0.5 rounded capitalize ${
+                                      currentStatus === "completed"
+                                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                        : currentStatus === "cancelled"
+                                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                                        : currentStatus === "inprogress"
+                                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                                    }`}
+                                  >
+                                    {currentStatus}
+                                  </span>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -430,19 +467,24 @@ export function MeetingsModal({ meetings = [], isOpen, onClose }) {
                       <option value="inprogress">In Progress</option>
                     </select>
                   ) : (
-                    <span
-                      className={`inline-block rounded px-2.5 py-1 text-xs font-medium capitalize ${
-                        selectedMeeting.meeting_status === "completed"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                          : selectedMeeting.meeting_status === "cancelled"
-                          ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                          : selectedMeeting.meeting_status === "inprogress"
-                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                          : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                      }`}
-                    >
-                      {selectedMeeting.meeting_status}
-                    </span>
+                    (() => {
+                      const detailStatus = getEffectiveMeetingStatus(selectedMeeting);
+                      return (
+                        <span
+                          className={`inline-block rounded px-2.5 py-1 text-xs font-medium capitalize ${
+                            detailStatus === "completed"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                              : detailStatus === "cancelled"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                              : detailStatus === "inprogress"
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                              : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                          }`}
+                        >
+                          {detailStatus}
+                        </span>
+                      );
+                    })()
                   )}
                 </div>
               </div>
