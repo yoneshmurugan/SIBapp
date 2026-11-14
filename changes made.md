@@ -11,13 +11,13 @@ Tracks changes across the 3 production workspaces:
 
 | # | Date | Category / Module | Web (`main`) | iOS (`feat/ios-build`) | Android (`main`) |
 |---|---|---|:---:|:---:|:---:|
-| #1 | 2026-11-13 | President Portal | [x] Synced | [ ] Pending | [x] Synced |
-| #2 | 2026-11-13 | Members Analytics | [x] Synced | [ ] Pending | [x] Synced |
-| #3 | 2026-11-13 | Coordinators Portal | [x] Synced | [ ] Pending | [x] Synced |
-| #4 | 2026-11-13 | Authentication (Sign In & Password Recovery) | [x] Synced | [ ] Pending | [x] Synced |
-| #5 | 2026-11-13 | Wall of Wishes | [x] Synced | [ ] Pending | [x] Synced |
-| #6 | 2026-11-13 | Settings (Update Password) | [x] Synced | [ ] Pending | [x] Synced |
-| #7 | 2026-11-13 | Settings (Sessions, Badge & Blood Donor) | [x] Synced | [ ] Pending | [x] Synced |
+| #1 | 2026-11-13 | President Portal | [x] Synced | [x] Synced | [x] Synced |
+| #2 | 2026-11-13 | Members Analytics | [x] Synced | [x] Synced | [x] Synced |
+| #3 | 2026-11-13 | Coordinators Portal | [x] Synced | [x] Synced | [x] Synced |
+| #4 | 2026-11-13 | Authentication (Sign In & Password Recovery) | [x] Synced | [x] Synced | [x] Synced |
+| #5 | 2026-11-13 | Wall of Wishes | [x] Synced | [x] Synced | [x] Synced |
+| #6 | 2026-11-13 | Settings (Update Password) | [x] Synced | [x] Synced | [x] Synced |
+| #7 | 2026-11-13 | Settings (Sessions, Badge & Blood Donor) | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -52,7 +52,7 @@ Tracks changes across the 3 production workspaces:
 
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
@@ -72,7 +72,7 @@ Tracks changes across the 3 production workspaces:
 
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
@@ -87,7 +87,7 @@ Tracks changes across the 3 production workspaces:
 
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
@@ -103,7 +103,7 @@ Tracks changes across the 3 production workspaces:
 
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
@@ -122,7 +122,7 @@ Tracks changes across the 3 production workspaces:
 
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
@@ -138,7 +138,7 @@ Tracks changes across the 3 production workspaces:
 
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
@@ -161,7 +161,7 @@ Tracks changes across the 3 production workspaces:
 
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
