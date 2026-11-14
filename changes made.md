@@ -26,6 +26,7 @@ Tracks changes across the 3 production workspaces:
 | S2-#4 | 2026-11-14 | Live Check-in Attendance: ID-Based Resolution & Upsert | [x] Synced | [x] Synced | [x] Synced |
 | S2-#5 | 2026-11-14 | Attendance Overview: Dual Date Visualization | [x] Synced | [x] Synced | [x] Synced |
 | S2-#6 | 2026-11-14 | Mobile Responsive Alignment, Light Mode & Header Polish | [x] Synced | [x] Synced | [x] Synced |
+| S2-#7 | 2026-11-14 | Repository Documentation: High-Impact README Overhaul | [x] Synced | N/A | [x] Synced |
 
 ---
 
@@ -376,3 +377,28 @@ Tracks changes across the 3 production workspaces:
 3. **Android Header Polish (`Header.jsx`):**
    - Removed the intrusive `<Zoom>` wrapper on the 42px header logo and added reliable automatic `/logo.webp` image fallback.
    - Optimized header layout with `px-3 sm:px-4 min-h-[64px]` and flexible gap spacing so the avatar and chapter initials never get squished against screen edges.
+
+### #7 [2026-11-14] - Repository Documentation: High-Impact README Overhaul
+- **Type:** Documentation / Branding / Multi-Platform Sync
+- **Origin:** Web & Android
+- **Files:** `README.md` (in `SIBapp`), `README.md` (in `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced (`4dd36bb`)
+- [x] **Android (`SIB_app_android`):** Synced (`5338275`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** N/A (Root documentation on main)
+
+#### Summary:
+1. **Clean Visual Branding & Hero Header:**
+   - Centered the official SIB gold crest logo (`public/logo.webp`) with technology badges (React 18, Vite 7, Tailwind CSS, Capacitor 8, Vercel, MIT License).
+2. **Interactive Platform & Store Badges:**
+   - Added direct download and portal badges with official icons:
+     - 🤖 **Google Play Store:** `com.senguntharinbusiness` ([Play Store Link](https://play.google.com/store/apps/details?id=com.senguntharinbusiness))
+     - 🍏 **Apple App Store:** `com.senguntharinbusiness.app` ([App Store Link](https://apps.apple.com/app/id6761088485))
+     - 🌐 **Official Web Platform:** [senguntharinbusiness.com](https://senguntharinbusiness.com) / [senguntharinbusiness.in](https://senguntharinbusiness.in)
+3. **Core Feature Modules:**
+   - Structured breakdown covering Multi-Tier Role Governance (Admin, President, Coordinator, Member), Digital Business Slips (M2M, Referrals, TYFTB), Meeting Lifecycle & Attendance, Gamification (Leaderboard & Wall of Wishes), and Biometric Security.
+4. **Architecture & Engineering Workflows:**
+   - Clean, modern GitHub-rendered Mermaid system architecture flowchart.
+   - Dedicated Android build commands (`./gradlew bundleRelease`) in `SIB_app_android`.
+   - Up-to-date maintainer attribution for Yonesh Murugan and official contact channel.
