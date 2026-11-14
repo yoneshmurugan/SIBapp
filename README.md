@@ -1,337 +1,263 @@
-# SIBapp
+# Sengunthar In Business (SIB)
 
-## Overview
+<div align="center">
 
-SIBapp is a role-based organizational management platform designed to digitally manage members, chapters, regions, events, meetings, and activity analytics for a structured association.  
-It centralizes governance workflows, improves transparency, and provides data-driven insights for different leadership roles.
+  <img src="public/logo.webp" alt="Sengunthar In Business (SIB) Logo" width="130" height="130" />
 
-The application supports multi-level access control (Members, Coordinators, Presidents, Admins) and combines dashboards, analytics, and workflow automation in a single system.
+  ### Official Digital Platform for Business Networking, Chapter Governance & Member Growth
 
----
+  [![React](https://img.shields.io/badge/React_18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+  [![Vite](https://img.shields.io/badge/Vite_7-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![Capacitor](https://img.shields.io/badge/Capacitor_8-119EFF?style=for-the-badge&logo=capacitor&logoColor=white)](https://capacitorjs.com/)
+  [![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://senguntharinbusiness.com)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg?style=for-the-badge)](LICENSE)
 
-## Tech Stack
+  <br />
 
-### Frontend
+  ### 📲 Download & Live Access Channels
 
-- **React (Vite)**
-- **React Router DOM**
-- **Tailwind CSS**
-- **Recharts** (analytics & graphs)
-- **Firebase SDK** (authentication & storage initialization)
-- **GSAP** (animations)
+  <p align="center">
+    <a href="https://senguntharinbusiness.com" target="_blank" rel="noopener noreferrer">
+      <img src="https://img.shields.io/badge/Official_Website-senguntharinbusiness.com-d97706?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Official Website" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://play.google.com/store/apps/details?id=com.senguntharinbusiness" target="_blank" rel="noopener noreferrer">
+      <img src="https://img.shields.io/badge/Google_Play-com.senguntharinbusiness-047857?style=for-the-badge&logo=googleplay&logoColor=white" alt="Google Play Store" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://apps.apple.com/app/id6761088485" target="_blank" rel="noopener noreferrer">
+      <img src="https://img.shields.io/badge/App_Store-iOS_Application-1d4ed8?style=for-the-badge&logo=apple&logoColor=white" alt="Apple App Store" />
+    </a>
+  </p>
 
-### Tooling & Deployment
-
-- **Vite**
-- **ESLint**
-- **Vercel** (deployment)
-
-### Backend (External)
-
-- **Custom REST API**
-- **Session-based authentication** (cookies)
-- **Role-based authorization**
-
-> **Note:** Backend and database are maintained as a separate service and are not part of this repository.
-
----
-
-## Key Features
-
-- Role-based dashboards (Member, Coordinator, President, Admin)
-- Secure session-based authentication
-- Chapter, region, and vertical management
-- Member directory with advanced filtering
-- Event and meeting management
-- Activity tracking (M2M, Referrals, TYFTB)
-- Analytics and reporting dashboards
-- Notification and alert system
-- Public and private portals
-- Media-rich galleries and assets
+</div>
 
 ---
 
-## Project Architecture (High Level)
+## 📌 Overview
 
-```
-Browser
-    ↓
-React SPA (SIBapp)
-    ↓
-Backend REST API
-    ↓
-Database & Auth System
-```
+**Sengunthar In Business (SIB)** is an enterprise-grade organizational management and business networking ecosystem designed for structured community chapters across Tamil Nadu and globally. SIB digitizes chapter administration, referral exchanges, meeting management, attendance tracking, and performance analytics into a single cohesive, multi-platform platform.
 
-- **Frontend** handles UI, routing, and API consumption
-- **Backend** owns authentication, authorization, and business logic
-- **Database** stores members, activities, events, analytics, and media metadata
-- The frontend never directly accesses the database.
+Built with modern web and native mobile technologies, SIB empowers members to generate mutual business, track verified transactions, and celebrate milestones while giving leadership full visibility through real-time governance portals.
 
 ---
 
-## Architecture
+## 🌐 Platform Availability
 
-The following diagram represents the high-level system architecture, clearly separating user roles, frontend responsibilities, backend services, and infrastructure dependencies. It is written using Mermaid and can be rendered directly by GitHub.
+| Platform | Channel | Link / Identifier | Status |
+| :---: | :---: | :---: | :---: |
+| 🌐 **Web Portal** | Official Web Platform | [senguntharinbusiness.com](https://senguntharinbusiness.com) • [senguntharinbusiness.in](https://senguntharinbusiness.in) | **Live & Active** |
+| 🤖 **Android App** | Google Play Store | [Install via Google Play](https://play.google.com/store/apps/details?id=com.senguntharinbusiness) (`com.senguntharinbusiness`) | **Published** |
+| 🍏 **iOS App** | Apple App Store | [Download on App Store](https://apps.apple.com/app/id6761088485) (`com.senguntharinbusiness.app`) | **Available** |
+
+---
+
+## ✨ Key Features & Capabilities
+
+### 👔 1. Multi-Tier Role Governance
+- **Regional Admin Portal (`/admin`):** Chapter creation, regional statistics, coordinator role assignments, and system-wide broadcast alerts.
+- **President Portal (`/presidentportal`):** Chapter roster governance, core leadership assignments (President, VP, Secretary, Treasurer), meeting creation, and automated WhatsApp/SMS meeting reminder dispatches.
+- **Coordinator Portal (`/coordinatorsportal`):** Live check-in meeting attendance marking, slip verification (M2M, Referrals, TYFTB), low attendance alerts, and activity auditing.
+- **Member Dashboard (`/dashboard`):** Personal performance metrics, quick activity submission, upcoming schedule preview, and chapter leadership overview.
+
+### 🤝 2. High-Velocity Business Slips
+- **Member-to-Member (M2M) Slips:** 1-to-1 business interaction recording with client-side image compression, photo proof uploads, and automated chapter auto-filling.
+- **Referral Slips:** Intra-chapter and cross-chapter business lead generation with status updates (New, Contacted, In Progress, Closed).
+- **Thank You For The Business (TYFTB):** Real-time closed revenue tracking and appreciation slips with instant value aggregations.
+
+### 📅 3. Intelligent Meeting Lifecycle & Attendance
+- **Automated Lifecycle Evaluator:** Dynamic transition of meeting status (`upcoming` ➔ `inprogress` ➔ `completed`) based on exact Indian Standard Time (IST) schedules.
+- **Dual-Date Meeting History:** Clean visual badges displaying both scheduled **Meeting Date** (amber) and attendance **Marked On** date (purple) with instant filtering.
+- **Attendance Bulk Write:** Atomic, idempotent database resolution keyed on unique member IDs with duplicate collision handling.
+
+### 🏆 4. Gamification & Community Engagement
+- **Dynamic Leaderboards (`/leaderboard`):** Monthly and all-time rankings calculated from referrals given, business generated, 1-to-1 meetings, and visitors hosted.
+- **Wall of Wishes (`/wall-of-wishes`):** Live birthday and wedding anniversary countdowns with celebratory confetti animations and direct member call/wishing actions.
+- **Performance Badges:** Automatic awarding of badges for Top M2M, Top Referral Contributor, Top TYB Earner, and 100% Attendance.
+
+### 🔒 5. Security & Mobile-First Experience
+- **Biometric Authentication:** Face ID, Touch ID, and Fingerprint login on native iOS and Android builds.
+- **Session History & Device Detection:** Transparent overview of active logins with OS, browser, IP address, and remote logout capabilities.
+- **Role-Scoped Route Guards:** Hardened client-side and server-side authorization ensuring absolute isolation of administrative actions.
+
+---
+
+## 🏛️ System Architecture
 
 ```mermaid
 graph TD
-    %% Styles
-    classDef frontend fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#01579b;
-    classDef backend fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#2e7d32;
-    classDef user fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:black;
-    classDef ext fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c;
-    classDef public fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#c62828;
+    %% Custom Styling
+    classDef client fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef gateway fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef service fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#15803d;
+    classDef storage fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#5b21b6;
+    classDef actor fill:#f3f4f6,stroke:#4b5563,stroke-width:2px,color:#1f2937;
 
-    %% =====================
-    %% User Actors
-    %% =====================
-    subgraph "User Actors"
-        A["Admin (Region Owner)"]:::user
-        P["President"]:::user
-        C["Coordinator"]:::user
-        M["Member"]:::user
-        V["Public Visitor"]:::user
+    subgraph "Clients & Interfaces"
+        Web["🌐 Web Client (React + Vite)"]:::client
+        iOS["🍏 iOS Native App (Capacitor)"]:::client
+        Android["🤖 Android Native App (Capacitor)"]:::client
     end
 
-    %% =====================
-    %% Frontend Layer
-    %% =====================
-    subgraph "Frontend Layer (React + Vite + Tailwind)"
-
-        subgraph "Public Zone"
-            Hero["Hero Page"]:::public
-            PubGal["Public Gallery (Approved M2M Proofs)"]:::public
-        end
-
-        subgraph "Authentication"
-            Login["Login UI"]:::frontend
-        end
-
-        subgraph "Protected Dashboards"
-            AD["Admin Dashboard"]:::frontend
-            PD["President Dashboard"]:::frontend
-            CD["Coordinator Dashboard"]:::frontend
-            MD["Member Dashboard"]:::frontend
-
-            Viz["Recharts – Analytics"]:::frontend
-            Anim["GSAP – Animations"]:::frontend
-        end
+    subgraph "API & Security Layer"
+        GW["🚀 Express REST API Gateway"]:::gateway
+        Auth["🔑 Session & Token Auth Middleware"]:::gateway
+        Cron["⏰ Scheduled Meeting & Sync Cron Jobs"]:::gateway
     end
 
-    %% =====================
-    %% Backend Layer
-    %% =====================
-    subgraph "Backend Layer (Custom REST API)"
-        API["API Gateway / Controllers"]:::backend
-        AuthMw["Session & Role-based Auth Middleware"]:::backend
-
-        subgraph "Business Logic Services"
-            RegSvc["Region & Chapter Service"]:::backend
-            MemSvc["Membership Service"]:::backend
-            SlipSvc["Slip / Referral Service"]:::backend
-            NotifSvc["Notification Service (Email + In-App)"]:::backend
-        end
+    subgraph "Core Business Logic Services"
+        ChapterSvc["🏛️ Chapter & Region Service"]:::service
+        MeetingSvc["📅 Meeting Lifecycle & Attendance Engine"]:::service
+        SlipSvc["🤝 Slip Service (M2M / Referral / TYFTB)"]:::service
+        NotifSvc["🔔 Push Notification & Alert Service"]:::service
+        MemberSvc["👤 Membership & Profile Service"]:::service
     end
 
-    %% =====================
-    %% Data & Infrastructure
-    %% =====================
-    subgraph "Data & Infrastructure"
-        FBAuth["Firebase Authentication"]:::ext
-        FBStore["Firebase Storage"]:::ext
-        DB["Primary Database"]:::ext
+    subgraph "Persistence & Cloud Infrastructure"
+        DB[("🍃 MongoDB Database")]:::storage
+        FCM["🔥 Firebase Cloud Messaging"]:::storage
+        S3["📦 Cloud Storage (Media & Proofs)"]:::storage
     end
 
-    %% =====================
-    %% Authentication Flow
-    %% =====================
-    Login -->|Authenticate| FBAuth
-    FBAuth -->|JWT / ID Token| Login
-    Login -->|Send Token| API
-    API -->|Set Session Cookie| Login
+    %% Routing
+    Web --> GW
+    iOS --> GW
+    Android --> GW
 
-    %% =====================
-    %% User Navigation
-    %% =====================
-    V --> Hero
-    V --> PubGal
-    A --> AD
-    P --> PD
-    C --> CD
-    M --> MD
+    GW --> Auth
+    Auth --> ChapterSvc
+    Auth --> MeetingSvc
+    Auth --> SlipSvc
+    Auth --> NotifSvc
+    Auth --> MemberSvc
 
-    %% =====================
-    %% Permission Hierarchy (Read-only Views)
-    %% =====================
-    PD -.->|Read-only Supervision| CD
-    AD -.->|Global Oversight| PD
+    Cron --> MeetingSvc
 
-    %% =====================
-    %% Dashboard Actions
-    %% =====================
-    AD -->|Create Regions / Chapters| RegSvc
-    AD -->|Broadcast Notifications| NotifSvc
-
-    PD -->|Create Members / Events| MemSvc
-    PD -->|Revoke Roles| MemSvc
-
-    CD -->|Mark Attendance| MemSvc
-    CD -->|Approve / Reject Slips| SlipSvc
-    CD -->|Low Attendance Alerts| NotifSvc
-
-    MD -->|Submit TYB / Referral / M2M| SlipSvc
-    MD -->|Upload Proof| FBStore
-    FBStore -->|Proof URL| SlipSvc
-
-    %% =====================
-    %% Public Gallery Flow
-    %% =====================
-    SlipSvc -->|Fetch Approved M2M| PubGal
-    FBStore -->|Serve Images| PubGal
-
-    %% =====================
-    %% Backend Processing
-    %% =====================
-    API --> AuthMw
-    AuthMw --> RegSvc
-    AuthMw --> MemSvc
-    AuthMw --> SlipSvc
-    AuthMw --> NotifSvc
-
-    RegSvc --> DB
-    MemSvc --> DB
+    ChapterSvc --> DB
+    MeetingSvc --> DB
     SlipSvc --> DB
-    NotifSvc --> DB
-
-    %% =====================
-    %% Notifications
-    %% =====================
-    NotifSvc -->|Email| A
-    NotifSvc -->|Email| P
-    NotifSvc -->|Email| C
-    NotifSvc -->|Email| M
-    NotifSvc -->|In-App Notifications| DB
-
-    AD -.->|Fetch Notifications| NotifSvc
-    PD -.->|Fetch Notifications| NotifSvc
-    CD -.->|Fetch Notifications| NotifSvc
-    MD -.->|Fetch Notifications| NotifSvc
+    MemberSvc --> DB
+    SlipSvc --> S3
+    NotifSvc --> FCM
 ```
-![System Architecture Diagram 1](docs/architecture/system-architecture1.png)
-![System Architecture Diagram 2](docs/architecture/system-architecture2.png)
 
 ---
 
-## Getting Started
+## 💻 Tech Stack
 
-### Prerequisites
-
-- Node.js (v18 or higher recommended)
-- npm or yarn
-- Backend API running (required for full functionality)
-- Environment variables configured
-
-### Installation
-
-```bash
-git clone https://github.com/your-username/SIBapp.git
-cd SIBapp
-npm install
-```
-
-### Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-VITE_APIKEY="your-firebase-api-key"
-VITE_AUTHDOMAIN="your-firebase-auth-domain"
-VITE_PROJECTID="your-firebase-project-id"
-VITE_STORAGEBUCKET="your-firebase-storage-bucket"
-VITE_MESSAGINGSENDERID="your-firebase-messaging-sender-id"
-VITE_APPID="your-firebase-app-id"
-VITE_MEASUREMENTID="your-firebase-measurement-id"
-VITE_BACKEND_SERVER="https://api.senguntharinbusiness.in"
-```
-
-### Run Locally
-
-```bash
-npm run dev
-```
-
-The app will be available at:  
-[http://localhost:5173](http://localhost:5173)
+| Domain | Technologies & Libraries |
+| :--- | :--- |
+| **Frontend Framework** | [React 18](https://react.dev/), [Vite](https://vitejs.dev/) |
+| **Mobile Runtime** | [Capacitor 8](https://capacitorjs.com/) (iOS & Android) |
+| **Styling & Design System** | [Tailwind CSS](https://tailwindcss.com/), Lucide Icons |
+| **State & Data Fetching** | [TanStack React Query](https://tanstack.com/query/latest), Custom Persistent Cache Hooks |
+| **Data Visualization** | [Recharts](https://recharts.org/) |
+| **Animations & FX** | [GSAP](https://greensock.com/gsap/), `react-confetti-boom`, Canvas Confetti |
+| **Native Device Plugins** | `@capacitor-community/contacts`, `@capgo/capacitor-native-biometric`, `@capacitor/share`, `@capacitor-firebase/messaging` |
+| **Hosting & Cloud** | [Vercel](https://vercel.com/) (Web), Google Play Store (Android), Apple App Store (iOS) |
 
 ---
 
-## Folder Structure
+## 📂 Project Structure
 
 ```
 SIBapp/
-├─ public/              # Static assets and images
+├─ public/                        # Static assets, logos, and manifest
+│  ├─ logo.webp                   # SIB official crest logo
+│  ├─ hero.avif                   # Optimized homepage hero banner
+│  └─ manifest.webmanifest        # Progressive Web App metadata
 ├─ src/
-│  ├─ hooks/            # Auth, routing, and data hooks
-│  ├─ utils/            # Utility and helper functions
-│  ├─ Components/       # Reusable UI components
-│  ├─ Admin/            # Admin portal
-│  ├─ Members/          # Member directory & analytics
-│  ├─ ChapterPage/      # Chapter-level views
-│  ├─ Coordinatorsportal/
-│  ├─ PresidentPortal/
-│  ├─ MyActivity/       # Activity tracking
-│  ├─ Meetings/         # Meetings management
-│  ├─ ProfilePage/
-│  ├─ Settings/
-│  ├─ SigninPage/
-│  ├─ NotificationPanel/
-│  └─ src1/             # Legacy public/marketing site
-├─ vite.config.js
-├─ package.json
-└─ README.md
+│  ├─ Admin/                      # Regional Administrator portal & stats
+│  ├─ ButtonPages/                # Digital Slips: M2MSlip, ReferalSlip, TYFTB
+│  ├─ ChapterPage/                # Chapter-level member lists and overview
+│  ├─ Components/                 # Reusable UI widgets & SessionLoadingScreen
+│  ├─ Coordinatorsportal/         # Attendance reports & member activity audits
+│  ├─ hooks/                      # Authentication, session, and role route guards
+│  ├─ MainPage/                   # Core Member Dashboard, Header, and Sidebar
+│  ├─ Meetings/                   # Meetings listing and filtering
+│  ├─ Members/                    # Member directory and cross-chapter filters
+│  ├─ MembersAnalytics/           # Graphical analytics and performance breakdowns
+│  ├─ MyActivity/                 # Personal slip submissions & activity stats
+│  ├─ NotificationPanel/          # Notification inbox & system alert viewer
+│  ├─ PresidentPortal/            # Meeting creation, roster & leadership controls
+│  ├─ ProfilePage/                # Member profile, business bio & QR badges
+│  ├─ Settings/                   # Password update, session history & security
+│  ├─ SigninPage/                 # Phone / username login & biometric gateway
+│  ├─ WallOfWishes/               # Celebratory wishes and birthday countdowns
+│  ├─ main.jsx                    # Application entry point & router setup
+│  └─ index.css                   # Global Tailwind CSS and scrollbar styling
+├─ changes made.md                # Multi-platform synchronization registry
+├─ vite.config.js                 # Vite bundler configuration
+└─ package.json                   # Project scripts and dependencies
 ```
 
 ---
 
-## Contribution Guide
+## 🚀 Getting Started
 
-We welcome contributions from the community.
+### Prerequisites
+- **Node.js:** v18.0.0 or higher
+- **npm:** v9.0.0 or higher
+- **Backend API:** Running instance of `SIB_backend` (defaults to `https://api.senguntharinbusiness.in`)
 
-Please read the contribution guidelines before submitting a pull request:
+### Installation & Setup
 
-➡️ [CONTRIBUTING.md](CONTRIBUTING.md)
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yoneshmurugan/SIBapp.git
+   cd SIBapp
+   ```
 
-**General guidelines:**
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-- Follow existing folder and naming conventions
-- Write clear commit messages
-- Test your changes before submitting
-- Open an issue before working on major changes
+3. **Configure Environment Variables:**
+   Create a `.env` file in the project root:
+   ```env
+   VITE_BACKEND_SERVER="https://api.senguntharinbusiness.in"
+   VITE_APIKEY="your-firebase-api-key"
+   VITE_AUTHDOMAIN="your-firebase-auth-domain"
+   VITE_PROJECTID="your-firebase-project-id"
+   VITE_STORAGEBUCKET="your-firebase-storage-bucket"
+   VITE_MESSAGINGSENDERID="your-firebase-messaging-sender-id"
+   VITE_APPID="your-firebase-app-id"
+   ```
 
-  Contributions are welcome for:
+4. **Launch the development server:**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-- Bug fixes
-- New features
-- Documentation improvements
-- Performance and security enhancements
-
+5. **Build for production:**
+   ```bash
+   npm run build
+   ```
 
 ---
 
-## Community & Contact
+## 🔄 Multi-Platform Synchronization
 
-- **Author:** Prem Kumar R  
-- **GitHub:** [https://github.com/prem-ramamoorthy](https://github.com/prem-ramamoorthy)
-- **email:** prem2005.developer@gmail.com  
-- **Project Discussions:** Use GitHub Issues and Pull Requests
+This repository operates in continuous alignment with its companion mobile workspaces:
+- **Web App (`main`):** Production web deployment hosted on Vercel.
+- **iOS App (`feat/ios-build`):** Native iOS project targeting App Store & TestFlight via Codemagic.
+- **Android App (`SIB_app_android`):** Native Android project targeting Google Play Store.
 
-For major changes, open an issue first to discuss your proposal.
+All features, bug fixes, and data schema migrations are logged and tracked in [changes made.md](changes%20made.md).
 
 ---
 
+## 👥 Authors & Maintainers
 
-## License
+- **Lead Developer & Maintainer:** [Yonesh Murugan](https://github.com/yoneshmurugan)
+- **Organization:** Sengunthar In Business (SIB)
+- **Official Inquiries & Support:** [members@senguntharinbusiness.in](mailto:members@senguntharinbusiness.in)
 
-This project is licensed under the MIT License.  
-See the [LICENSE](LICENSE) file for details.
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for complete details.
