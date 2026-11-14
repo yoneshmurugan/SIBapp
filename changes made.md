@@ -11,13 +11,13 @@ Tracks changes across the 3 production workspaces:
 
 | # | Date | Category / Module | Web (`main`) | iOS (`feat/ios-build`) | Android (`main`) |
 |---|---|---|:---:|:---:|:---:|
-| #1 | 2026-11-13 | President Portal | [x] Synced | [ ] Pending | [ ] Pending |
-| #2 | 2026-11-13 | Members Analytics | [x] Synced | [ ] Pending | [ ] Pending |
-| #3 | 2026-11-13 | Coordinators Portal | [x] Synced | [ ] Pending | [ ] Pending |
-| #4 | 2026-11-13 | Authentication (Sign In & Password Recovery) | [x] Synced | [ ] Pending | [ ] Pending |
-| #5 | 2026-11-13 | Wall of Wishes | [x] Synced | [ ] Pending | [ ] Pending |
-| #6 | 2026-11-13 | Settings (Update Password) | [x] Synced | [ ] Pending | [ ] Pending |
-| #7 | 2026-11-13 | Settings (Sessions, Badge & Blood Donor) | [x] Synced | [ ] Pending | [ ] Pending |
+| #1 | 2026-11-13 | President Portal | [x] Synced | [ ] Pending | [x] Synced |
+| #2 | 2026-11-13 | Members Analytics | [x] Synced | [ ] Pending | [x] Synced |
+| #3 | 2026-11-13 | Coordinators Portal | [x] Synced | [ ] Pending | [x] Synced |
+| #4 | 2026-11-13 | Authentication (Sign In & Password Recovery) | [x] Synced | [ ] Pending | [x] Synced |
+| #5 | 2026-11-13 | Wall of Wishes | [x] Synced | [ ] Pending | [x] Synced |
+| #6 | 2026-11-13 | Settings (Update Password) | [x] Synced | [ ] Pending | [x] Synced |
+| #7 | 2026-11-13 | Settings (Sessions, Badge & Blood Donor) | [x] Synced | [ ] Pending | [x] Synced |
 
 ---
 
@@ -53,7 +53,7 @@ Tracks changes across the 3 production workspaces:
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
 - [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
-- [ ] **Android (`SIB_app_android`):** Pending
+- [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
 1. Fixed coordinator removal not calling API after page refresh due to role capitalization mismatch (`"Coordinator"` vs `"coordinator"`).
@@ -73,7 +73,7 @@ Tracks changes across the 3 production workspaces:
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
 - [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
-- [ ] **Android (`SIB_app_android`):** Pending
+- [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
 1. Split heavy M2M, TYFTB, and Referrals overview tables into lazy-loaded dedicated views accessible via coordinator action buttons ("M to M Coordinator", "TYB Coordinator", "Referrals Coordinator") for much faster initial page loads.
@@ -88,7 +88,7 @@ Tracks changes across the 3 production workspaces:
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
 - [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
-- [ ] **Android (`SIB_app_android`):** Pending
+- [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
 1. Removed static "Network" (Active Chapter Members) and "Status" (Online System Operations) statistic cards from the Coordinator Dashboard.
@@ -104,7 +104,7 @@ Tracks changes across the 3 production workspaces:
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
 - [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
-- [ ] **Android (`SIB_app_android`):** Pending
+- [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
 1. Redesigned Member Sign In page into a polished professional portal card with SIB branding, official logo header, Eye password toggle icon, and amber accent buttons.
@@ -123,7 +123,7 @@ Tracks changes across the 3 production workspaces:
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
 - [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
-- [ ] **Android (`SIB_app_android`):** Pending
+- [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
 1. Added member celebration date (e.g. "14th Nov") with a calendar icon to WishCard alongside event type and relative status (Today / Tomorrow / In X days).
@@ -139,7 +139,7 @@ Tracks changes across the 3 production workspaces:
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
 - [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
-- [ ] **Android (`SIB_app_android`):** Pending
+- [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
 1. Redesigned `SecurityPanel.jsx` with full dark/gold theme cohesion, encrypted badge, Lucide icons (`Lock`, `KeyRound`, `ShieldCheck`), and an amber gradient action button.
@@ -162,7 +162,7 @@ Tracks changes across the 3 production workspaces:
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Synced
 - [ ] **iOS (`SIBapp:feat/ios-build`):** Pending
-- [ ] **Android (`SIB_app_android`):** Pending
+- [x] **Android (`SIB_app_android`):** Synced
 
 #### Summary:
 1. **Dedicated Session & Device History Panel:** Moved session history out of Update Password into its own separate panel (`src/Settings/components/SessionsPanel.jsx`) with dedicated sidebar item "Session & Devices".

@@ -4,6 +4,7 @@ import {
   Lock, 
   Mail, 
   ShieldCheck, 
+  ShieldAlert, 
   Eye, 
   EyeOff, 
   CheckCircle2, 
@@ -267,7 +268,7 @@ export default function SecurityPanel() {
           </p>
         </div>
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-semibold self-start sm:self-auto">
-          <ShieldAlert className="w-3.5 h-3.5" />
+          <ShieldCheck className="w-3.5 h-3.5" />
           End-to-End Encrypted
         </div>
       </div>
@@ -479,7 +480,7 @@ export default function SecurityPanel() {
 
         {/* Real-time Password Strength & Criteria Helper Card */}
         {values.newPassword.length > 0 && (
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-850/60 p-4 space-y-3 animate-in fade-in duration-200">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60 p-4 space-y-3 animate-in fade-in duration-200">
             {/* Visual Strength Meter */}
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-gray-600 dark:text-gray-400">Password Strength:</span>
