@@ -82,11 +82,22 @@ const AttendanceOverview = ({ onBack }) => {
     rawData.forEach(record => {
       const meetingId = record?.meeting?._id || record?.date || "unknown_meeting";
       if (!meetingMap[meetingId]) {
+        const markedFormatted = record?.date
+          ? new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+          : null;
+        const meetingFormatted = record?.meeting?.meeting_date
+          ? new Date(record.meeting.meeting_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+          : null;
+
         meetingMap[meetingId] = {
           id: meetingId,
           title: record?.meeting?.title || 'Unknown Meeting',
-          date: record?.date ? new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A',
-          timestamp: record?.date ? new Date(record.date).getTime() : 0,
+          date: markedFormatted || 'N/A',
+          markedDate: markedFormatted || 'N/A',
+          meetingDate: meetingFormatted,
+          timestamp: record?.meeting?.meeting_date
+            ? new Date(record.meeting.meeting_date).getTime()
+            : (record?.date ? new Date(record.date).getTime() : 0),
           present: [],
           absent: []
         };
@@ -101,8 +112,12 @@ const AttendanceOverview = ({ onBack }) => {
     });
 
     return Object.values(meetingMap)
-      .filter(m => m.title.toLowerCase().includes(searchTerm.toLowerCase()) || m.date.includes(searchTerm))
-      .sort((a, b) => b.timestamp - a.timestamp); // Sort by newest first
+      .filter(m =>
+        m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (m.markedDate && m.markedDate.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (m.meetingDate && m.meetingDate.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+      .sort((a, b) => b.timestamp - a.timestamp); // Sort by newest meeting first
   }, [rawData, searchTerm]);
 
   // Process for Alerts View (< 75% attendance)
@@ -336,7 +351,17 @@ const AttendanceOverview = ({ onBack }) => {
                     <div className="flex justify-between items-start">
                       <div className="pr-4">
                         <h3 className="text-sm font-black text-gray-900 dark:text-white">{meeting.title}</h3>
-                        <p className="text-[10px] font-bold text-purple-500 uppercase tracking-widest mt-1">{meeting.date}</p>
+                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1.5 text-[10px] font-bold uppercase tracking-wider">
+                          {meeting.meetingDate && (
+                            <span className="flex items-center gap-1 text-amber-500 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                              <Calendar className="w-3 h-3" />
+                              <span>Meeting Date: {meeting.meetingDate}</span>
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1 text-purple-500 dark:text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-md border border-purple-500/20">
+                            <span>Marked On: {meeting.markedDate}</span>
+                          </span>
+                        </div>
                       </div>
                       {isExpanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
                     </div>

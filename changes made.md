@@ -324,3 +324,25 @@ Tracks changes across the 3 production workspaces:
 3. **Frontend Payload & Error Handling (`MemberActivityReport.jsx`):**
    - Explicitly mapped `usersdata` to include `{ id, user_id, name, attendance }`.
    - Added JSON error parsing so error popups display human-readable messages instead of raw JSON strings.
+
+### #5 [2026-11-14] - Attendance Overview: Dual Date Visualization (Meeting Date & Marked Date)
+- **Type:** UI/UX / Feature / Multi-Platform Sync
+- **Origin:** Web, Android & Backend
+- **Files:** `SIB_backend/src/pages/meetings/MeetigAttendanceRoute.mjs`, `src/Coordinatorsportal/components/AttendanceReport.jsx`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+
+#### Summary:
+1. **Meeting History Date Visibility:**
+   - In Coordinator Portal `Attendance Overview` -> `Meetings` tab, previously only the attendance submission timestamp (`record.date`) was displayed under the meeting title.
+   - Now displays **both distinct dates with clean, dedicated badges**:
+     - **Meeting Date (`meetingDate`):** Tagged in amber/gold with a calendar icon (e.g. `MEETING DATE: 18 APR 2026`).
+     - **Marked On (`markedDate`):** Tagged in purple (e.g. `MARKED ON: 14 NOV 2026`).
+2. **Search Filter Enhancement:**
+   - Extended the meeting filter to match against meeting title, scheduled meeting date, and marked date.
+3. **Backend Field Projection:**
+   - Extended `GET /meeting/attendance/getallattendances` projection to include `meeting_time` and `meeting_type` alongside `meeting_date`.
