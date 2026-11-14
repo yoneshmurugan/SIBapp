@@ -20,6 +20,12 @@ Tracks changes across the 3 production workspaces:
 | #7 | 2026-11-13 | Settings (Sessions, Badge & Blood Donor) | [x] Synced | [x] Synced | [x] Synced |
 | #8 | 2026-11-14 | Mobile Navigation: Sidebar Z-Index Stacking | [x] Synced | [x] Synced | [x] Synced |
 | #9 | 2026-11-14 | Referral & M2M Slips: Member & Chapter Auto-fill | [x] Synced | [x] Synced | [x] Synced |
+| S2-#1 | 2026-11-14 | Automated Meeting Lifecycle & Status Synchronization | [x] Synced | [x] Synced | [x] Synced |
+| S2-#2 | 2026-11-14 | Leadership Core Team: Auto-Initialization & Modal Fix | [x] Synced | [x] Synced | [x] Synced |
+| S2-#3 | 2026-11-14 | Animated SIB Logo Loading Screen & Route Guards | [x] Synced | [x] Synced | [x] Synced |
+| S2-#4 | 2026-11-14 | Live Check-in Attendance: ID-Based Resolution & Upsert | [x] Synced | [x] Synced | [x] Synced |
+| S2-#5 | 2026-11-14 | Attendance Overview: Dual Date Visualization | [x] Synced | [x] Synced | [x] Synced |
+| S2-#6 | 2026-11-14 | Mobile Responsive Alignment, Light Mode & Header Polish | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -219,7 +225,7 @@ Tracks changes across the 3 production workspaces:
 - [x] **Backend (`SIB_backend:main`):** Synced & Deployed (`12c62ca`)
 - [x] **Web (`SIBapp:main`):** Synced (`e630b34`)
 - [x] **Android (`SIB_app_android`):** Synced (`05f330f`)
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 
 #### Summary:
 1. **Automated Lifecycle Evaluator (`meetingStatusHelper.mjs`):**
@@ -249,7 +255,7 @@ Tracks changes across the 3 production workspaces:
 - [x] **Backend (`SIB_backend:main`):** Synced
 - [x] **Web (`SIBapp:main`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 
 #### Summary:
 1. **Root Cause Analysis:**
@@ -278,7 +284,7 @@ Tracks changes across the 3 production workspaces:
 - [x] **Backend (`SIB_backend:main`):** N/A (Frontend only)
 - [x] **Web (`SIBapp:main`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 
 #### Summary:
 1. **"Checking for session cookie..." Refinement:**
@@ -306,7 +312,7 @@ Tracks changes across the 3 production workspaces:
 - [x] **Backend (`SIB_backend:main`):** Synced
 - [x] **Web (`SIBapp:main`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 
 #### Summary:
 1. **Diagnosis & Root Cause Analysis:**
@@ -334,7 +340,7 @@ Tracks changes across the 3 production workspaces:
 - [x] **Backend (`SIB_backend:main`):** Synced
 - [x] **Web (`SIBapp:main`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 
 #### Summary:
 1. **Meeting History Date Visibility:**
@@ -356,7 +362,7 @@ Tracks changes across the 3 production workspaces:
 - [x] **Backend (`SIB_backend:main`):** N/A (Frontend only)
 - [x] **Web (`SIBapp:main`):** Synced
 - [x] **Android (`SIB_app_android`):** Synced
-- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
 
 #### Summary:
 1. **Device Diagnosis (SS1 vs SS2):**
