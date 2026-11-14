@@ -217,8 +217,8 @@ Tracks changes across the 3 production workspaces:
 
 #### Sync Status:
 - [x] **Backend (`SIB_backend:main`):** Synced & Deployed (`12c62ca`)
-- [x] **Web (`SIBapp:main`):** Synced
-- [ ] **Android (`SIB_app_android`):** Pending sync of UI priority sorting
+- [x] **Web (`SIBapp:main`):** Synced (`e630b34`)
+- [x] **Android (`SIB_app_android`):** Synced (`05f330f`)
 - [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
 
 #### Summary:
