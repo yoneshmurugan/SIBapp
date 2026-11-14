@@ -346,3 +346,27 @@ Tracks changes across the 3 production workspaces:
    - Extended the meeting filter to match against meeting title, scheduled meeting date, and marked date.
 3. **Backend Field Projection:**
    - Extended `GET /meeting/attendance/getallattendances` projection to include `meeting_time` and `meeting_type` alongside `meeting_date`.
+
+### #6 [2026-11-14] - Mobile Responsive Alignment, Light Mode Contrast & Header Polish
+- **Type:** UI/UX / Enhancement / Mobile / Multi-Platform Sync
+- **Origin:** Android & Web
+- **Files:** `src/MainPage/UpcomingEvents.jsx`, `SIB_app_android/src/MainPage/Header.jsx`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A (Frontend only)
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+
+#### Summary:
+1. **Device Diagnosis (SS1 vs SS2):**
+   - **Stale Data vs Updated Data:** SS2 was running an un-refreshed session (captured at 7:51) showing the old meeting (Oct 24) and uninitialized team placeholder ("NO TEAM ASSIGNED"). SS1 (captured at 8:32 PM) was running the latest updated state with Nov 14 and Sunbow Suresh assigned as President.
+   - **Theme Contrast:** SS1 was viewed in Dark Mode with rich dark surfaces and gold accents, whereas SS2 was in Light Mode with pale borders (`border-gray-100`) making cards look flat and washed out.
+   - **Device DPI & Font Scaling Collisions:** On devices with larger system font scaling, the `Explore All` button crowded out the Schedule title, the meeting name truncated aggressively (`AAC CHAPTER MEE...`), and the header logo collapsed.
+2. **Schedule Header & Button Responsiveness (`UpcomingEvents.jsx`):**
+   - Streamlined horizontal padding (`px-4 py-3 sm:px-5 sm:py-4`) and optimized `Explore All` button spacing (`px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs whitespace-nowrap shrink-0`) to eliminate title collisions.
+   - Allowed 2-line title wrapping (`line-clamp-2`) in `ScheduleCard` so meeting titles with chapter prefixes never truncate awkwardly with ellipsis.
+   - Enhanced card border definition (`border-gray-200/80 dark:border-gray-800 shadow-sm`) so cards in Light Mode are as sharp and well-structured as in Dark Mode.
+3. **Android Header Polish (`Header.jsx`):**
+   - Removed the intrusive `<Zoom>` wrapper on the 42px header logo and added reliable automatic `/logo.webp` image fallback.
+   - Optimized header layout with `px-3 sm:px-4 min-h-[64px]` and flexible gap spacing so the avatar and chapter initials never get squished against screen edges.

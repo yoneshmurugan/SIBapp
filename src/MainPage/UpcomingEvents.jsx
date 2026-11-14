@@ -170,7 +170,7 @@ const ScheduleCard = ({ type, title, dateStr, time, location, iconColor }) => {
               {type}
             </span>
           </div>
-          <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+          <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors leading-snug">
             {title}
           </h4>
           <div className="flex flex-col gap-1">
@@ -356,23 +356,23 @@ function UpcomingEvents() {
     <div className="w-full space-y-6 animate-in fade-in duration-700 pb-10">
       
       {/* ─── Schedule Section ─── */}
-      <section className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/20 dark:shadow-none transition-all">
+      <section className="bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200/80 dark:border-gray-800 shadow-sm dark:shadow-none transition-all">
         {/* Sub-Header */}
-        <div className="px-5 py-4 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-white dark:from-gray-800/20 dark:to-gray-900">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl">
-              <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+        <div className="px-4 py-3 sm:px-5 sm:py-4 border-b border-gray-200/60 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-white dark:from-gray-800/20 dark:to-gray-900 gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="p-1.5 sm:p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl shrink-0">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 dark:text-amber-500" />
             </div>
-            <div>
-              <h3 className="text-base font-black text-gray-900 dark:text-white tracking-tight">Schedule</h3>
-              <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Upcoming Activities</p>
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white tracking-tight truncate">Schedule</h3>
+              <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate">Upcoming Activities</p>
             </div>
           </div>
           
           {!allEventsLoading && allEvents && (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all active:scale-95 group"
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all active:scale-95 group shrink-0 whitespace-nowrap"
             >
               <span>Explore All</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -422,12 +422,12 @@ function UpcomingEvents() {
       </section>
 
       {/* ─── Leadership Team Section ─── */}
-      <section className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/20 dark:shadow-none transition-all">
-        <div className="px-5 py-4 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-white dark:from-gray-800/20 dark:to-gray-900">
-          <div className="flex items-center gap-3">
+      <section className="bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200/80 dark:border-gray-800 shadow-sm dark:shadow-none transition-all">
+        <div className="px-4 py-3 sm:px-5 sm:py-4 border-b border-gray-200/60 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-white dark:from-gray-800/20 dark:to-gray-900">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <div>
-              <h3 className="text-base font-black text-gray-900 dark:text-white tracking-tight">Leadership</h3>
-              <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">The Core Team</p>
+              <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white tracking-tight">Leadership</h3>
+              <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">The Core Team</p>
             </div>
           </div>
           
@@ -509,4 +509,4 @@ function UpcomingEvents() {
   );
 }
 
-export default UpcomingEvents;
+export default UpcomingEvents;
