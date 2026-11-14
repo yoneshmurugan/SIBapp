@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
+import SessionLoadingScreen from "../Components/SessionLoadingScreen";
 
 export default function CoordinatorsRoute() {
     const [isValid, setIsValid] = useState(null);
@@ -19,12 +20,15 @@ export default function CoordinatorsRoute() {
         }
     }, [access]);
 
-    if (isValid === null || loading)
+    if (isValid === null || loading) {
         return (
-            <div className="w-full min-h-[200px] flex items-center justify-center">
-                Checking coordinator access...
-            </div>
+            <SessionLoadingScreen
+                title="Leadership Portal"
+                subtitle="Verifying Coordinator & Leadership Access"
+                hint="Authenticating permissions..."
+            />
         );
+    }
 
     return isValid ? <Outlet /> : <Navigate to="/noteligible" replace />;
 }

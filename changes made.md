@@ -268,3 +268,31 @@ Tracks changes across the 3 production workspaces:
    - In `CoordinatorBulkEditModal`: Added fallback to `DEFAULT_CORE_ROLES` so even if the backend returns an empty array, the 4 core team slots are guaranteed to render in the edit modal.
    - Fixed `CrossChapterSearch` binding to properly display the current member name if already assigned, or stay clean if `"Not Assigned"`.
    - Enhanced `TeamMemberCard` on the dashboard: when unassigned, it cleanly renders a subtle dashed container with italicized `"Not Assigned"` text instead of broken or confusing blank spaces, and only allows clicking through to profile when an actual member is assigned.
+
+### #3 [2026-11-14] - Premium Animated SIB Logo Session Loading Screen & Route Guard Overhaul
+- **Type:** UI/UX / Enhancement / Branding / Multi-Platform Sync
+- **Origin:** Web & Android
+- **Files:** `src/Components/SessionLoadingScreen.jsx`, `src/hooks/ExistingSession.jsx`, `src/hooks/protectedRoute.jsx`, `src/hooks/CoordinatorRoute.jsx`, `src/hooks/AdminRoute.jsx`, `src/hooks/PresidentRoute.jsx`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A (Frontend only)
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+
+#### Summary:
+1. **"Checking for session cookie..." Refinement:**
+   - Replaced raw unstyled text displayed during session authentication (`/sib` and login transitions) with a luxury, animated SIB loading experience (`SessionLoadingScreen.jsx`).
+2. **Animated Brand Centerpiece:**
+   - Created multi-layered ring animation: dual counter-rotating orbital rings (`animate-sib-spin-slow` and `animate-sib-spin-reverse`), warm golden pulse glow, and floating rounded badge with the official SIB logo and a golden sparkle badge.
+3. **Inspiring Sentiments & Dynamic Words:**
+   - Displayed the official gold pill badge `"SENGUNTHAR IN BUSINESS"` with a live pulsing beacon.
+   - Smooth cycling inspirational ethos statements reflecting SIB's core purpose:
+     - *"Empowering Entrepreneurs • Multiplying Growth • Building Legacy"*
+     - *"Connecting Community to Commerce with Trust & Integrity"*
+     - *"Uniting Sengunthar Leaders Across Chapters & Verticals"*
+     - *"Fostering Opportunities, Collaboration & Collective Prosperity"*
+4. **Sleek Golden Progress Shimmer & Security Footprint:**
+   - Embedded an animated continuous gradient shimmer sweep bar with a reassuring security verification note (`ShieldCheck` + `"Securing your session..."`).
+5. **Universal Route Guard Upgrade:**
+   - Replaced white/blank flashes across `ExistingSession.jsx`, `protectedRoute.jsx` (dashboard reload), `CoordinatorRoute.jsx`, `AdminRoute.jsx`, and `PresidentRoute.jsx` with custom contextual headings.
