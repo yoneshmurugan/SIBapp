@@ -195,7 +195,12 @@ function MemberActivityReport({ onBack }) {
             const today = new Date();
             const formattedDate = today.toISOString().split('T')[0];
             const data = {
-                usersdata: memberData, // we pass all members data
+                usersdata: memberData.map(m => ({
+                    id: m.id,
+                    user_id: m.id,
+                    name: m.name,
+                    attendance: m.attendance
+                })),
                 meeting_id: selectedMeeting,
                 date: formattedDate,
             };
@@ -205,7 +210,16 @@ function MemberActivityReport({ onBack }) {
                 body: JSON.stringify(data),
             });
             
-            if (!attendanceRes.ok) throw new Error(await attendanceRes.text());
+            if (!attendanceRes.ok) {
+                let errorMsg = 'Error during attendance submission';
+                try {
+                    const errObj = await attendanceRes.json();
+                    errorMsg = errObj.error || errObj.message || errorMsg;
+                } catch {
+                    errorMsg = await attendanceRes.text() || errorMsg;
+                }
+                throw new Error(errorMsg);
+            }
 
             const confirm_data = { _id: selectedMeeting, attendance_status: true };
             const updateMeetingRes = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/meeting/updatemeeting`, {
@@ -213,7 +227,16 @@ function MemberActivityReport({ onBack }) {
                 body: JSON.stringify(confirm_data),
             });
 
-            if (!updateMeetingRes.ok) throw new Error(await updateMeetingRes.text());
+            if (!updateMeetingRes.ok) {
+                let errorMsg = 'Error updating meeting status';
+                try {
+                    const errJson = await updateMeetingRes.json();
+                    errorMsg = errJson.error || errJson.message || errorMsg;
+                } catch {
+                    errorMsg = await updateMeetingRes.text() || errorMsg;
+                }
+                throw new Error(errorMsg);
+            }
 
             setSubmittedAttendances(new Set(memberData.map(m => m.id)));
             

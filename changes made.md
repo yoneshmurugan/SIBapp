@@ -296,3 +296,31 @@ Tracks changes across the 3 production workspaces:
    - Embedded an animated continuous gradient shimmer sweep bar with a reassuring security verification note (`ShieldCheck` + `"Securing your session..."`).
 5. **Universal Route Guard Upgrade:**
    - Replaced white/blank flashes across `ExistingSession.jsx`, `protectedRoute.jsx` (dashboard reload), `CoordinatorRoute.jsx`, `AdminRoute.jsx`, and `PresidentRoute.jsx` with custom contextual headings.
+
+### #4 [2026-11-14] - Live Check-in Bulk Attendance: Duplicate Username Collision Fix & ID-Based Resolution
+- **Type:** Bug Fix / Architecture / Attendance / Multi-Platform Sync
+- **Origin:** Web, Android & Backend
+- **Files:** `SIB_backend/src/pages/meetings/MeetigAttendanceRoute.mjs`, `src/Coordinatorsportal/components/MemberActivityReport.jsx`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+
+#### Summary:
+1. **Diagnosis & Root Cause Analysis:**
+   - In MCC chapter, the user attempted to mark attendance for all 132 active members in the Coordinator Live Check-in module, resulting in the error: `{"error": "Some users not found: "}` (with a blank missing users list).
+   - **Temporary Removal Verification:** Confirmed that the regional temporary hanging membership removal worked 100% correctly (12 inactive memberships were properly excluded, leaving exactly 132 active members).
+   - **Root Cause:** In `POST /meeting/attendance/createbulkattendances`, the backend was mapping users strictly by username string:
+     - In MongoDB, there are two separate accounts with username `"Admin"` (`6a2a8cf574c318184cf8dd03` and `6a2a8f174c30b43d908bd6af`).
+     - Querying `User.find({ username: { $in: usernames } })` returned **133** users for **132** names.
+     - The crude guard `if (users.length !== usernames.length)` evaluated to `true` (133 !== 132).
+     - Because all 132 names were found, `missingUsernames` was empty `[]`, resulting in `error: "Some users not found: "`.
+2. **Backend Direct ObjectId Resolution & Atomic Bulk Upsert (`MeetigAttendanceRoute.mjs`):**
+   - Updated `/createbulkattendances` to resolve users primarily by their unique MongoDB `id` / `user_id` (which the frontend already provides), with fallback to username.
+   - Removed the length comparison check so multiple accounts with identical names or duplicate names never fail. Missing users are only flagged if a member actually cannot be resolved.
+   - Converted database writes from raw `insertMany` to atomic `bulkWrite` with `{ upsert: true }` keyed on `(user_id, meeting_id)` to ensure idempotency and prevent duplicate records on retries.
+3. **Frontend Payload & Error Handling (`MemberActivityReport.jsx`):**
+   - Explicitly mapped `usersdata` to include `{ id, user_id, name, attendance }`.
+   - Added JSON error parsing so error popups display human-readable messages instead of raw JSON strings.
