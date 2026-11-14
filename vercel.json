@@ -1,5 +1,22 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/sitemap.xml",
+      "has": [
+        {
+          "type": "host",
+          "value": "(.*)senguntharinbusiness\\.in(.*)"
+        }
+      ],
+      "destination": "/sitemap-in.xml"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap-com.xml"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
   ]
 }

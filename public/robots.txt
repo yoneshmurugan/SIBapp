@@ -33,4 +33,4 @@ Disallow: /reset-password
 Disallow: /noteligible
 
 Sitemap: https://senguntharinbusiness.com/sitemap.xml
-Sitemap: https://senguntharinbusiness.in/sitemap-in.xml
+Sitemap: https://senguntharinbusiness.in/sitemap.xml
