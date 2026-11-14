@@ -2,8 +2,6 @@
 
 <div align="center">
 
-  <img src="public/logo.webp" alt="Sengunthar In Business (SIB) Logo" width="130" height="130" />
-
   ### Official Digital Platform for Business Networking, Chapter Governance & Member Growth
 
   [![React](https://img.shields.io/badge/React_18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
@@ -15,7 +13,7 @@
 
   <br />
 
-  ### 📲 Download & Live Access Channels
+  ### Download & Live Access Channels
 
   <p align="center">
     <a href="https://senguntharinbusiness.com" target="_blank" rel="noopener noreferrer">
@@ -35,92 +33,89 @@
 
 ---
 
-## 📌 Overview
+## Overview
 
-**Sengunthar In Business (SIB)** is an enterprise-grade organizational management and business networking ecosystem designed for structured community chapters across Tamil Nadu and globally. SIB digitizes chapter administration, referral exchanges, meeting management, attendance tracking, and performance analytics into a single cohesive, multi-platform platform.
+**Sengunthar In Business (SIB)** is an enterprise-grade organizational management and business networking ecosystem designed for structured community chapters across Tamil Nadu and globally. SIB digitizes chapter administration, referral exchanges, meeting management, attendance tracking, and performance analytics into a single cohesive platform.
 
 Built with modern web and native mobile technologies, SIB empowers members to generate mutual business, track verified transactions, and celebrate milestones while giving leadership full visibility through real-time governance portals.
 
 ---
 
-## 🌐 Platform Availability
+## Platform Availability
 
 | Platform | Channel | Link / Identifier | Status |
-| :---: | :---: | :---: | :---: |
-| 🌐 **Web Portal** | Official Web Platform | [senguntharinbusiness.com](https://senguntharinbusiness.com) • [senguntharinbusiness.in](https://senguntharinbusiness.in) | **Live & Active** |
-| 🤖 **Android App** | Google Play Store | [Install via Google Play](https://play.google.com/store/apps/details?id=com.senguntharinbusiness) (`com.senguntharinbusiness`) | **Published** |
-| 🍏 **iOS App** | Apple App Store | [Download on App Store](https://apps.apple.com/app/id6761088485) (`com.senguntharinbusiness.app`) | **Available** |
+| :--- | :--- | :--- | :--- |
+| **Web Portal** | Official Web Platform | [senguntharinbusiness.com](https://senguntharinbusiness.com) / [senguntharinbusiness.in](https://senguntharinbusiness.in) | Live |
+| **Android App** | Google Play Store | [Install via Google Play](https://play.google.com/store/apps/details?id=com.senguntharinbusiness) (`com.senguntharinbusiness`) | Published |
+| **iOS App** | Apple App Store | [Download on App Store](https://apps.apple.com/app/id6761088485) (`com.senguntharinbusiness.app`) | Available |
 
 ---
 
-## ✨ Key Features & Capabilities
+## Key Features & Capabilities
 
-### 👔 1. Multi-Tier Role Governance
+### 1. Multi-Tier Role Governance
 - **Regional Admin Portal (`/admin`):** Chapter creation, regional statistics, coordinator role assignments, and system-wide broadcast alerts.
 - **President Portal (`/presidentportal`):** Chapter roster governance, core leadership assignments (President, VP, Secretary, Treasurer), meeting creation, and automated WhatsApp/SMS meeting reminder dispatches.
 - **Coordinator Portal (`/coordinatorsportal`):** Live check-in meeting attendance marking, slip verification (M2M, Referrals, TYFTB), low attendance alerts, and activity auditing.
 - **Member Dashboard (`/dashboard`):** Personal performance metrics, quick activity submission, upcoming schedule preview, and chapter leadership overview.
 
-### 🤝 2. High-Velocity Business Slips
+### 2. High-Velocity Business Slips
 - **Member-to-Member (M2M) Slips:** 1-to-1 business interaction recording with client-side image compression, photo proof uploads, and automated chapter auto-filling.
 - **Referral Slips:** Intra-chapter and cross-chapter business lead generation with status updates (New, Contacted, In Progress, Closed).
 - **Thank You For The Business (TYFTB):** Real-time closed revenue tracking and appreciation slips with instant value aggregations.
 
-### 📅 3. Intelligent Meeting Lifecycle & Attendance
-- **Automated Lifecycle Evaluator:** Dynamic transition of meeting status (`upcoming` ➔ `inprogress` ➔ `completed`) based on exact Indian Standard Time (IST) schedules.
-- **Dual-Date Meeting History:** Clean visual badges displaying both scheduled **Meeting Date** (amber) and attendance **Marked On** date (purple) with instant filtering.
+### 3. Intelligent Meeting Lifecycle & Attendance
+- **Automated Lifecycle Evaluator:** Dynamic transition of meeting status (`upcoming` -> `inprogress` -> `completed`) based on exact Indian Standard Time (IST) schedules.
+- **Dual-Date Meeting History:** Clean visual badges displaying both scheduled Meeting Date (amber) and attendance Marked On date (purple) with instant filtering.
 - **Attendance Bulk Write:** Atomic, idempotent database resolution keyed on unique member IDs with duplicate collision handling.
 
-### 🏆 4. Gamification & Community Engagement
+### 4. Gamification & Community Engagement
 - **Dynamic Leaderboards (`/leaderboard`):** Monthly and all-time rankings calculated from referrals given, business generated, 1-to-1 meetings, and visitors hosted.
-- **Wall of Wishes (`/wall-of-wishes`):** Live birthday and wedding anniversary countdowns with celebratory confetti animations and direct member call/wishing actions.
+- **Wall of Wishes (`/wall-of-wishes`):** Live birthday and wedding anniversary countdowns with celebratory confetti animations and direct member call actions.
 - **Performance Badges:** Automatic awarding of badges for Top M2M, Top Referral Contributor, Top TYB Earner, and 100% Attendance.
 
-### 🔒 5. Security & Mobile-First Experience
+### 5. Security & Mobile-First Architecture
 - **Biometric Authentication:** Face ID, Touch ID, and Fingerprint login on native iOS and Android builds.
 - **Session History & Device Detection:** Transparent overview of active logins with OS, browser, IP address, and remote logout capabilities.
 - **Role-Scoped Route Guards:** Hardened client-side and server-side authorization ensuring absolute isolation of administrative actions.
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 ```mermaid
 graph TD
-    %% Custom Styling
     classDef client fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
     classDef gateway fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
     classDef service fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#15803d;
     classDef storage fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#5b21b6;
-    classDef actor fill:#f3f4f6,stroke:#4b5563,stroke-width:2px,color:#1f2937;
 
     subgraph "Clients & Interfaces"
-        Web["🌐 Web Client (React + Vite)"]:::client
-        iOS["🍏 iOS Native App (Capacitor)"]:::client
-        Android["🤖 Android Native App (Capacitor)"]:::client
+        Web["Web Client (React + Vite)"]:::client
+        iOS["iOS Native App (Capacitor)"]:::client
+        Android["Android Native App (Capacitor)"]:::client
     end
 
     subgraph "API & Security Layer"
-        GW["🚀 Express REST API Gateway"]:::gateway
-        Auth["🔑 Session & Token Auth Middleware"]:::gateway
-        Cron["⏰ Scheduled Meeting & Sync Cron Jobs"]:::gateway
+        GW["Express REST API Gateway"]:::gateway
+        Auth["Session & Token Auth Middleware"]:::gateway
+        Cron["Scheduled Meeting & Sync Cron Jobs"]:::gateway
     end
 
     subgraph "Core Business Logic Services"
-        ChapterSvc["🏛️ Chapter & Region Service"]:::service
-        MeetingSvc["📅 Meeting Lifecycle & Attendance Engine"]:::service
-        SlipSvc["🤝 Slip Service (M2M / Referral / TYFTB)"]:::service
-        NotifSvc["🔔 Push Notification & Alert Service"]:::service
-        MemberSvc["👤 Membership & Profile Service"]:::service
+        ChapterSvc["Chapter & Region Service"]:::service
+        MeetingSvc["Meeting Lifecycle & Attendance Engine"]:::service
+        SlipSvc["Slip Service (M2M / Referral / TYFTB)"]:::service
+        NotifSvc["Push Notification & Alert Service"]:::service
+        MemberSvc["Membership & Profile Service"]:::service
     end
 
     subgraph "Persistence & Cloud Infrastructure"
-        DB[("🍃 MongoDB Database")]:::storage
-        FCM["🔥 Firebase Cloud Messaging"]:::storage
-        S3["📦 Cloud Storage (Media & Proofs)"]:::storage
+        DB[("MongoDB Database")]:::storage
+        FCM["Firebase Cloud Messaging"]:::storage
+        S3["Cloud Media Storage"]:::storage
     end
 
-    %% Routing
     Web --> GW
     iOS --> GW
     Android --> GW
@@ -144,7 +139,7 @@ graph TD
 
 ---
 
-## 💻 Tech Stack
+## Tech Stack
 
 | Domain | Technologies & Libraries |
 | :--- | :--- |
@@ -159,14 +154,11 @@ graph TD
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 SIBapp/
-├─ public/                        # Static assets, logos, and manifest
-│  ├─ logo.webp                   # SIB official crest logo
-│  ├─ hero.avif                   # Optimized homepage hero banner
-│  └─ manifest.webmanifest        # Progressive Web App metadata
+├─ public/                        # Static assets and manifest
 ├─ src/
 │  ├─ Admin/                      # Regional Administrator portal & stats
 │  ├─ ButtonPages/                # Digital Slips: M2MSlip, ReferalSlip, TYFTB
@@ -194,52 +186,7 @@ SIBapp/
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-- **Node.js:** v18.0.0 or higher
-- **npm:** v9.0.0 or higher
-- **Backend API:** Running instance of `SIB_backend` (defaults to `https://api.senguntharinbusiness.in`)
-
-### Installation & Setup
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yoneshmurugan/SIBapp.git
-   cd SIBapp
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables:**
-   Create a `.env` file in the project root:
-   ```env
-   VITE_BACKEND_SERVER="https://api.senguntharinbusiness.in"
-   VITE_APIKEY="your-firebase-api-key"
-   VITE_AUTHDOMAIN="your-firebase-auth-domain"
-   VITE_PROJECTID="your-firebase-project-id"
-   VITE_STORAGEBUCKET="your-firebase-storage-bucket"
-   VITE_MESSAGINGSENDERID="your-firebase-messaging-sender-id"
-   VITE_APPID="your-firebase-app-id"
-   ```
-
-4. **Launch the development server:**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:5173](http://localhost:5173) in your browser.
-
-5. **Build for production:**
-   ```bash
-   npm run build
-   ```
-
----
-
-## 🔄 Multi-Platform Synchronization
+## Multi-Platform Synchronization
 
 This repository operates in continuous alignment with its companion mobile workspaces:
 - **Web App (`main`):** Production web deployment hosted on Vercel.
@@ -250,14 +197,13 @@ All features, bug fixes, and data schema migrations are logged and tracked in [c
 
 ---
 
-## 👥 Authors & Maintainers
+## Authors & Maintainers
 
 - **Lead Developer & Maintainer:** [Yonesh Murugan](https://github.com/yoneshmurugan)
 - **Organization:** Sengunthar In Business (SIB)
-- **Official Inquiries & Support:** [members@senguntharinbusiness.in](mailto:members@senguntharinbusiness.in)
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for complete details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for complete details.
