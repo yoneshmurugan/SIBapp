@@ -10,21 +10,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Firebase initialization
-        if let filePath = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
-           let options = FirebaseOptions(contentsOfFile: filePath) {
-            FirebaseApp.configure(options: options)
-            print("✅ Firebase initialized successfully")
+        // Safe Firebase initialization
+        if FirebaseApp.app() == nil {
+            if let filePath = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+               let options = FirebaseOptions(contentsOfFile: filePath) {
+                FirebaseApp.configure(options: options)
+                print("✅ Firebase initialized successfully with GoogleService-Info.plist")
+            } else {
+                // Fallback to default configuration
+                FirebaseApp.configure()
+                print("ℹ️ Firebase configured with default bundle settings")
+            }
         } else {
-            print("⚠️ GoogleService-Info.plist not found in bundle, skipping FirebaseApp.configure()")
+            print("ℹ️ Firebase already initialized")
         }
 
         // Set delegates for push notification handling
         UNUserNotificationCenter.current().delegate = self
-        Messaging.messaging().delegate = self
+        
+        if FirebaseApp.app() != nil {
+            Messaging.messaging().delegate = self
+        }
 
-        // THIS IS THE CRITICAL LINE: Tell iOS to contact Apple's APNs servers
-        // Without this, iOS never requests a device token, and push never works
+        // Tell iOS to contact Apple's APNs servers
         application.registerForRemoteNotifications()
 
         return true
@@ -69,7 +77,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         // Give the raw APNs token to Firebase so it can map FCM token -> APNs token
-        Messaging.messaging().apnsToken = deviceToken
+        if FirebaseApp.app() != nil {
+            Messaging.messaging().apnsToken = deviceToken
+        }
         NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
     }
 
