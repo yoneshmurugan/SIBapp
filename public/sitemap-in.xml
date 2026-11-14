@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Home Page -->
+  <url>
+    <loc>https://senguntharinbusiness.in/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://senguntharinbusiness.com/" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://senguntharinbusiness.in/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://senguntharinbusiness.com/" />
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Public Members Directory -->
+  <url>
+    <loc>https://senguntharinbusiness.in/public-members</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://senguntharinbusiness.com/public-members" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://senguntharinbusiness.in/public-members" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://senguntharinbusiness.com/public-members" />
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Events & Meetings -->
+  <url>
+    <loc>https://senguntharinbusiness.in/events-meetings</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://senguntharinbusiness.com/events-meetings" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://senguntharinbusiness.in/events-meetings" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://senguntharinbusiness.com/events-meetings" />
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Album / Gallery -->
+  <url>
+    <loc>https://senguntharinbusiness.in/album</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://senguntharinbusiness.com/album" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://senguntharinbusiness.in/album" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://senguntharinbusiness.com/album" />
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Member Sign In -->
+  <url>
+    <loc>https://senguntharinbusiness.in/signin</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://senguntharinbusiness.com/signin" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://senguntharinbusiness.in/signin" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://senguntharinbusiness.com/signin" />
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Privacy Policy -->
+  <url>
+    <loc>https://senguntharinbusiness.in/privacy-policy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://senguntharinbusiness.com/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://senguntharinbusiness.in/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://senguntharinbusiness.com/privacy-policy" />
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- Child Safety Standards -->
+  <url>
+    <loc>https://senguntharinbusiness.in/child-safety-standards</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://senguntharinbusiness.com/child-safety-standards" />
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://senguntharinbusiness.in/child-safety-standards" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://senguntharinbusiness.com/child-safety-standards" />
+    <lastmod>2026-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+</urlset>
