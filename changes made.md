@@ -239,3 +239,32 @@ Tracks changes across the 3 production workspaces:
    - Implemented real-time dynamic status evaluation in `EventCard.jsx` and `MeetingModal.jsx` so expired meetings immediately render as `completed` with proper grey styling even before API response transitions finish.
 
 ---
+
+### #2 [2026-11-14] - Leadership Core Team: Auto-Initialization & Edit Modal Fix for New Chapters
+- **Type:** Bug Fix / Architecture / Data Integrity / Frontend / Backend
+- **Origin:** Web & Backend
+- **Files:** `SIB_backend/src/pages/admin/CoordinatorRoute.mjs`, `SIB_backend/src/pages/chapter/chapterRoute.mjs`, `src/MainPage/UpcomingEvents.jsx`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android`):** Synced
+- [ ] **iOS (`SIBapp:feat/ios-build`):** Pending sync
+
+#### Summary:
+1. **Root Cause Analysis:**
+   - In MongoDB `coordinators` collection, records were historically only seeded for `CH001` (MCC) and `CH002` (TKC). For newer chapters (`CH003` - Salem, `CH004` - Arignar Anna Chapter), zero coordinator records existed in the database.
+   - `GET /admin/coordinator/getcoordinators` returned an empty array `[]`.
+   - In `UpcomingEvents.jsx`, `CoordinatorBulkEditModal` initialized its form state with `initial || []` and iterated over it. When `initial` was empty, the modal rendered zero input fields (showing only blank space with Cancel and Update buttons).
+   - In `CoordinatorRoute.mjs`, `updatecoordinatorsbyrole` used `findOneAndUpdate` without `{ upsert: true }`, which would reject any update with a 404 error if records were not pre-seeded.
+2. **Backend Auto-Initialization & Upsert Resilience (`CoordinatorRoute.mjs`):**
+   - Added standard `DEFAULT_CORE_ROLES = ['President', 'VP', 'Secretary', 'Treasurer']`.
+   - In `GET /admin/coordinator/getcoordinators`: If a chapter has no coordinators, the API auto-inserts the 4 default roles with `name: 'Not Assigned'`. If any standard role is missing from an existing chapter, it inserts the missing roles seamlessly.
+   - Responses are consistently sorted by core hierarchy (`President` -> `VP` -> `Secretary` -> `Treasurer`).
+   - In `PUT /admin/coordinator/updatecoordinatorsbyrole`: Added `{ upsert: true, new: true, setDefaultsOnInsert: true }` so any role assignment succeeds regardless of prior state.
+3. **Chapter Creation Hook (`chapterRoute.mjs`):**
+   - In `POST /createchapter`: Added automatic insertion of the 4 default coordinator records (`Not Assigned`) upon chapter creation so all newly created chapters start fully prepared.
+4. **Frontend Form Fallback & Display Optimization (`UpcomingEvents.jsx`):**
+   - In `CoordinatorBulkEditModal`: Added fallback to `DEFAULT_CORE_ROLES` so even if the backend returns an empty array, the 4 core team slots are guaranteed to render in the edit modal.
+   - Fixed `CrossChapterSearch` binding to properly display the current member name if already assigned, or stay clean if `"Not Assigned"`.
+   - Enhanced `TeamMemberCard` on the dashboard: when unassigned, it cleanly renders a subtle dashed container with italicized `"Not Assigned"` text instead of broken or confusing blank spaces, and only allows clicking through to profile when an actual member is assigned.

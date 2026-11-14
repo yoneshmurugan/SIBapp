@@ -38,11 +38,17 @@ const formatDate = (dateString) => {
 };
 
 // --- Coordinator Bulk Edit Modal ---
+const DEFAULT_CORE_ROLES = ['President', 'VP', 'Secretary', 'Treasurer'];
+
 function CoordinatorBulkEditModal({ open, onClose, onSave, initial, loading, allProfiles }) {
   const [coords, setCoords] = useState([]);
 
   useEffect(() => {
-    setCoords([...(initial || [])]);
+    if (initial && initial.length > 0) {
+      setCoords([...initial]);
+    } else {
+      setCoords(DEFAULT_CORE_ROLES.map(role => ({ role, name: "Not Assigned", _selectedUsername: "" })));
+    }
   }, [initial]);
 
   const handleChange = (index, value) => {
@@ -73,7 +79,7 @@ function CoordinatorBulkEditModal({ open, onClose, onSave, initial, loading, all
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
                 <CrossChapterSearch
                   label={`Select member for ${coord.role}`}
-                  value={coord._selectedUsername || ""}
+                  value={coord._selectedUsername || (coord.name && coord.name !== "Not Assigned" ? coord.name : "")}
                   onChange={(val) => {
                     setCoords(prev => prev.map((c, i) => i === idx ? { ...c, _selectedUsername: val } : c));
                   }}
@@ -87,7 +93,7 @@ function CoordinatorBulkEditModal({ open, onClose, onSave, initial, loading, all
                 />
                 <div className="mt-2 text-xs font-bold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-3 py-2 rounded-lg flex items-center justify-between">
                    <span>Selected Name:</span>
-                   <span className="text-gray-900 dark:text-white truncate max-w-[200px]">{coord.name || "None"}</span>
+                   <span className="text-gray-900 dark:text-white truncate max-w-[200px]">{coord.name && coord.name !== "Not Assigned" ? coord.name : "None"}</span>
                 </div>
               </div>
             </div>
@@ -195,28 +201,39 @@ const TeamMemberCard = ({ name, role, profile }) => {
     }
   };
 
+  const isAssigned = Boolean(name && name.trim() !== "" && name.trim().toLowerCase() !== "not assigned");
+  const displayName = isAssigned ? name : "Not Assigned";
+
   return (
     <div 
-      onClick={profile ? handleClick : undefined}
-      className={`flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 transition-all group ${profile ? "cursor-pointer hover:border-amber-200 dark:hover:border-amber-900/30 hover:shadow-lg hover:shadow-amber-500/5" : ""}`}
+      onClick={profile && isAssigned ? handleClick : undefined}
+      className={`flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800/40 border transition-all group ${
+        isAssigned 
+          ? "border-gray-100 dark:border-gray-800 cursor-pointer hover:border-amber-200 dark:hover:border-amber-900/30 hover:shadow-lg hover:shadow-amber-500/5" 
+          : "border-dashed border-gray-200 dark:border-gray-800 opacity-75"
+      }`}
     >
-      {profile?.profile_image_url && profile.profile_image_url !== "N/A" ? (
+      {profile?.profile_image_url && profile.profile_image_url !== "N/A" && isAssigned ? (
         <img 
           src={profile.profile_image_url} 
-          alt={name} 
+          alt={displayName} 
           className="w-14 h-14 rounded-2xl object-cover border border-gray-200 dark:border-gray-700 shadow-sm shrink-0"
         />
       ) : (
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 font-black text-xl shadow-sm shrink-0">
-          {name?.charAt(0) || "U"}
+          {displayName.charAt(0) || "U"}
         </div>
       )}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         <p className="text-[11px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-1">
           {role}
         </p>
-        <p className="text-base font-bold text-gray-900 dark:text-white truncate group-hover:text-amber-600 transition-colors">
-          {name}
+        <p className={`text-base font-bold truncate transition-colors ${
+          isAssigned 
+            ? "text-gray-900 dark:text-white group-hover:text-amber-600" 
+            : "text-gray-400 dark:text-gray-500 italic"
+        }`}>
+          {displayName}
         </p>
       </div>
     </div>
