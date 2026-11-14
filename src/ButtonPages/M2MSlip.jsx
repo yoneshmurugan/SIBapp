@@ -277,18 +277,24 @@ function ButtonPage({ onClose = () => {} }) {
                 className="bg-gray-50 dark:bg-gray-800"
               />
               <CrossChapterSearch
-                label="Member 2 (Partner)"
+                label="Member 2 (Partner) *"
                 placeholder="Search a member"
+                value={member2Name}
                 onChange={setMember2Name}
+                userstate={(user) => {
+                  if (user?.chapter || user?.chapter_name) {
+                    setChapterName(user.chapter || user.chapter_name);
+                  }
+                }}
               />
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-               <CrossChapterSearch
-                label="Chapter"
-                placeholder="(MEMBER 2)Chapter Name of the member met"
+              <EntryField
+                type="text"
+                placeholder="Auto-filled from Member 2 (or enter chapter)"
+                label="Chapter *"
+                value={chapterName}
                 onChange={setChapterName}
-                offsubmit={true}
-                searchdomain="searchchapter"
               />
               <EntryField
                 type="date"

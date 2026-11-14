@@ -205,6 +205,7 @@ function ButtonPage({ onClose = () => { } }) {
                <CrossChapterSearch
                 label="To *"
                 placeholder="Search Member Username..."
+                value={to}
                 onChange={setTo}
                 userstate={setUserData}
               />
