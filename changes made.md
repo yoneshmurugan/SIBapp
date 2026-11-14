@@ -18,6 +18,8 @@ Tracks changes across the 3 production workspaces:
 | #5 | 2026-11-13 | Wall of Wishes | [x] Synced | [x] Synced | [x] Synced |
 | #6 | 2026-11-13 | Settings (Update Password) | [x] Synced | [x] Synced | [x] Synced |
 | #7 | 2026-11-13 | Settings (Sessions, Badge & Blood Donor) | [x] Synced | [x] Synced | [x] Synced |
+| #8 | 2026-11-14 | Mobile Navigation: Sidebar Z-Index Stacking | [x] Synced | [x] Synced | [x] Synced |
+| #9 | 2026-11-14 | Referral & M2M Slips: Member & Chapter Auto-fill | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -169,5 +171,44 @@ Tracks changes across the 3 production workspaces:
 2. **Fixed Dark Mode Visibility:** Resolved the issue where session and device cards had illegible text on bright white containers in dark mode. Restructured with dark theme classes (`bg-gray-50 dark:bg-gray-850/60` fixed to `dark:bg-gray-800/70 border-gray-200 dark:border-gray-800`), bold high-contrast text (`text-gray-900 dark:text-gray-100`), amber badge icons, and active session pulse indicator.
 3. **Membership Badge:** Created `MembershipBadgePanel.jsx` displaying a luxury SIB digital membership badge with SIB Member ID (`idno`) and copy button, Chapter Name & Chapter Code, Member Role badge (President / Coordinator / Member), Joining Date, and dynamic Renewal Date countdown badge with days remaining.
 4. **Reverted Emergency Blood Donor:** Completely removed the Emergency Blood Donor opt-in and all associated schemas and routes per request to keep settings streamlined.
+
+---
+
+### #8 [2026-11-14] - Mobile Navigation: Sidebar Z-Index Stacking Fix
+- **Type:** Bug Fix / Mobile UI
+- **Origin:** Android & iOS
+- **Files:** `src/MainPage/SideBar/SideBar.jsx`, `src/MainPage/Dashboard.jsx`, `src/MainPage/UserInfo.jsx`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+- [x] **Android (`SIB_app_android`):** Synced
+
+#### Summary:
+1. **Fixed Stacking Context Bleed:** Resolved an issue on mobile (Android and iOS) where dashboard profile elements (such as `<Building2 />` and Company Name in `UserInfo.jsx`) overlapped the open sidebar navigation menu.
+2. **Elevated Sidebar Dropdown:** Raised `SideBar.jsx` wrapper to `relative z-50` and explicitly gave the dropdown menu container `z-50` (matching `Avatar.jsx` and `Notification.jsx`).
+3. **Scoped Main Content & UserInfo:** Added `relative z-0` to the Dashboard main content column and `isolate relative z-0` to `UserInfo.jsx` to prevent internal positioned elements from bleeding outside their container.
+4. **Added Mobile Touch Dismissal:** Added `touchstart` event listener in `SideBar.jsx` alongside `mousedown` for immediate tap-to-close behavior on mobile touch screens.
+
+---
+
+### #9 [2026-11-14] - Referral & M2M Slips: Member & Chapter Auto-fill Fix
+- **Type:** Bug Fix / Forms / UI
+- **Origin:** Web & Android
+- **Files:** `src/Components/CrossSearch.jsx`, `src/ButtonPages/ReferalSlip.jsx`, `src/ButtonPages/M2MSlip.jsx`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+- [x] **Android (`SIB_app_android`):** Synced
+
+#### Summary:
+1. **Fixed Blank Selected Member in Referral Slip:** Resolved issue where selecting a member auto-filled phone and email, but the "To *" field remained blank (`placeholder`). `ReferalSlip.jsx` was omitting `value={to}` to `<CrossChapterSearch />`.
+2. **Enhanced CrossChapterSearch Dual State:** Added automatic internal state fallback (`currentValue`) so the component reliably displays selected members even if caller omits the `value` prop.
+3. **Enriched Member Metadata in Search:** Added `chapter` and `chapter_name` directly to the `userstate` object returned by `<CrossChapterSearch />`.
+4. **Fixed Member 2 & Chapter Auto-fill in M2M Slip:**
+   - Linked `value={member2Name}` and `onChange={setMember2Name}` to Member 2 partner search.
+   - Wired `userstate={(user) => setChapterName(user.chapter)}` to automatically populate the Chapter field the instant Member 2 is selected.
+   - Replaced broken nested search with an auto-filled and editable `EntryField` for Chapter.
 
 ---
