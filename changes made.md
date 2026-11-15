@@ -32,6 +32,7 @@ Tracks changes across the 3 production workspaces:
 | S3-#3 | 2026-11-15 | End-to-End Notification System: Slips, Chapter Meetings & Mobile Push (FCM + APNs) | [x] Synced | [x] Synced | [x] Synced |
 | S3-#4 | 2026-11-15 | Executive Direct Detail Modals & Complete Overhaul: Meetings & Event Management | [x] Synced | [x] Synced | [x] Synced |
 | S3-#5 | 2026-11-15 | Member Renewal Reminders: Multi-Channel Delivery (In-App & Push Checkboxes) | [x] Synced | [x] Synced | [x] Synced |
+| S3-#6 | 2026-11-15 | Executive Alert Broadcast System: Multi-Channel UI, Live Preview & Backend Scoping | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -557,4 +558,38 @@ Tracks changes across the 3 production workspaces:
    - In `POST /notification/createnotificationwithoutsender`, fixed a `ReferenceError: data is not defined` bug and added support for `notifyInApp` and `notifyPush` boolean flags.
    - Added `notifyInApp`, `notifyPush`, and `data` to `createNotificationValidation` in `validators.mjs`.
    - Dispatches individual high-priority push notifications to the member's registered mobile device tokens via Firebase Admin SDK.
+
+### S3-#6 [2026-11-15] - Executive Alert Broadcast System: Multi-Channel UI, Live Preview & Backend Scoping
+- **Type:** UI/UX Redesign / Architecture / Notifications (In-App, Push, Email)
+- **Origin:** Web, Android, iOS & Backend
+- **Files:**
+  - `src/PresidentPortal/AlertSystem.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `SIB_backend/src/pages/notifications/notificationRoute.mjs`
+  - `SIB_backend/src/validators.mjs`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Executive Alert Broadcast UI Redesign:**
+   - Overhauled `AlertSystem.jsx` with an executive, modern card layout matching Chapter Meetings and Event Management.
+   - Replaced plain radio buttons with interactive category tiles: **Announcement** (Megaphone), **Urgent Alert** (AlertTriangle), and **Event Info** (Calendar) with themed badge accents and glow rings.
+   - Refined input fields with character counters (Title: max 100, Message: max 1000).
+2. **Interactive Delivery Channel Tiles:**
+   - Replaced plain checkboxes with 3 interactive delivery channel tiles: **In-App Notification** (Bell), **Push Notification (Mobile)** (Smartphone), and **Notify via Email** (Mail).
+   - Allows leadership to toggle any combination of delivery channels with validation ensuring at least one channel is active.
+3. **Multi-Channel Live Device Preview:**
+   - Added interactive 3-mode preview tabs:
+     - **In-App Feed View:** Simulates the notification drawer card with badge, timestamp, title, and body.
+     - **Mobile Push View:** Simulates an iOS/Android lock-screen notification pill with app branding.
+     - **Email Message View:** Simulates the official branded email letterhead, Subject, and formatted content.
+4. **Backend Scoping & Robust Delivery:**
+   - In `POST /notification/createbulknotifications`, enhanced chapter resolution using `req.chapter?._id || membership?.chapter_id`.
+   - Included structured deep-link payload `data: { action: "OPEN_ANNOUNCEMENT", type }` in both in-app records and FCM/APNs push notifications.
+   - Added email delivery error handling to ensure SMTP exceptions do not interrupt in-app and push broadcasts.
+   - Updated `createbulkNotificationValidation` in `validators.mjs` to support extended content (max 2048 chars), `type`, and `methods`.
+
 
