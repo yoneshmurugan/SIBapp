@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { HiArrowUp, HiArrowDown, HiCheck, HiX } from "react-icons/hi";
+import { Bell, Smartphone, Send } from "lucide-react";
 
 // MemberCard with Selection Checkbox
-const MemberCard = ({ member, onSendReminder, loading, onrenewuser, selected, onToggleSelect }) => (
+const MemberCard = ({ member, onSendReminder, loading, onrenewuser, selected, onToggleSelect, notifyInApp, notifyPush }) => (
   <div 
     className={`flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border p-4 mb-3 shadow-sm transition-all duration-200 
     ${selected 
@@ -47,14 +48,16 @@ const MemberCard = ({ member, onSendReminder, loading, onrenewuser, selected, on
       <button
         onClick={() => onSendReminder(member)}
         disabled={loading}
-        className="px-4 py-2 rounded-lg font-medium text-sm border border-amber-300 bg-amber-300 text-gray-900 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex-grow sm:flex-grow-0"
+        title={notifyInApp && notifyPush ? "Send reminder via In-App & Mobile Push" : notifyPush ? "Send reminder via Mobile Push" : notifyInApp ? "Send reminder via In-App" : "Select at least one delivery channel"}
+        className="px-4 py-2 rounded-lg font-medium text-sm border border-amber-300 bg-amber-300 text-gray-900 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex-grow sm:flex-grow-0 flex items-center justify-center gap-1.5"
       >
-        {loading ? 'Sending...' : 'Remind'}
+        <Send size={14} />
+        <span>{loading ? 'Sending...' : 'Remind'}</span>
       </button>
       {member.phone && (
         <button
           onClick={() => {
-            const msg = `⏳ Action Required: Membership Renewal\nHi ${member.name}! 👋\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}. 📅\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active! 🚀`;
+            const msg = `Action Required: Membership Renewal\nHi ${member.name}!\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}.\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active!`;
             window.open(`https://wa.me/${member.phone}?text=${encodeURIComponent(msg)}`, '_blank');
           }}
           className="px-4 py-2 rounded-lg font-medium text-sm border border-green-500 bg-green-500 text-white hover:bg-green-600 transition-colors duration-200 flex-grow sm:flex-grow-0"
@@ -138,6 +141,10 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
   const [selectedMembers, setSelectedMembers] = useState([]); // Array of IDs
   const [bulkRenewModalOpen, setBulkRenewModalOpen] = useState(false);
   const [bulkRenewDate, setBulkRenewDate] = useState("");
+
+  // Reminder Delivery Channels State
+  const [notifyInApp, setNotifyInApp] = useState(true);
+  const [notifyPush, setNotifyPush] = useState(true);
 
   useEffect(() => {
     fetchMembers();
@@ -260,6 +267,12 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
   /* --- ACTIONS --- */
 
   const handleSendReminder = async (member) => {
+    if (!notifyInApp && !notifyPush) {
+      setError("Please select at least one delivery channel (In-App or Push Notification).");
+      setTimeout(() => setError(null), 3500);
+      return;
+    }
+
     setSelectedReminder(member.id);
     setLoading(true);
     setError(null);
@@ -268,8 +281,15 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
     try {
       const payload = {
         receiver: member.name,
-        header: `⏳ Action Required: Membership Renewal`,
-        content: `Hi ${member.name}!\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}.\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active!`
+        header: "Action Required: Membership Renewal",
+        content: `Hi ${member.name}!\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}.\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active!`,
+        notifyInApp,
+        notifyPush,
+        data: {
+          action: "MEMBERSHIP_RENEWAL",
+          memberId: String(member.id),
+          dueDate: member.dueDate
+        }
       };
 
       const res = await fetch(
@@ -288,8 +308,14 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
         throw new Error(data.error || "Failed to send reminder");
       }
 
-      setSuccess(`Reminder sent to ${member.name}`);
-      setTimeout(() => setSuccess(null), 3000);
+      const channelDesc = notifyInApp && notifyPush
+        ? "via In-App & Push Notification"
+        : notifyPush
+          ? "via Push Notification"
+          : "via In-App Notification";
+
+      setSuccess(`Renewal reminder sent to ${member.name} ${channelDesc}`);
+      setTimeout(() => setSuccess(null), 3500);
     } catch (err) {
       setError(`Failed to send reminder to ${member.name}: ${err.message}`);
       setTimeout(() => setError(null), 4000);
@@ -297,6 +323,74 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
       setLoading(false);
       setSelectedReminder(null);
     }
+  };
+
+  const handleRemindSelected = async () => {
+    if (!notifyInApp && !notifyPush) {
+      setError("Please select at least one delivery channel (In-App or Push Notification).");
+      setTimeout(() => setError(null), 3500);
+      return;
+    }
+
+    const targetMembers = members.filter(m => selectedMembers.includes(m.id));
+    if (targetMembers.length === 0) return;
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    let sentCount = 0;
+    let failedCount = 0;
+
+    for (let member of targetMembers) {
+      try {
+        const payload = {
+          receiver: member.name,
+          header: "Action Required: Membership Renewal",
+          content: `Hi ${member.name}!\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}.\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active!`,
+          notifyInApp,
+          notifyPush,
+          data: {
+            action: "MEMBERSHIP_RENEWAL",
+            memberId: String(member.id),
+            dueDate: member.dueDate
+          }
+        };
+
+        const res = await fetch(
+          `${import.meta.env.VITE_BACKEND_SERVER}/notification/createnotificationwithoutsender`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          }
+        );
+
+        if (res.ok) {
+          sentCount += 1;
+        } else {
+          failedCount += 1;
+        }
+      } catch {
+        failedCount += 1;
+      }
+    }
+
+    const channelDesc = notifyInApp && notifyPush
+      ? "via In-App & Push Notification"
+      : notifyPush
+        ? "via Push Notification"
+        : "via In-App Notification";
+
+    if (sentCount > 0) {
+      setSuccess(`Reminders sent to ${sentCount} member(s) ${channelDesc}${failedCount > 0 ? ` (${failedCount} failed)` : ''}`);
+    } else {
+      setError("Failed to send reminders to selected members");
+    }
+
+    setTimeout(() => setSuccess(null), 4000);
+    setLoading(false);
   };
 
   // Single Renew
@@ -406,6 +500,12 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
   };
 
   const handleAutoSendReminders = async () => {
+    if (!notifyInApp && !notifyPush) {
+      setError("Please select at least one delivery channel (In-App or Push Notification).");
+      setTimeout(() => setError(null), 3500);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(null);
@@ -415,6 +515,7 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
 
       if (currentList.length === 0) {
         setError("No members to send reminders to");
+        setLoading(false);
         return;
       }
 
@@ -425,8 +526,15 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
         try {
           const payload = {
             receiver: member.name,
-            header: `⏳ Action Required: Membership Renewal`,
-            content: `Hi ${member.name}!\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}.\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active!`
+            header: "Action Required: Membership Renewal",
+            content: `Hi ${member.name}!\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}.\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active!`,
+            notifyInApp,
+            notifyPush,
+            data: {
+              action: "MEMBERSHIP_RENEWAL",
+              memberId: String(member.id),
+              dueDate: member.dueDate
+            }
           };
 
           const res = await fetch(
@@ -444,19 +552,25 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
           } else {
             failedCount += 1;
           }
-        } catch (err) {
+        } catch {
           failedCount += 1;
         }
       }
 
+      const channelDesc = notifyInApp && notifyPush
+        ? "via In-App & Push Notification"
+        : notifyPush
+          ? "via Push Notification"
+          : "via In-App Notification";
+
       if (sentCount > 0) {
-        setSuccess(`Reminders sent to ${sentCount} member(s)${failedCount > 0 ? ` (${failedCount} failed)` : ''}`);
+        setSuccess(`Reminders sent to ${sentCount} member(s) ${channelDesc}${failedCount > 0 ? ` (${failedCount} failed)` : ''}`);
       } else {
         setError("Failed to send reminders to any members");
       }
 
       setTimeout(() => setSuccess(null), 4000);
-    } catch (err) {
+    } catch {
       setError("Failed to process bulk reminders");
       setTimeout(() => setError(null), 4000);
     } finally {
@@ -561,6 +675,42 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
         />
       </div>
 
+      {/* Delivery Channels Selector */}
+      <div className="mb-5 p-3.5 sm:p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide">
+            Reminder Delivery Channels:
+          </span>
+        </div>
+        <div className="flex items-center gap-4 sm:gap-6">
+          <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={notifyInApp}
+              onChange={(e) => setNotifyInApp(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-amber-500 focus:ring-amber-400 cursor-pointer"
+            />
+            <Bell size={16} className={notifyInApp ? "text-amber-500" : "text-gray-400"} />
+            <span className={`text-xs sm:text-sm ${notifyInApp ? "text-gray-900 dark:text-gray-100 font-semibold" : "text-gray-500 dark:text-gray-400"}`}>
+              In-App Notification
+            </span>
+          </label>
+
+          <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={notifyPush}
+              onChange={(e) => setNotifyPush(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-amber-500 focus:ring-amber-400 cursor-pointer"
+            />
+            <Smartphone size={16} className={notifyPush ? "text-amber-500" : "text-gray-400"} />
+            <span className={`text-xs sm:text-sm ${notifyPush ? "text-gray-900 dark:text-gray-100 font-semibold" : "text-gray-500 dark:text-gray-400"}`}>
+              Push Notification (Mobile)
+            </span>
+          </label>
+        </div>
+      </div>
+
       {/* Toolbar */}
       <div className="mb-6 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between flex-wrap p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50">
         <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -621,19 +771,27 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
             </div>
             <span className="font-medium text-gray-900 dark:text-gray-100">Members Selected</span>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-             <button
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <button
               onClick={() => setSelectedMembers([])}
               className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm font-medium border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Cancel
             </button>
             <button
+              onClick={handleRemindSelected}
+              disabled={loading}
+              className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-amber-300 text-gray-900 text-sm font-bold shadow-sm hover:bg-amber-400 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Send size={15} />
+              <span>{loading ? 'Sending...' : `Remind Selected (${selectedMembers.length})`}</span>
+            </button>
+            <button
               onClick={() => setBulkRenewModalOpen(true)}
               className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-bold shadow-sm hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
             >
               <HiCheck className="w-4 h-4" />
-              Renew Selected
+              <span>Renew Selected</span>
             </button>
           </div>
         </div>
@@ -740,6 +898,8 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
                 onSendReminder={handleSendReminder}
                 onrenewuser={handleRenewUser}
                 loading={loading && selectedReminder === member.id}
+                notifyInApp={notifyInApp}
+                notifyPush={notifyPush}
               />
             ))}
           </div>
