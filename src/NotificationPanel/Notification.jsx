@@ -1,28 +1,26 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { createPortal } from "react-dom";
-import { Bell, Check, CheckCheck, X, ChevronRight, Info } from "lucide-react";
+import {
+  Bell,
+  Check,
+  X,
+  IndianRupee,
+  ArrowRight,
+  ExternalLink,
+  CheckCheck
+} from "lucide-react";
 import useFetch from "../hooks/useFetch";
-import { NavLink } from "react-router-dom";
-
-function formatTime(iso) {
-  try {
-    const d = new Date(iso);
-    const diff = Date.now() - d.getTime();
-    const sec = Math.floor(diff / 1000);
-    if (sec < 60) return "Just now";
-    const min = Math.floor(sec / 60);
-    if (min < 60) return `${min}m ago`;
-    const hr = Math.floor(min / 60);
-    if (hr < 24) return `${hr}h ago`;
-    const day = Math.floor(hr / 24);
-    if (day < 7) return `${day}d ago`;
-    return d.toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-  } catch {
-    return "";
-  }
-}
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  formatNotificationTime,
+  formatFullDateTime,
+  getNotificationCategory,
+  getCategoryConfig,
+  isReferralNotification,
+  extractReferrerInfo
+} from "./notificationUtils";
 
 export default function Notification() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const buttonRef = useRef(null);
   const panelRef = useRef(null);
@@ -43,9 +41,7 @@ export default function Notification() {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    if (Array.isArray(listData)) {
-      setNotifications(listData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-    }
+    if (Array.isArray(listData)) setNotifications(listData);
   }, [listData]);
 
   const unreadCount = useMemo(
@@ -120,25 +116,8 @@ export default function Notification() {
       if (!res.ok) throw new Error(`Error ${res.status}`);
       await res.json();
     } catch (e) {
-      console.log(e);
+      console.error("Failed to mark all as read:", e);
       setNotifications(prev);
-    }
-  };
-
-  const handleClearAll = async () => {
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_SERVER}/notification/deleteallnotifications`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
-      if (res.ok) {
-        setNotifications([]);
-      }
-    } catch (e) {
-      console.error(e);
     }
   };
 
@@ -160,20 +139,51 @@ export default function Notification() {
   const openDetails = async (n) => {
     setActiveNotif(n);
     setDetailOpen(true);
-    setOpen(false);
 
     if (!n.read) {
-      const prev = notifications;
       setNotifications((prevList) =>
         prevList.map((x) => (x._id === n._id ? { ...x, read: true } : x))
       );
-
       try {
         await patchReadById(n._id);
-      } catch {
-        setNotifications(prev);
+      } catch (e) {
+        console.error("Failed to mark read:", e);
       }
     }
+  };
+
+  const handlePunchTYB = async (n, e) => {
+    if (e) e.stopPropagation();
+
+    // Mark as read
+    if (!n.read) {
+      setNotifications((prevList) =>
+        prevList.map((x) => (x._id === n._id ? { ...x, read: true } : x))
+      );
+      try {
+        await patchReadById(n._id);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    setOpen(false);
+    setDetailOpen(false);
+
+    const refInfo = extractReferrerInfo(n);
+    const prefillComments = refInfo.referralDetails
+      ? `Regarding referral: ${refInfo.referralDetails}`
+      : (refInfo.referrerName ? `Business from referral by ${refInfo.referrerName}` : "");
+
+    navigate('/slips', {
+      state: {
+        action: 'OPEN_TYB',
+        referrerName: refInfo.referrerName,
+        prefillComments: prefillComments,
+        crossChapter: refInfo.crossChapter,
+        chapterId: refInfo.chapterId
+      }
+    });
   };
 
   useEffect(() => {
@@ -190,23 +200,6 @@ export default function Notification() {
         setDetailOpen(false);
         requestAnimationFrame(() => panelRef.current?.focus?.());
       }
-      if (e.key === "Tab" && detailRef.current) {
-        const nodes = detailRef.current.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        const focusables = Array.from(nodes);
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        if (!first || !last) return;
-
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
@@ -221,12 +214,12 @@ export default function Notification() {
         aria-expanded={open}
         aria-controls="notification-panel"
         onClick={toggle}
-        className="relative inline-flex items-center justify-center rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-400"
+        className="relative inline-flex items-center justify-center rounded-xl p-2.5 text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-gray-800 transition-all focus:outline-none focus:ring-2 focus:ring-amber-400"
       >
-        <Bell className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+        <Bell className="w-5 h-5 text-gray-700 dark:text-gray-200" />
         {unreadCount > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-gray-900 animate-pulse">
-            {unreadCount > 99 ? '99+' : unreadCount}
+          <span className="absolute -top-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-[11px] font-bold text-white shadow-md animate-pulse">
+            {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </button>
@@ -238,44 +231,41 @@ export default function Notification() {
           role="dialog"
           aria-label="Notifications"
           aria-modal="true"
-          className="fixed inset-x-4 top-[70px] sm:absolute sm:inset-auto sm:-right-2 sm:top-14 sm:w-[380px] z-50 origin-top-right rounded-2xl border border-gray-200/60 dark:border-gray-700/60 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl focus:outline-none transform transition-all animate-in fade-in slide-in-from-top-2"
+          className="absolute right-0 sm:-right-4 z-50 mt-2 w-88 sm:w-96 origin-top-right rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4 py-3 bg-white/50 dark:bg-gray-900/50 rounded-t-2xl">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              Notifications
-              {unreadCount > 0 && (
-                <span className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-semibold px-2 py-0.5 rounded-full">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-5 py-4 bg-gray-50/70 dark:bg-gray-900/90 backdrop-blur-sm">
+            <div className="flex items-center gap-2.5">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                Notifications
+              </h3>
+              {unreadCount > 0 ? (
+                <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20">
                   {unreadCount} new
                 </span>
+              ) : (
+                <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                  Caught up
+                </span>
               )}
-            </h3>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={markAllRead}
-                title="Mark all as read"
-                className="rounded-full p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={listLoading || !!listError || unreadCount === 0}
-              >
-                <CheckCheck className="w-4 h-4" />
-              </button>
-              <button
-                onClick={handleClearAll}
-                title="Clear all"
-                className="rounded-full p-1.5 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={listLoading || !!listError || notifications.length === 0}
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 6h18"></path>
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                </svg>
-              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllRead}
+                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors disabled:opacity-50"
+                  disabled={listLoading || !!listError}
+                  title="Mark all as read"
+                >
+                  <CheckCheck className="w-3.5 h-3.5" />
+                  <span>Mark all read</span>
+                </button>
+              )}
               <button
                 onClick={close}
-                title="Close"
                 aria-label="Close notifications"
-                className="rounded-full p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors sm:hidden"
+                className="rounded-lg p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -283,144 +273,193 @@ export default function Notification() {
           </div>
 
           {/* List */}
-          <ul className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+          <ul className="max-h-96 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800/60 custom-scrollbar">
             {listLoading && (
-              <li className="flex flex-col items-center justify-center py-10 px-4 text-center">
-                <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mb-3"></div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Fetching notifications...</p>
+              <li className="px-5 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                <div className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-amber-500 border-t-transparent mb-2" />
+                <p>Loading notifications…</p>
               </li>
             )}
-            
             {listError && (
-              <li className="px-4 py-8 text-center">
-                <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Info className="w-5 h-5" />
-                </div>
-                <p className="text-sm font-medium text-red-600 dark:text-red-400">Failed to load</p>
-                <p className="text-xs text-gray-500 mt-1">Please try again later.</p>
+              <li className="px-5 py-8 text-center text-sm text-red-600 dark:text-red-400">
+                Failed to load notifications. Please try again.
               </li>
             )}
-            
             {!listLoading && !listError && notifications.length === 0 && (
-              <li className="px-4 py-10 text-center">
-                <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
+              <li className="px-5 py-10 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 mb-3">
                   <Bell className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">You're all caught up!</p>
-                <p className="text-xs text-gray-500 mt-1">No new notifications at the moment.</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">No notifications yet</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">We'll alert you here when new activities arrive.</p>
               </li>
             )}
 
-            {!listLoading && !listError && notifications.slice(0, 10).map((n) => (
-              <li key={n._id} className="relative group">
-                <button
-                  className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/80 ${
-                    !n.read 
-                      ? "bg-amber-50/30 dark:bg-amber-900/10" 
-                      : "bg-white dark:bg-transparent"
-                  }`}
-                  onClick={() => openDetails(n)}
-                >
-                  <div className="mt-1 flex-shrink-0">
-                    {!n.read ? (
-                      <span className="flex h-2.5 w-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span>
-                    ) : (
-                      <span className="flex h-2.5 w-2.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    )}
+            {!listLoading && !listError && notifications.map((n) => {
+              const cat = getNotificationCategory(n);
+              const conf = getCategoryConfig(cat);
+              const isRef = isReferralNotification(n);
+              const CategoryIcon = conf.Icon;
+
+              return (
+                <li key={n._id}>
+                  <div
+                    onClick={() => openDetails(n)}
+                    className={`group relative flex flex-col p-4 text-left transition-all cursor-pointer hover:bg-amber-50/40 dark:hover:bg-gray-800/60 ${
+                      !n.read
+                        ? "bg-amber-500/5 dark:bg-amber-500/5"
+                        : "bg-white dark:bg-gray-900"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      {/* Category Icon */}
+                      <div className={`flex-shrink-0 p-2 rounded-xl ${conf.iconBgClass} shadow-sm`}>
+                        <CategoryIcon className="w-4 h-4" />
+                      </div>
+
+                      {/* Content */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className={`text-sm font-bold truncate ${!n.read ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
+                            {n.header}
+                          </p>
+                          {!n.read && (
+                            <span
+                              className="h-2 w-2 flex-none rounded-full bg-red-500 ring-4 ring-red-500/20"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </div>
+
+                        <p className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                          {n.content}
+                        </p>
+
+                        <div className="mt-2.5 flex items-center justify-between">
+                          <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
+                            {formatNotificationTime(n.createdAt)}
+                          </span>
+
+                          {/* "Punch TYB" button for Referral Notifications */}
+                          {isRef && (
+                            <button
+                              type="button"
+                              onClick={(e) => handlePunchTYB(n, e)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-400/20 hover:bg-amber-400/30 border border-amber-500/30 shadow-sm transition-transform active:scale-95"
+                              title="Open TYB Slip with details autofilled"
+                            >
+                              <IndianRupee className="w-3.5 h-3.5" />
+                              <span>Punch TYB</span>
+                              <ArrowRight className="w-3 h-3 ml-0.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm mb-0.5 truncate pr-2 ${!n.read ? "font-semibold text-gray-900 dark:text-white" : "font-medium text-gray-700 dark:text-gray-300"}`}>
-                      {n.header}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                      {n.content}
-                    </p>
-                    <p className="mt-1.5 text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide">
-                      {formatTime(n.createdAt)}
-                    </p>
-                  </div>
-                </button>
-                <div className="absolute bottom-0 left-12 right-4 h-px bg-gray-100 dark:bg-gray-800/60 group-last:hidden"></div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
 
           {/* Footer */}
-          {!listLoading && !listError && notifications.length > 0 && (
-            <div className="border-t border-gray-100 dark:border-gray-800 p-2 bg-gray-50/50 dark:bg-gray-900/50 rounded-b-2xl">
-              <NavLink
-                to='/allnotifications'
-                className="flex items-center justify-center w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
-                onClick={close}
-              >
-                View all notifications
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </NavLink>
-            </div>
-          )}
+          <div className="border-t border-gray-100 dark:border-gray-800 px-4 py-3 bg-gray-50/70 dark:bg-gray-900/90 flex justify-between items-center">
+            <NavLink
+              to='/allnotifications'
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              onClick={() => setOpen(false)}
+            >
+              <span>View all notifications</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </NavLink>
+            <span className="text-[11px] text-gray-400">
+              {notifications.length} total
+            </span>
+          </div>
         </div>
       )}
 
-      {/* Details Modal overlay */}
-      {detailOpen && activeNotif && createPortal(
+      {/* Details Modal */}
+      {detailOpen && activeNotif && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Notification details"
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/40 dark:bg-black/60 backdrop-blur-sm p-4 animate-in fade-in"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) setDetailOpen(false);
           }}
         >
           <div
             ref={detailRef}
-            className="w-full max-w-sm sm:max-w-md rounded-2xl bg-white dark:bg-gray-900 shadow-2xl outline-none transform animate-in zoom-in-95 duration-200 overflow-hidden"
+            className="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-2xl border border-gray-100 dark:border-gray-800 outline-none animate-in fade-in zoom-in-95 duration-150"
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                  <Bell className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                </div>
-                <h4 className="text-base font-bold text-gray-900 dark:text-white">
-                  Notification
+            {/* Header */}
+            <div className="flex items-start justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
+              <div className="space-y-1">
+                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${getCategoryConfig(getNotificationCategory(activeNotif)).badgeClass}`}>
+                  {getCategoryConfig(getNotificationCategory(activeNotif)).label}
+                </span>
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-snug">
+                  {activeNotif.header}
                 </h4>
               </div>
               <button
-                className="rounded-full p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="rounded-xl p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 onClick={() => setDetailOpen(false)}
                 aria-label="Close details"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
-            {/* Modal Body */}
-            <div className="px-5 py-6">
-              <h5 className="text-lg font-bold text-gray-900 dark:text-white mb-3 leading-tight">
-                {activeNotif.header}
-              </h5>
-              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap border border-gray-100 dark:border-gray-700/50 max-h-[50vh] overflow-y-auto">
-                {activeNotif.content}
+
+            {/* Body */}
+            <div className="my-5 space-y-4">
+              <div className="rounded-xl bg-gray-50 dark:bg-gray-800/40 p-4 border border-gray-100 dark:border-gray-800">
+                <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+                  {activeNotif.content}
+                </p>
               </div>
-              <p className="mt-4 text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center">
-                {formatTime(activeNotif.createdAt)}
-              </p>
+
+              <div className="grid grid-cols-2 gap-3 text-xs text-gray-500 dark:text-gray-400">
+                <div>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">Received:</span>{" "}
+                  {formatFullDateTime(activeNotif.createdAt)}
+                </div>
+                {activeNotif.sender && (
+                  <div>
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">From:</span>{" "}
+                    {typeof activeNotif.sender === 'object' ? activeNotif.sender.name || activeNotif.sender.username : activeNotif.sender}
+                  </div>
+                )}
+              </div>
             </div>
-            
-            {/* Modal Footer */}
-            <div className="px-5 py-4 border-t border-gray-100 dark:border-gray-800 flex justify-end bg-gray-50 dark:bg-gray-800">
+
+            {/* Modal Actions */}
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
               <button
-                className="rounded-xl px-5 py-2.5 text-sm font-semibold bg-gray-900 text-white dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                type="button"
+                className="w-full sm:w-auto rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 onClick={() => setDetailOpen(false)}
               >
-                Got it
+                Close
               </button>
+
+              {/* Punch TYB CTA inside detail modal */}
+              {isReferralNotification(activeNotif) && (
+                <button
+                  type="button"
+                  onClick={() => handlePunchTYB(activeNotif)}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-gray-900 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 shadow-md shadow-amber-500/20 transition-all active:scale-95"
+                >
+                  <IndianRupee className="w-4 h-4" />
+                  <span>Punch TYB for this Referral</span>
+                  <ArrowRight className="w-4 h-4 ml-0.5" />
+                </button>
+              )}
             </div>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
     </div>
   );

@@ -89,15 +89,18 @@ function CrossChapterSearch({
   placeholder = "Select a member",
   label = "To *",
   userstate = null,
+  prefillChapterId = "",
+  prefillCrossChapter = false,
   offsubmit = false // kept for backwards compatibility but we now use a toggle switch
 }) {
-  const [crossChapter, setCrossChapter] = useState(false);
+  const [crossChapter, setCrossChapter] = useState(prefillCrossChapter || !!prefillChapterId);
   const [availableMembers, setAvailableMembers] = useState([]);
   const [availableChapters, setAvailableChapters] = useState([]);
-  const [selectedChapter, setSelectedChapter] = useState("");
+  const [selectedChapter, setSelectedChapter] = useState(prefillChapterId || "");
   const [dropdownLoading, setDropdownLoading] = useState(false);
   const [chaptersLoading, setChaptersLoading] = useState(false);
   const [internalValue, setInternalValue] = useState(controlledValue || "");
+  const [resolvedUsername, setResolvedUsername] = useState("");
   const currentValue = controlledValue !== undefined ? controlledValue : internalValue;
 
   useEffect(() => {
@@ -105,6 +108,101 @@ function CrossChapterSearch({
       setInternalValue(controlledValue);
     }
   }, [controlledValue]);
+
+  // Auto-resolve cross-chapter if controlledValue is not in current availableMembers
+  useEffect(() => {
+    let cancelled = false;
+    const resolveMember = async () => {
+      const targetUser = controlledValue?.trim();
+      if (!targetUser || resolvedUsername === targetUser) return;
+      if (dropdownLoading || chaptersLoading) return;
+
+      // Check if targetUser already exists in availableMembers
+      const foundInCurrent = availableMembers.find(
+        (m) => m.username?.toLowerCase() === targetUser.toLowerCase()
+      );
+      if (foundInCurrent) {
+        setResolvedUsername(targetUser);
+        return;
+      }
+
+      // If not found in current availableMembers, look up member
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_BACKEND_SERVER}/chapter/membership/findmember/${encodeURIComponent(targetUser)}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+          }
+        );
+        if (!res.ok) return;
+        const memberInfo = await res.json();
+        if (cancelled || !memberInfo?.username) return;
+
+        setResolvedUsername(memberInfo.username);
+
+        // Fetch all chapters if not already fetched
+        if (availableChapters.length === 0) {
+          try {
+            const chapRes = await fetch(
+              `${import.meta.env.VITE_BACKEND_SERVER}/chapter/main/getallchapters`,
+              {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+              }
+            );
+            const chapData = await chapRes.json();
+            if (Array.isArray(chapData)) setAvailableChapters(chapData);
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
+        // Enable cross-chapter and select member's chapter
+        setCrossChapter(true);
+        if (memberInfo.chapter_id) {
+          setSelectedChapter(memberInfo.chapter_id);
+        }
+
+        const newMem = {
+          username: memberInfo.username,
+          display_name: memberInfo.display_name || memberInfo.name || memberInfo.username,
+          chapter: memberInfo.chapter_name || "",
+          chapter_id: memberInfo.chapter_id || "",
+          rawUser: {
+            username: memberInfo.username,
+            name: memberInfo.name,
+            display_name: memberInfo.display_name || memberInfo.name || memberInfo.username,
+            phone_number: memberInfo.company_phone,
+            chapter: memberInfo.chapter_name || "",
+            chapter_name: memberInfo.chapter_name || "",
+            chapter_id: memberInfo.chapter_id || "",
+          },
+        };
+
+        setAvailableMembers((prev) => {
+          if (prev.some((m) => m.username === newMem.username)) return prev;
+          return [newMem, ...prev];
+        });
+
+        setInternalValue(memberInfo.username);
+        if (onChange) onChange(memberInfo.username);
+        if (userstate) userstate(newMem.rawUser);
+      } catch (err) {
+        console.error("Auto-resolve member error:", err);
+      }
+    };
+
+    if (controlledValue && !dropdownLoading) {
+      resolveMember();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [controlledValue, availableMembers, dropdownLoading, chaptersLoading, resolvedUsername, availableChapters.length, onChange, userstate]);
 
   // Fetch Dropdown Data
   useEffect(() => {

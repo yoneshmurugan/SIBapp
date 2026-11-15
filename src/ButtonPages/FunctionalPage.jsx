@@ -12,7 +12,13 @@ function SubmitButtons() {
 
   useEffect(() => {
     if (location.state?.action === 'OPEN_TYB') {
-      setModalState({ type: 'tyb', prefill: location.state.referrerName || '' });
+      setModalState({
+        type: 'tyb',
+        prefill: location.state.referrerName || '',
+        comments: location.state.prefillComments || '',
+        chapterId: location.state.chapterId || '',
+        crossChapter: location.state.crossChapter || false
+      });
       navigate(location.pathname, { replace: true, state: {} });
     } else if (location.state?.action === 'OPEN_M2M') {
       setModalState({ type: 'm2m', prefill: location.state.partnerName || '' });
@@ -57,7 +63,13 @@ function SubmitButtons() {
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <div className="w-full h-full max-w-[1600px] max-h-[100vh]">
               <div className="relative w-full h-full rounded-xl overflow-auto p-5">
-                <TYFTBSlip onClose={() => setModalState(null)} prefillTo={modalState.prefill} />
+                <TYFTBSlip
+                  onClose={() => setModalState(null)}
+                  prefillTo={modalState.prefill}
+                  prefillComments={modalState.comments}
+                  prefillChapterId={modalState.chapterId}
+                  prefillCrossChapter={modalState.crossChapter}
+                />
               </div>
             </div>
           </div>

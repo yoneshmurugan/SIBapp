@@ -7,18 +7,23 @@ import FilterButton from "../Members/Components/FilterButton";
 import { getDate } from "../utils/getDate.mjs";
 import { X, IndianRupee, Calendar, Briefcase, FileText, User, Layers } from "lucide-react";
 
-function ButtonPage({ onClose = () => { }, prefillTo = '' }) {
+function ButtonPage({ onClose = () => { }, prefillTo = '', prefillComments = '', prefillChapterId = '', prefillCrossChapter = false }) {
   const todaysDate = getDate();
   const [date, setDate] = useState(todaysDate);
   const [amount, setAmount] = useState("");
   const [businessType, setBusinessType] = useState("new");
   const [referralType, setReferralType] = useState("tier1");
-  const [comments, setComments] = useState("");
+  const [comments, setComments] = useState(prefillComments || "");
   const [to, setTo] = useState(prefillTo || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [response, setResponse] = useState(null);
   const [chapterName, setChapterName] = useState("loading..");
+
+  useEffect(() => {
+    if (prefillTo) setTo(prefillTo);
+    if (prefillComments && !comments) setComments(prefillComments);
+  }, [prefillTo, prefillComments]);
 
   useEffect(() => {
     let cancelled = false;
@@ -215,6 +220,8 @@ function ButtonPage({ onClose = () => { }, prefillTo = '' }) {
               placeholder="Select a member"
               value={to}
               onChange={setTo}
+              prefillChapterId={prefillChapterId}
+              prefillCrossChapter={prefillCrossChapter}
               className="dark:bg-gray-700 dark:text-gray-100 dark:border-yellow-400"
             />
 
