@@ -630,5 +630,35 @@ Tracks changes across the 3 production workspaces:
    - In `notificationRoute.mjs`, fixed a latent reference error in `PATCH /readallnotifications` by replacing undefined `userObj._id` with `req.userid`.
    - Automatically populates `sender` with `username name email` across `getallnotifications` and `getnotificationbyid`.
 
+---
+
+### S3-#8 [2026-11-15] - Minimalist Chapter Broadcast Component & Branded Email/Push Delivery
+- **Type:** UI/UX Redesign / Simplification / Branding / Email & Push Delivery
+- **Origin:** Web, Android, iOS & Backend
+- **Files:**
+  - `src/PresidentPortal/AlertSystem.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `SIB_backend/src/pages/Auth/emailTemplates.mjs`
+  - `SIB_backend/src/utils/fcmHelper.mjs`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Minimalist Chapter Broadcast UI Redesign:**
+   - Overhauled `AlertSystem.jsx` to be clean, executive, and minimalist under the title **Chapter Broadcast**, perfectly complementing `MemberRenewalManagement` beside it.
+   - Removed bloated information architecture, step numbers ("1.", "2.", "3.", "4."), giant subtitle boxes, and simulated device mockups.
+   - Streamlined broadcast type selection into minimal segmented pill buttons: **Announcement**, **Urgent**, **Event Info**.
+   - Simplified notification methods into clean inline checkboxes: **In-App Notification**, **Push Notification**, and **Notify via Email**.
+   - Added compact collapsible recipient preview and a prominent **Broadcast Alert** button with loading feedback.
+2. **Official SIB Logo & Branded Email Formulation:**
+   - Formulated `getAnnouncementTemplate` in `emailTemplates.mjs` to feature the official high-resolution SIB gold crest logo (`https://senguntharinbusiness.in/logo.webp`), bold letterhead (`SENGUNTHAR IN BUSINESS`), left-accent gold card border, and direct portal action button.
+3. **Mobile Push Notification Branding:**
+   - Configured FCM Android payload in `fcmHelper.mjs` to explicitly declare `ic_launcher` app icon and `#d97706` SIB Gold branding tint with high delivery priority.
+   - iOS APNs delivery natively pairs with the registered app bundle icon for immediate member recognition.
+
+
 
 
