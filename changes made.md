@@ -38,6 +38,7 @@ Tracks changes across the 3 production workspaces:
 | S3-#12 | 2026-11-15 | Executive Referral Slips Desk Overhaul (/slips): Real-Time KPIs, Action Cards & Activity Feed | [x] Synced | [x] Synced | [x] Synced |
 | S3-#13 | 2026-11-15 | Member Directory: 20-Card Doubling & Sliding Ellipsis Pagination (Public & Private) | [x] Synced | [x] Synced | [x] Synced |
 | S3-#14 | 2026-11-15 | Slips Desk: NaN Amount Fix, Remove Standards & Full Mobile Optimization | [x] Synced | [x] Synced | [x] Synced |
+| S3-#15 | 2026-11-15 | Slips Desk: Removed Recent Slip Submissions Component & Streamlined State | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -866,6 +867,29 @@ Tracks changes across the 3 production workspaces:
    - KPI Bar: Responsive 2x2 grid on mobile screens with compact typography and badges.
    - Action Cards: Refactored card spacing (`gap-3.5`), padding (`p-4`), and full-width buttons for smooth thumb interaction.
    - Recent Transactions: Clean mobile item rows with right-aligned amount and verification badges.
+
+---
+
+### S3-#15 [2026-11-15] - Slips Desk: Removed Recent Slip Submissions Component & Streamlined State
+- **Type:** UI Cleanup
+- **Origin:** Web (`SIBapp`)
+- **Files:**
+  - `src/ButtonPages/FunctionalPage.jsx` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Removed Recent Slip Submissions Component:**
+   - Completely removed the "Recent Slip Submissions" ledger section from the `/slips` page per user direction.
+   - Full transaction history remains accessible via the *"Full Activity Ledger"* button deep-linking directly to `/myactivity`.
+2. **State & Network Optimization:**
+   - Removed unused state variables (`recentSlips`, `loadingRecent`), date formatting helper (`formatSlipDate`), and the redundant `fetchRecentSlips` call.
+   - Refreshes now exclusively request the lightweight KPI statistics endpoint `GET /activity/getactivity`.
+
 
 
 

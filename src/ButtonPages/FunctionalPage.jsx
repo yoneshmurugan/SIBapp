@@ -12,7 +12,6 @@ import {
   UserPlus,
   ArrowRight,
   TrendingUp,
-  Clock,
   FileText,
   RefreshCw,
   ExternalLink
@@ -47,7 +46,7 @@ export default function FunctionalPage() {
   // Active modal state: null or { type, prefill, comments, chapterId, crossChapter }
   const [modalState, setModalState] = useState(null);
 
-  // Summary statistics & recent submissions
+  // Summary statistics
   const [stats, setStats] = useState({
     referral_given: 0,
     referral_received: 0,
@@ -57,9 +56,7 @@ export default function FunctionalPage() {
     M2Ms: 0,
     Visitors: 0
   });
-  const [recentSlips, setRecentSlips] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
-  const [loadingRecent, setLoadingRecent] = useState(true);
 
   // Auto-open modal if navigated with route state (e.g. from Push Notification or "Punch TYB" button)
   useEffect(() => {
@@ -108,88 +105,14 @@ export default function FunctionalPage() {
     }
   }, []);
 
-  // Fetch recent slips feed
-  const fetchRecentSlips = useCallback(async () => {
-    try {
-      setLoadingRecent(true);
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_SERVER}/activity/getfullactivity`,
-        { method: "GET", credentials: "include" }
-      );
-      if (res.ok) {
-        const apiData = await res.json();
-        const formatted = [];
-
-        if (Array.isArray(apiData.referral)) {
-          apiData.referral.slice(0, 5).forEach((item) => {
-            formatted.push({
-              id: item._id,
-              rawDate: item.created_at || item.createdAt,
-              type: "REFERRAL",
-              title: item.direction === "given"
-                ? `Referral to ${item.referee?.name || item.contact_name || "Member"}`
-                : `Referral from ${item.referrer?.name || "Member"}`,
-              subtitle: item.description || item.contact_name || "Business Opportunity",
-              direction: item.direction || "given",
-              status: item.status ? "Verified" : "Pending",
-              amount: null
-            });
-          });
-        }
-
-        if (Array.isArray(apiData.tyftb)) {
-          apiData.tyftb.slice(0, 5).forEach((item) => {
-            formatted.push({
-              id: item._id,
-              rawDate: item.created_at || item.createdAt,
-              type: "TYB",
-              title: item.direction === "given"
-                ? `TYB to ${item.receiver?.name || "Member"}`
-                : `TYB from ${item.payer?.name || "Member"}`,
-              subtitle: item.business_description || "Closed Business",
-              direction: item.direction || "given",
-              status: item.status ? "Verified" : "Pending",
-              amount: parseAmount(item.business_amount)
-            });
-          });
-        }
-
-        if (Array.isArray(apiData.m2m)) {
-          apiData.m2m.slice(0, 5).forEach((item) => {
-            formatted.push({
-              id: item._id,
-              rawDate: item.createdAt,
-              type: "M2M",
-              title: `1-to-1 with ${item.direction === "given" ? (item.member2?.name || "Partner") : (item.member1?.name || "Partner")}`,
-              subtitle: item.discussion_points || item.location || "Strategic 1-to-1",
-              direction: item.direction || "given",
-              status: item.status ? "Verified" : "Pending",
-              amount: null
-            });
-          });
-        }
-
-        // Sort by recency and take top 6
-        formatted.sort((a, b) => new Date(b.rawDate || 0) - new Date(a.rawDate || 0));
-        setRecentSlips(formatted.slice(0, 6));
-      }
-    } catch (err) {
-      console.error("Failed to load recent slips:", err);
-    } finally {
-      setLoadingRecent(false);
-    }
-  }, []);
-
   useEffect(() => {
     fetchStats();
-    fetchRecentSlips();
-  }, [fetchStats, fetchRecentSlips]);
+  }, [fetchStats]);
 
   // Handle closing modal & refresh metrics
   const handleCloseModal = () => {
     setModalState(null);
     fetchStats();
-    fetchRecentSlips();
   };
 
   // 4 Primary Action Cards Config
@@ -244,16 +167,6 @@ export default function FunctionalPage() {
     }
   ], []);
 
-  const formatSlipDate = (iso) => {
-    if (!iso) return "Recent";
-    try {
-      const d = new Date(iso);
-      return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-    } catch {
-      return "Recent";
-    }
-  };
-
   return (
     <div className="w-full min-h-screen bg-stone-50 dark:bg-black/30 pb-20 transition-colors duration-300">
       <div className="sticky top-0 z-40">
@@ -288,11 +201,11 @@ export default function FunctionalPage() {
               </Link>
               <button
                 type="button"
-                onClick={() => { fetchStats(); fetchRecentSlips(); }}
+                onClick={fetchStats}
                 className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:white hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors"
                 title="Refresh metrics"
               >
-                <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${loadingStats || loadingRecent ? "animate-spin" : ""}`} />
+                <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${loadingStats ? "animate-spin" : ""}`} />
               </button>
             </div>
           </div>
@@ -418,97 +331,6 @@ export default function FunctionalPage() {
               );
             })}
           </div>
-        </section>
-
-        {/* Recent Slips Activity Feed (Full Width, Mobile-Optimized) */}
-        <section className="w-full rounded-2xl sm:rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 sm:p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 sm:pb-4">
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
-                  Recent Slip Submissions
-                </h3>
-                <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">
-                  Your latest transactions logged across the chapter
-                </p>
-              </div>
-            </div>
-
-            <Link
-              to="/myactivity"
-              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
-            >
-              <span>View all</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {loadingRecent && (
-            <div className="py-10 sm:py-12 text-center">
-              <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-amber-500 border-t-transparent mb-2" />
-              <p className="text-xs text-gray-400">Loading slip entries...</p>
-            </div>
-          )}
-
-          {!loadingRecent && recentSlips.length === 0 && (
-            <div className="py-10 sm:py-12 text-center space-y-2">
-              <FileText className="w-7 h-7 sm:w-8 sm:h-8 mx-auto text-gray-300 dark:text-gray-600" />
-              <p className="text-sm font-bold text-gray-700 dark:text-gray-300">No slips recorded yet</p>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto px-4">
-                Click any of the action cards above to submit your first referral, TYB revenue slip, or 1-to-1 meeting.
-              </p>
-            </div>
-          )}
-
-          {!loadingRecent && recentSlips.length > 0 && (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
-              {recentSlips.map((item) => {
-                let typeBadgeClass = "bg-slate-500/10 text-slate-600 border-slate-500/20";
-                if (item.type === "REFERRAL") typeBadgeClass = "bg-amber-500/10 text-amber-600 border-amber-500/20";
-                if (item.type === "TYB") typeBadgeClass = "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
-                if (item.type === "M2M") typeBadgeClass = "bg-indigo-500/10 text-indigo-600 border-indigo-500/20";
-
-                return (
-                  <div key={item.id} className="py-3 sm:py-3.5 flex items-center justify-between gap-3 sm:gap-4">
-                    <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <span className={`px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider border ${typeBadgeClass}`}>
-                          {item.type}
-                        </span>
-                        <span className="text-[11px] sm:text-xs font-semibold text-gray-400 dark:text-gray-500">
-                          {formatSlipDate(item.rawDate)}
-                        </span>
-                      </div>
-                      <p className="text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-100 truncate">
-                        {item.title}
-                      </p>
-                      <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate max-w-md">
-                        {item.subtitle}
-                      </p>
-                    </div>
-
-                    <div className="text-right shrink-0 pl-2">
-                      {item.amount !== null && (
-                        <p className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 mb-0.5 sm:mb-1">
-                          ₹{parseAmount(item.amount).toLocaleString("en-IN")}
-                        </p>
-                      )}
-                      <span className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-semibold ${
-                        item.status === "Verified" || item.status === "Approved"
-                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-                          : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
-                      }`}>
-                        {item.status}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </section>
       </main>
 
