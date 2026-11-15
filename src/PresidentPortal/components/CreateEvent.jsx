@@ -4,7 +4,7 @@ import { FileText, Clock, Calendar as CalendarIcon, MapPin, Flag, X } from "luci
 
 const meetingTypes = ["Weekly", "Monthly", "Others"];
 
-export default function CreateEvent() {
+export default function CreateEvent({ onCreated = () => {} }) {
   const [openModal, setOpenModal] = useState(false);
   const initialFocusRef = useRef(null);
   const [title, setTitle] = useState("");
@@ -80,25 +80,16 @@ export default function CreateEvent() {
         });
         const result = await res.json();
         if (result?.message === "success") {
-          const notificationData = {
-            header: `🎟️ A new Event has been scheduled.`,
-            content: `A new Event titled ${title} has been scheduled for ${date} at ${time} in ${location}. Please review the meeting details and ensure your availability. Please mark your calendar and be prepared to attend.
-            Thank you!`,
-            read: false,
-          };
-
-          await fetch(
-            `${import.meta.env.VITE_BACKEND_SERVER}/notification/createbulknotifications`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(notificationData),
-              credentials: "include",
-            }
-          );
           setId(result.id);
           setIsSubmitting(false);
           setSuccess(true);
+          if (typeof onCreated === "function") {
+            onCreated(result.id);
+          }
+          setTimeout(() => {
+            setOpenModal(false);
+            handleClear();
+          }, 1200);
         } else if (result?.errors) {
           const errMsg = result?.errors?.[0]
             ? `${result.errors[0].path} : ${result.errors[0].msg}`
@@ -129,7 +120,7 @@ export default function CreateEvent() {
                     dark:bg-yellow-500 dark:text-gray-900 
                     dark:hover:bg-yellow-400 
                     dark:focus:ring-yellow-600
-                    shadow-md hover:shadow-lg min-h-[40px]"
+                    shadow-md hover:shadow-lg min-h-[40px] px-4 py-2 text-sm sm:text-base flex items-center justify-center shrink-0"
       >
         Create New Event
       </button>
