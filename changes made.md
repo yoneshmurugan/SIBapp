@@ -658,6 +658,12 @@ Tracks changes across the 3 production workspaces:
 3. **Mobile Push Notification Branding:**
    - Configured FCM Android payload in `fcmHelper.mjs` to explicitly declare `ic_launcher` app icon and `#d97706` SIB Gold branding tint with high delivery priority.
    - iOS APNs delivery natively pairs with the registered app bundle icon for immediate member recognition.
+4. **Backend Mongoose Population Model Resolution:**
+   - Fixed `Schema hasn't been registered for model "User"` in `schemas.mjs`:
+     - Registered `User` alias for `userSchema` (`mongoose.model("users", ...)`).
+     - Registered `Chapter` alias for `chapterSchema` (`mongoose.model("chapters", ...)`).
+     - Updated `NotificationSchema` `receiver` and `sender` refs to `'users'` and `meetingSchema` `chapter_id` ref to `'chapters'`.
+
 
 
 
