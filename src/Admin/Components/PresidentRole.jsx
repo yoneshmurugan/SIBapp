@@ -11,8 +11,26 @@ import {
   AlertTriangle,
   User,
   UserX,
-  Edit2
+  Edit2,
+  Calendar,
+  Clock
 } from "lucide-react";
+
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  const d = new Date(dateString);
+  return isNaN(d.getTime())
+    ? "-"
+    : d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+const formatDateTime = (dateString) => {
+  if (!dateString) return null;
+  const d = new Date(dateString);
+  return isNaN(d.getTime())
+    ? null
+    : `${d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}, ${d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`;
+};
 
 const capitalize = (str) => {
   if (!str) return "";
@@ -24,6 +42,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
   const [members, setMembers] = useState([]);
   const [selected, setSelected] = useState([]);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("active"); // "active" | "suspended" | "all"
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: '' }
@@ -51,7 +70,9 @@ export default function PresidentRoleManagement({ chapterId = null }) {
             role: item.role ? capitalize(item.role) : "Member",
             isPresident: /president/i.test(item.role || ""),
             isSuspended: item.membership_status === false || item.membership_status === 0,
-            avatar: item.user?.avatar
+            avatar: item.user?.avatar,
+            dateJoined: item.join_date || item.createdAt,
+            lastSignedIn: item.user?.last_signed_in
           }))
         : [];
         
@@ -257,11 +278,18 @@ export default function PresidentRoleManagement({ chapterId = null }) {
     }
   };
 
-  const filteredMembers = members.filter(m =>
-    m.name.toLowerCase().includes(search.trim().toLowerCase()) ||
-    m.email.toLowerCase().includes(search.trim().toLowerCase()) ||
-    m.role.toLowerCase().includes(search.trim().toLowerCase())
-  );
+  const activeMembersCount = members.filter(m => !m.isSuspended).length;
+  const suspendedMembersCount = members.filter(m => m.isSuspended).length;
+
+  const filteredMembers = members.filter(m => {
+    if (statusFilter === "active" && m.isSuspended) return false;
+    if (statusFilter === "suspended" && !m.isSuspended) return false;
+    return (
+      m.name.toLowerCase().includes(search.trim().toLowerCase()) ||
+      m.email.toLowerCase().includes(search.trim().toLowerCase()) ||
+      m.role.toLowerCase().includes(search.trim().toLowerCase())
+    );
+  });
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 space-y-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 relative">
@@ -414,16 +442,54 @@ export default function PresidentRoleManagement({ chapterId = null }) {
 
       {/* Controls & Toolbar */}
       <div className="flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center sticky top-0 z-20 bg-white dark:bg-gray-900 py-2">
-        {/* Search */}
-        <div className="relative w-full lg:w-72 group">
-          <input
-            type="text"
-            placeholder="Search members..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none text-sm"
-          />
-          <Search className="absolute left-3.5 top-3 text-gray-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
+        {/* Search & Active/Suspended Filter Tabs */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto flex-1">
+          <div className="relative w-full lg:w-72 group">
+            <input
+              type="text"
+              placeholder="Search members..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none text-sm"
+            />
+            <Search className="absolute left-3.5 top-3 text-gray-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
+          </div>
+
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl self-start sm:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => setStatusFilter("active")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                statusFilter === "active"
+                  ? "bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+              }`}
+            >
+              Active ({activeMembersCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("suspended")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                statusFilter === "suspended"
+                  ? "bg-white dark:bg-gray-700 text-orange-600 dark:text-orange-400 shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+              }`}
+            >
+              Suspended ({suspendedMembersCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("all")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                statusFilter === "all"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+              }`}
+            >
+              All ({members.length})
+            </button>
+          </div>
         </div>
 
         {/* Action Buttons */}
@@ -485,13 +551,15 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                 </th>
                 <th className="p-4 bg-gray-50 dark:bg-gray-800">Member</th>
                 <th className="p-4 bg-gray-50 dark:bg-gray-800">Current Role</th>
+                <th className="p-4 bg-gray-50 dark:bg-gray-800 whitespace-nowrap">Date Joined</th>
+                <th className="p-4 bg-gray-50 dark:bg-gray-800 whitespace-nowrap">Last Signed In</th>
                 <th className="p-4 text-center bg-gray-50 dark:bg-gray-800">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="p-12 text-center text-gray-500">
+                  <td colSpan={6} className="p-12 text-center text-gray-500">
                     <div className="flex flex-col items-center gap-3">
                       <RefreshCw className="animate-spin text-emerald-500" size={24} />
                       <span className="text-sm font-medium">Loading data...</span>
@@ -500,7 +568,7 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                 </tr>
               ) : filteredMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="p-12 text-center text-gray-500">
+                  <td colSpan={6} className="p-12 text-center text-gray-500">
                     <p className="text-sm">No members found.</p>
                   </td>
                 </tr>
@@ -536,6 +604,17 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                               </button>
                             </div>
                           <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px] lg:max-w-xs">{member.email}</p>
+                          <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
+                            <span className="inline-flex items-center gap-1">
+                              <Calendar size={12} className="text-gray-400 shrink-0" />
+                              Joined: {formatDate(member.dateJoined)}
+                            </span>
+                            <span>•</span>
+                            <span className="inline-flex items-center gap-1">
+                              <Clock size={12} className="text-gray-400 shrink-0" />
+                              Last Login: {member.lastSignedIn ? formatDateTime(member.lastSignedIn) : <span className="text-rose-500 dark:text-rose-400 italic font-medium">Never</span>}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -548,13 +627,24 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                         {member.role}
                       </span>
                     </td>
-                    <td className="p-4">
-                      {member.lastSignedIn ? (
-                        <span className="text-sm text-gray-600 dark:text-gray-300">
-                          {new Date(member.lastSignedIn).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                    <td className="p-4 whitespace-nowrap">
+                      {member.dateJoined ? (
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                          {formatDate(member.dateJoined)}
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-400 italic">-</span>
+                        <span className="text-xs text-gray-400 italic">-</span>
+                      )}
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      {member.lastSignedIn ? (
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                          {formatDateTime(member.lastSignedIn)}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50">
+                          Never
+                        </span>
                       )}
                     </td>
                     <td className="p-4 text-center">
@@ -665,6 +755,19 @@ export default function PresidentRoleManagement({ chapterId = null }) {
                           {member.role}
                         </span>
                       </div>
+                      <div className="pl-12 pt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-500 dark:text-gray-400">
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar size={12} className="text-gray-400 shrink-0" />
+                          Joined: <strong className="text-gray-700 dark:text-gray-300 font-medium">{formatDate(member.dateJoined)}</strong>
+                        </span>
+                        <span>•</span>
+                        <span className="inline-flex items-center gap-1">
+                          <Clock size={12} className="text-gray-400 shrink-0" />
+                          Last signed in: <strong className={member.lastSignedIn ? "text-gray-700 dark:text-gray-300 font-medium" : "text-rose-600 dark:text-rose-400 italic font-medium"}>
+                            {member.lastSignedIn ? formatDateTime(member.lastSignedIn) : "Never"}
+                          </strong>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -674,13 +777,26 @@ export default function PresidentRoleManagement({ chapterId = null }) {
         </div>
         
         {/* Footer / Count */}
-        <div className="bg-gray-50 dark:bg-gray-800/50 px-4 sm:px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 font-medium shrink-0">
-          <span>{filteredMembers.length} member{filteredMembers.length !== 1 && 's'}</span>
-          <span>
+        <div className="bg-gray-50 dark:bg-gray-800/50 px-4 sm:px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex flex-wrap justify-between items-center gap-3 text-xs text-gray-500 dark:text-gray-400 font-medium shrink-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="font-bold text-gray-900 dark:text-gray-100">
+              Total Members: <span className="text-emerald-600 dark:text-emerald-400">{activeMembersCount}</span>
+            </span>
+            {suspendedMembersCount > 0 && (
+              <>
+                <span className="text-gray-300 dark:text-gray-600">•</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-900/40 text-[11px] font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                  {suspendedMembersCount} Suspended Member{suspendedMembersCount !== 1 ? 's' : ''}
+                </span>
+              </>
+            )}
+          </div>
+          <div>
             {selected.length > 0 ? (
               <span className="text-emerald-600 dark:text-emerald-400 font-bold">{selected.length} selected</span>
             ) : 'Select to edit'}
-          </span>
+          </div>
         </div>
       </div>
     </div>

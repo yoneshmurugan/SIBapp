@@ -59,7 +59,7 @@ const compressImage = (file, maxWidth = 1200, quality = 0.7) => {
   });
 };
 
-function ButtonPage({ onClose = () => {} }) {
+function ButtonPage({ onClose = () => {}, prefillPartner = "" }) {
   const todaysDate = getDate();
 
   const [chapterName, setChapterName] = useState("");
@@ -70,7 +70,7 @@ function ButtonPage({ onClose = () => {} }) {
   const [imageUploading, setImageUploading] = useState(false); // Separate loader for image
   const [error, setError] = useState(null);
   const [response, setResponse] = useState(null);
-  const [member2Name, setMember2Name] = useState("");
+  const [member2Name, setMember2Name] = useState(prefillPartner);
   const [username, setUsername] = useState("loading...");
   const [imageUrl, setImageUrl] = useState("");
   const [imageError, setImageError] = useState(null);
@@ -191,24 +191,7 @@ function ButtonPage({ onClose = () => {} }) {
 
     try {
       setLoading(true);
-      // Send notification
-      const notificationData = {
-        receiver: formData.member2_name,
-        sender: formData.created_by_username,
-        header: `Upcoming Member-to-Member (M2M) Meeting ${formData.created_by_username}`,
-        content: `This is to notify you about the scheduled Member-to-Member (M2M) meeting by the user ${formData.created_by_username}. Topic of conversation: ${formData.discussion_points}`,
-        read: false,
-      };
-      await fetch(
-        `${import.meta.env.VITE_BACKEND_SERVER}/notification/createnotification`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(notificationData),
-          credentials: "include",
-        }
-      );
-      // Submit slip
+      // 1. Submit slip first
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_SERVER}/slips/one2one/createone2one`,
         {
@@ -219,6 +202,40 @@ function ButtonPage({ onClose = () => {} }) {
         }
       );
       const result = await res.json();
+
+      if (result?.errors || !res.ok) {
+        const errMsg = result?.errors?.[0]
+          ? `${result?.errors?.[0].path} : ${result?.errors?.[0].msg}`
+          : (result?.message || "An error occurred during submission.");
+        setError(errMsg);
+        return;
+      }
+
+      // 2. Only upon confirmed slip creation success, dispatch notification
+      try {
+        const notificationData = {
+          receiver: formData.member2_name,
+          sender: formData.created_by_username,
+          header: `1-to-1 Meeting with ${formData.created_by_username}`,
+          content: `Member-to-Member (M2M) meeting scheduled by ${formData.created_by_username}. Topic: ${formData.discussion_points}`,
+          read: false,
+          data: {
+            action: "OPEN_M2M",
+            partnerName: formData.created_by_username
+          }
+        };
+        await fetch(
+          `${import.meta.env.VITE_BACKEND_SERVER}/notification/createnotification`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(notificationData),
+            credentials: "include",
+          }
+        );
+      } catch (notifErr) {
+        console.error("Failed to send M2M notification:", notifErr);
+      }
       if (result?.errors ) {
         const errMsg = result?.errors?.[0]
           ? `${result?.errors?.[0].path} : ${result?.errors?.[0].msg}`

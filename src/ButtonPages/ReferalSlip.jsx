@@ -98,24 +98,7 @@ function ButtonPage({ onClose = () => { } }) {
     try {
       setLoading(true);
 
-      const notificationData = {
-        receiver: data.referee_username,
-        sender: data.referrer_username,
-        header: `New Referral Received from ${data.referrer_username}`,
-        content: `Hello! You’ve been referred by ${data.referrer_username} : ${data.description}`,
-        read: false,
-      };
-
-      await fetch(
-        `${import.meta.env.VITE_BACKEND_SERVER}/notification/createnotification`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(notificationData),
-          credentials: "include",
-        }
-      );
-
+      // 1. Submit slip first to ensure validation and persistence succeed
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_SERVER}/slips/referral/createreferral`,
         {
@@ -127,6 +110,42 @@ function ButtonPage({ onClose = () => { } }) {
       );
 
       const result = await res.json();
+
+      if (result?.errors || result?.message === "error" || result?.error || !res.ok) {
+        const errMsg =
+          result?.errors?.[0]
+            ? `${result?.errors?.[0].path} : ${result?.errors?.[0].msg}`
+            : result?.message || result?.error || "An error occurred while creating referral.";
+        setError(String(errMsg));
+        return;
+      }
+
+      // 2. Only upon confirmed slip creation success, dispatch push & in-app notification
+      try {
+        const notificationData = {
+          receiver: data.referee_username,
+          sender: data.referrer_username,
+          header: `New Referral Received from ${data.referrer_username}`,
+          content: `Hello! You have received a new referral from ${data.referrer_username}: ${data.description}`,
+          read: false,
+          data: {
+            action: "OPEN_TYB",
+            referrerName: data.referrer_username
+          }
+        };
+
+        await fetch(
+          `${import.meta.env.VITE_BACKEND_SERVER}/notification/createnotification`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(notificationData),
+            credentials: "include",
+          }
+        );
+      } catch (notifErr) {
+        console.error("Failed to send referral notification:", notifErr);
+      }
 
       if (result?.errors || result?.message === "error" || result?.error) {
         const errMsg =

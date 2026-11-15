@@ -27,6 +27,9 @@ Tracks changes across the 3 production workspaces:
 | S2-#5 | 2026-11-14 | Attendance Overview: Dual Date Visualization | [x] Synced | [x] Synced | [x] Synced |
 | S2-#6 | 2026-11-14 | Mobile Responsive Alignment, Light Mode & Header Polish | [x] Synced | [x] Synced | [x] Synced |
 | S2-#7 | 2026-11-14 | Repository Documentation: High-Impact README Overhaul | [x] Synced | N/A | [x] Synced |
+| S3-#1 | 2026-11-15 | Chapter Leadership: Date Joined, Last Signed In & Suspended Filtering | [x] Synced | [x] Synced | [x] Synced |
+| S3-#2 | 2026-11-15 | Global Member Count: Suspended Account Exclusion | [x] Synced | [x] Synced | [x] Synced |
+| S3-#3 | 2026-11-15 | Bulletproof Slip Notifications (Referral, M2M, TYFTB) In-App & Push | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -402,3 +405,86 @@ Tracks changes across the 3 production workspaces:
    - Clean, modern GitHub-rendered Mermaid system architecture flowchart.
    - Dedicated Android build commands (`./gradlew bundleRelease`) in `SIB_app_android`.
    - Up-to-date maintainer attribution for Yonesh Murugan and official contact channel.
+
+
+---
+
+## Session 3 Change Log
+
+### S3-#1 [2026-11-15] - Chapter Leadership: Date Joined, Last Signed In & Suspended Member Filtering
+- **Type:** UI/UX / Feature / Role Governance / Multi-Platform Sync
+- **Origin:** Web & Android
+- **Files:** `src/Admin/Components/PresidentRole.jsx` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A (Frontend display & filter)
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Date Joined Column:** Added account creation timestamp formatted cleanly for each member row.
+2. **Last Signed In Column:** Displays exact relative sign-in time (e.g., *"2 hours ago"*, *"3 days ago"*) or clear *"Never"* badge for members without a recorded sign-in session.
+3. **Status Badges & Tabs:**
+   - Visual status pill indicating **Active** vs **Suspended** membership.
+   - Filter tabs allowing instantaneous toggling between **Active (count)**, **Suspended (count)**, and **All (total)**.
+4. **Suspended Count Footer:** Bottom summary component displaying the exact count of suspended members in the chapter.
+
+---
+
+### S3-#2 [2026-11-15] - Global Member Count: Suspended Account Exclusion
+- **Type:** Bug Fix / Data Integrity / Multi-Platform Sync
+- **Origin:** Backend, Web & Android
+- **Files:** `SIB_backend/src/pages/dashboard/dashboardRoute.mjs`, `SIB_backend/src/pages/public/public.mjs`, `SIB_backend/src/pages/admin/AdminRoute.mjs`, `src/MainPage/Dashboard.jsx`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Backend Chapter Overview Metric (`/dashboard/getchapteroverview`):** Filtered out suspended accounts (`user_status: { $ne: 'suspended' }` and `is_active: true`) so that active chapter totals reflect actual active members without skewing.
+2. **Public Member Directories (`/public/getallmembers`):** Excluded suspended accounts from public view and member counts.
+3. **Admin Chapter Stats:** Updated admin aggregation pipelines to exclude inactive/suspended memberships from active counts across all views.
+
+---
+
+### S3-#3 [2026-11-15] - Bulletproof Slip Notifications (Referral, M2M, TYFTB) In-App & Push
+- **Type:** Architecture / Bug Fix / Notifications / Multi-Platform Sync
+- **Origin:** Backend, Web & Android
+- **Files:**
+  - `SIB_backend/src/middlewares.mjs`
+  - `SIB_backend/src/schemas.mjs`
+  - `SIB_backend/src/validators.mjs`
+  - `SIB_backend/src/utils/fcmHelper.mjs`
+  - `SIB_backend/src/pages/notifications/notificationRoute.mjs`
+  - `src/ButtonPages/ReferalSlip.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/ButtonPages/M2MSlip.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/ButtonPages/TYFTBSlip.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/ButtonPages/FunctionalPage.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/hooks/usePushNotifications.jsx` (in `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Safe Order of Operations (Zero Phantom Notifications):**
+   - Re-architected all digital slip forms (`ReferalSlip`, `M2MSlip`, `TYFTBSlip`) to strictly await and confirm database persistence *first*.
+   - In-app notification creation (`POST /notification/createnotification`) and mobile push delivery execute *only* upon verified HTTP 200/201 response.
+2. **Universal Identity Mapping (`middlewares.mjs`):**
+   - Upgraded `mapNamesToIds` middleware to resolve identities across MongoDB ObjectId strings, usernames, and MemberProfile display names, eliminating `User not found by username` errors.
+3. **Notification Schema & Validation Resilience:**
+   - Extended `NotificationSchema` to store structured `data` action payloads for in-app notifications.
+   - Raised notification `header` max length from 80 to 200 characters in `validators.mjs` to prevent 400 Bad Request rejections on emoji-rich or detailed headings.
+4. **FCM Multicast & iOS APNs Hardening:**
+   - Ensured strict FCM compliance by stringifying all payload `data` key-value pairs in `fcmHelper.mjs`.
+   - Added standard iOS APNs payload (`aps: { sound: 'default', badge: 1 }`) for audible sound and badge incrementing.
+   - Verified active Apple APNs Auth Key (`LF3VSF496V`, Team ID `7C4RH6695J`) in Firebase Console for both Development and Production environments.
+5. **End-to-End Action Deep-Linking:**
+   - **Referral Slips:** Dispatches `action: 'OPEN_TYB'` with `referrerName`. Tapping notification deep-links to `/slips` and automatically opens the TYB Slip modal with the referrer pre-filled.
+   - **M2M Slips:** Dispatches `action: 'OPEN_M2M'` with `partnerName`. Tapping notification deep-links to `/slips` and automatically opens the M2M Slip modal with the partner pre-filled.
+   - **TYFTB Slips:** Dispatches `action: 'VIEW_ACTIVITY'` with formatted revenue amount (`₹XX,XXX`). Tapping notification opens `/myactivity`.

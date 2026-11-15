@@ -7,14 +7,14 @@ import FilterButton from "../Members/Components/FilterButton";
 import { getDate } from "../utils/getDate.mjs";
 import { X, IndianRupee, Calendar, Briefcase, FileText, User, Layers } from "lucide-react";
 
-function ButtonPage({ onClose = () => { } }) {
+function ButtonPage({ onClose = () => { }, prefillTo = '' }) {
   const todaysDate = getDate();
   const [date, setDate] = useState(todaysDate);
   const [amount, setAmount] = useState("");
   const [businessType, setBusinessType] = useState("new");
   const [referralType, setReferralType] = useState("tier1");
   const [comments, setComments] = useState("");
-  const [to, setTo] = useState("");
+  const [to, setTo] = useState(prefillTo || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [response, setResponse] = useState(null);
@@ -76,34 +76,7 @@ function ButtonPage({ onClose = () => { } }) {
     try {
       setLoading(true);
 
-      const userRes = await fetch(
-        `${import.meta.env.VITE_BACKEND_SERVER}/auth/getuser`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
-      const getuser = await userRes.json();
-
-      const notificationData = {
-        receiver: data.receiver_displayname,
-        sender: getuser?.username ?? "",
-        header: `You've received the TYB from the user : ${(getuser?.username ?? "").toString()}`,
-        content: `Thankyou for Business(TYB), I have earned ₹${data.business_amount} from your referral. Description : ${data.business_description} `,
-        read: false
-      };
-
-      await fetch(
-        `${import.meta.env.VITE_BACKEND_SERVER}/notification/createnotification`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(notificationData),
-          credentials: "include",
-        }
-      );
-
+      // 1. Submit TYB slip first
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_SERVER}/slips/tyftb/createtyftb`,
         {
@@ -114,6 +87,50 @@ function ButtonPage({ onClose = () => { } }) {
         }
       );
       const result = await res.json();
+
+      if (result?.errors || result?.message === "error" || result?.error || !res.ok) {
+        const errMsg = result?.errors?.[0]
+          ? `${result?.errors?.[0].path} : ${result?.errors?.[0].msg}`
+          : (result?.message || result?.error || "An error occurred.");
+        setError(String(errMsg));
+        return;
+      }
+
+      // 2. Only upon confirmed slip creation success, dispatch notification
+      try {
+        const userRes = await fetch(
+          `${import.meta.env.VITE_BACKEND_SERVER}/auth/getuser`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+          }
+        );
+        const getuser = await userRes.json();
+
+        const notificationData = {
+          receiver: data.receiver_displayname,
+          sender: getuser?.username ?? "",
+          header: `💸 TYB received from ${(getuser?.username ?? "").toString()}`,
+          content: `Thank you for the business! ₹${data.business_amount.toLocaleString('en-IN')} has been logged for your referral. Note: ${data.business_description}`,
+          read: false,
+          data: {
+            action: "VIEW_ACTIVITY"
+          }
+        };
+
+        await fetch(
+          `${import.meta.env.VITE_BACKEND_SERVER}/notification/createnotification`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(notificationData),
+            credentials: "include",
+          }
+        );
+      } catch (notifErr) {
+        console.error("Failed to send TYB notification:", notifErr);
+      }
 
       if (result?.errors || result?.message === "error" || result?.error) {
         const errMsg = result?.errors?.[0]
