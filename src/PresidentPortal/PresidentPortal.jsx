@@ -11,9 +11,9 @@ import MemberRoleManagement from './components/MemberRole'
 function PresidentPortal() {
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
-  const handleRefresh = () => {
+  const handleRefresh = React.useCallback(() => {
     setRefreshTrigger(prev => prev + 1)
-  }
+  }, [])
 
   return (
     <div className="min-h-screen w-full  transition-colors duration-300">
