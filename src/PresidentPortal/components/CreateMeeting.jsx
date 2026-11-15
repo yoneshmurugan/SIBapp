@@ -14,7 +14,7 @@ const durationOptions = [
 const priorityLevels = ["Normal", "High Priority", "Low Priority"];
 const meetingTypes = ["Weekly", "Monthly", "Others"];
 
-export default function ModalViewer() {
+export default function ModalViewer({ onCreated = () => {} }) {
   const [openModal, setOpenModal] = useState(false);
   const initialFocusRef = useRef(null);
   const [title, setTitle] = useState("");
@@ -93,25 +93,16 @@ export default function ModalViewer() {
         });
         const result = await res.json();
         if (result?.message === "success") {
-          const notificationData = {
-            header: `🗓️ A new chapter meeting has been scheduled.`,
-            content: `A new meeting titled ${title} has been scheduled for ${date} at ${time} in ${location}. Please review the meeting details and ensure your availability. Please mark your calendar and be prepared to attend.
-            Thank you!`,
-            read: false,
-          };
-
-          await fetch(
-            `${import.meta.env.VITE_BACKEND_SERVER}/notification/createbulknotifications`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(notificationData),
-              credentials: "include",
-            }
-          );
           setId(result.id);
           setIsSubmitting(false);
           setSuccess(true);
+          if (typeof onCreated === "function") {
+            onCreated(result.id);
+          }
+          setTimeout(() => {
+            setOpenModal(false);
+            handleClear();
+          }, 1200);
         } else if (result?.errors) {
           const errMsg = result?.errors?.[0]
             ? `${result.errors[0].path} : ${result.errors[0].msg}`
