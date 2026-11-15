@@ -25,10 +25,6 @@ export default function Notification() {
   const buttonRef = useRef(null);
   const panelRef = useRef(null);
 
-  const [detailOpen, setDetailOpen] = useState(false);
-  const detailRef = useRef(null);
-  const [activeNotif, setActiveNotif] = useState(null);
-
   const {
     data: listData,
     loading: listLoading,
@@ -136,10 +132,7 @@ export default function Notification() {
     return res.json();
   };
 
-  const openDetails = async (n) => {
-    setActiveNotif(n);
-    setDetailOpen(true);
-
+  const handleItemClick = async (n) => {
     if (!n.read) {
       setNotifications((prevList) =>
         prevList.map((x) => (x._id === n._id ? { ...x, read: true } : x))
@@ -150,6 +143,8 @@ export default function Notification() {
         console.error("Failed to mark read:", e);
       }
     }
+    setOpen(false);
+    navigate("/allnotifications", { state: { openId: n._id } });
   };
 
   const handlePunchTYB = async (n, e) => {
@@ -168,7 +163,6 @@ export default function Notification() {
     }
 
     setOpen(false);
-    setDetailOpen(false);
 
     const refInfo = extractReferrerInfo(n);
     const prefillComments = refInfo.referralDetails
@@ -304,22 +298,21 @@ export default function Notification() {
               return (
                 <li key={n._id}>
                   <div
-                    onClick={() => openDetails(n)}
-                    className={`group relative flex flex-col p-4 text-left transition-all cursor-pointer hover:bg-amber-50/40 dark:hover:bg-gray-800/60 ${
+                    onClick={() => handleItemClick(n)}
+                    className={`group relative flex items-center justify-between gap-3 px-4 py-3 text-left transition-all cursor-pointer hover:bg-amber-50/50 dark:hover:bg-gray-800/60 ${
                       !n.read
                         ? "bg-amber-500/5 dark:bg-amber-500/5"
                         : "bg-white dark:bg-gray-900"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      {/* Category Icon */}
+                    {/* Left: Category Icon + Title + Timestamp */}
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className={`flex-shrink-0 p-2 rounded-xl ${conf.iconBgClass} shadow-sm`}>
                         <CategoryIcon className="w-4 h-4" />
                       </div>
 
-                      {/* Content */}
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
                           <p className={`text-sm font-bold break-words line-clamp-2 leading-snug ${!n.read ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
                             {n.header}
                           </p>
@@ -331,31 +324,27 @@ export default function Notification() {
                           )}
                         </div>
 
-                        <p className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                          {n.content}
-                        </p>
-
-                        <div className="mt-2.5 flex items-center justify-between">
-                          <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
-                            {formatNotificationTime(n.createdAt)}
-                          </span>
-
-                          {/* "Punch TYB" button for Referral Notifications */}
-                          {isRef && (
-                            <button
-                              type="button"
-                              onClick={(e) => handlePunchTYB(n, e)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-400/20 hover:bg-amber-400/30 border border-amber-500/30 shadow-sm transition-transform active:scale-95"
-                              title="Open TYB Slip with details autofilled"
-                            >
-                              <IndianRupee className="w-3.5 h-3.5" />
-                              <span>Punch TYB</span>
-                              <ArrowRight className="w-3 h-3 ml-0.5" />
-                            </button>
-                          )}
-                        </div>
+                        <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 inline-block">
+                          {formatNotificationTime(n.createdAt)}
+                        </span>
                       </div>
                     </div>
+
+                    {/* Right: "Punch TYB" button for Referral Notifications */}
+                    {isRef && (
+                      <div className="shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => handlePunchTYB(n, e)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-950 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 shadow-sm transition-transform active:scale-95 whitespace-nowrap"
+                          title="Open TYB Slip with details autofilled"
+                        >
+                          <IndianRupee className="w-3.5 h-3.5" />
+                          <span>Punch TYB</span>
+                          <ArrowRight className="w-3 h-3 ml-0.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </li>
               );
@@ -375,89 +364,6 @@ export default function Notification() {
             <span className="text-[11px] text-gray-400">
               {notifications.length} total
             </span>
-          </div>
-        </div>
-      )}
-
-      {/* Details Modal */}
-      {detailOpen && activeNotif && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Notification details"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setDetailOpen(false);
-          }}
-        >
-          <div
-            ref={detailRef}
-            className="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-2xl border border-gray-100 dark:border-gray-800 outline-none animate-in fade-in zoom-in-95 duration-150"
-          >
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
-              <div className="space-y-1">
-                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${getCategoryConfig(getNotificationCategory(activeNotif)).badgeClass}`}>
-                  {getCategoryConfig(getNotificationCategory(activeNotif)).label}
-                </span>
-                <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-snug">
-                  {activeNotif.header}
-                </h4>
-              </div>
-              <button
-                className="rounded-xl p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                onClick={() => setDetailOpen(false)}
-                aria-label="Close details"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="my-5 space-y-4">
-              <div className="rounded-xl bg-gray-50 dark:bg-gray-800/40 p-4 border border-gray-100 dark:border-gray-800">
-                <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
-                  {activeNotif.content}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-xs text-gray-500 dark:text-gray-400">
-                <div>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">Received:</span>{" "}
-                  {formatFullDateTime(activeNotif.createdAt)}
-                </div>
-                {activeNotif.sender && (
-                  <div>
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">From:</span>{" "}
-                    {typeof activeNotif.sender === 'object' ? activeNotif.sender.name || activeNotif.sender.username : activeNotif.sender}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                className="w-full sm:w-auto rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                onClick={() => setDetailOpen(false)}
-              >
-                Close
-              </button>
-
-              {/* Punch TYB CTA inside detail modal */}
-              {isReferralNotification(activeNotif) && (
-                <button
-                  type="button"
-                  onClick={() => handlePunchTYB(activeNotif)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-gray-900 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 shadow-md shadow-amber-500/20 transition-all active:scale-95"
-                >
-                  <IndianRupee className="w-4 h-4" />
-                  <span>Punch TYB for this Referral</span>
-                  <ArrowRight className="w-4 h-4 ml-0.5" />
-                </button>
-              )}
-            </div>
           </div>
         </div>
       )}

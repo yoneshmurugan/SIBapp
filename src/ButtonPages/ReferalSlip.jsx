@@ -126,7 +126,7 @@ function ButtonPage({ onClose = () => { } }) {
           receiver: data.referee_username,
           sender: data.referrer_username,
           header: `New Referral Received from ${data.referrer_username}`,
-          content: `Hello! You have received a new referral from ${data.referrer_username}: ${data.description}`,
+          content: `Hello! You have received a new referral from ${data.referrer_username}: ${data.description}. Tap to punch TYB!`,
           read: false,
           data: {
             action: "OPEN_TYB",

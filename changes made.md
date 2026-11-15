@@ -33,6 +33,7 @@ Tracks changes across the 3 production workspaces:
 | S3-#4 | 2026-11-15 | Executive Direct Detail Modals & Complete Overhaul: Meetings & Event Management | [x] Synced | [x] Synced | [x] Synced |
 | S3-#5 | 2026-11-15 | Member Renewal Reminders: Multi-Channel Delivery (In-App & Push Checkboxes) | [x] Synced | [x] Synced | [x] Synced |
 | S3-#6 | 2026-11-15 | Executive Alert Broadcast System: Multi-Channel UI, Live Preview & Backend Scoping | [x] Synced | [x] Synced | [x] Synced |
+| S3-#10 | 2026-11-15 | Notification Popover Minimalism, Dedicated M2M & TYB Tabs & Referral Push Auto-Routing | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -698,6 +699,41 @@ Tracks changes across the 3 production workspaces:
    - Restored the multi-channel live device preview tabs (In-App Feed, Mobile Push, Email Message).
    - Set the official heading to **CHAPTER BROADCAST**.
    - Removed the "Active Chapter" badge and removed placeholder "e.g." text from the title and message fields.
+
+---
+
+### S3-#10 [2026-11-15] - Notification Popover Minimalism, Dedicated M2M & TYB Tabs & Referral Push Auto-Routing
+- **Type:** UI/UX Streamlining / Feature / Notification Routing
+- **Origin:** Web, Android & iOS
+- **Files:**
+  - `src/NotificationPanel/Notification.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/NotificationPanel/NotificationsPage.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/NotificationPanel/notificationUtils.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/hooks/usePushNotifications.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/hooks/protectedRoute.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/ButtonPages/ReferalSlip.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `SIB_backend/src/utils/fcmHelper.mjs`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Bell Popover Minimalism (`Notification.jsx`):**
+   - Removed description/content paragraph clutter from the notification dropdown list items.
+   - Now displays strictly: Category Icon, Title (`n.header`), Timestamp, Unread status dot, and the "Punch TYB" button (if applicable).
+   - Clicking an item in the popover marks it as read, closes the popover, and navigates to the dedicated Notifications Page (`/allnotifications`) where complete message details, sender information, and timestamps are displayed.
+2. **Dedicated M2M Category & TYB Tab Alignment (`NotificationsPage.jsx` & `notificationUtils.jsx`):**
+   - Added dedicated **`M2M`** category filter tab to cleanly isolate Member-to-Member meeting slips.
+   - Renamed `"Slips & TYB"` tab to strictly **`TYB`** tab.
+   - Updated category counter logic to calculate `m2m` and `tyb` counts separately.
+3. **Referral Push Notification Deep-Link & Auto-Routing:**
+   - Updated `usePushNotifications.jsx` native listener (`notificationActionPerformed`): tapping a referral received push notification on mobile automatically navigates to `/slips` with `{ action: 'OPEN_TYB', referrerName, prefillComments, crossChapter, chapterId }`, which auto-opens the `TYFTBSlip` modal prefilled.
+   - Referral notification message text enhanced with `"Tap to punch TYB!"` prompt.
+   - Added `clickAction: 'FCM_PLUGIN_ACTIVITY'` and category payload to Android FCM and iOS APNs push payloads.
+
 
 
 
