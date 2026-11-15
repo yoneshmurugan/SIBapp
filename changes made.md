@@ -36,6 +36,8 @@ Tracks changes across the 3 production workspaces:
 | S3-#10 | 2026-11-15 | Notification Popover Minimalism, Dedicated M2M & TYB Tabs & Referral Push Auto-Routing | [x] Synced | [x] Synced | [x] Synced |
 | S3-#11 | 2026-11-15 | Executive Notification UI: Stripe/Linear Left Accent Border, Micro Category Chips & Emoji Normalization | [x] Synced | [x] Synced | [x] Synced |
 | S3-#12 | 2026-11-15 | Executive Referral Slips Desk Overhaul (/slips): Real-Time KPIs, Action Cards & Activity Feed | [x] Synced | [x] Synced | [x] Synced |
+| S3-#13 | 2026-11-15 | Member Directory: 20-Card Doubling & Sliding Ellipsis Pagination (Public & Private) | [x] Synced | [x] Synced | [x] Synced |
+| S3-#14 | 2026-11-15 | Slips Desk: NaN Amount Fix, Remove Standards & Full Mobile Optimization | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -808,6 +810,63 @@ Tracks changes across the 3 production workspaces:
    - Structured 3 core chapter networking best practices for lead qualification, revenue tracking, and bilateral synergy.
 5. **Emoji Cleanliness:**
    - Removed informal emojis from slip notification headers, ensuring 100% clean enterprise vector styling.
+
+---
+
+### S3-#13 [2026-11-15] - Member Directory: 20-Card Doubling & Sliding Ellipsis Pagination (Public & Private)
+- **Type:** Enhancement / UI UX
+- **Origin:** Web (`SIBapp`)
+- **Files:**
+  - `src/Members/Components/MemberList.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/src1/Members/Main.jsx` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Doubled Member Card Count Per Page:**
+   - Doubled card density from 10 to 20 member cards per page across both Private Directory (`/members`) and Public Directory (`/public-members`).
+2. **Compact Sliding Window Pagination with Ellipsis (`...`):**
+   - Replaced runaway sequential page numbering (`1 2 3 ... 17`) with an intelligent sliding window algorithm.
+   - When total pages exceed 7, dynamically caps visible buttons using left/right ellipsis (`1 ... 4 5 6 ... 17`), keeping page navigation under 7–8 buttons regardless of directory scale.
+3. **Responsive Controls & UX:**
+   - Added `ChevronLeft` and `ChevronRight` navigation buttons with disabled state bounds checking.
+   - Added item count indicator: `Showing X–Y of Z members`.
+   - Smoothly scrolls to the directory top on page change.
+
+---
+
+### S3-#14 [2026-11-15] - Slips Desk: NaN Amount Fix, Remove Standards & Full Mobile Optimization
+- **Type:** Bug Fix & Mobile UI Optimization
+- **Origin:** Web (`SIBapp`) & Backend (`SIB_backend`)
+- **Files:**
+  - `src/ButtonPages/FunctionalPage.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/pages/activity/activityRoute.mjs` (in `SIB_backend`)
+  - `src/pages/dashboard/dashboardRoute.mjs` (in `SIB_backend`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Resolved `₹NaN` TYB Revenue Metric:**
+   - Root cause: MongoDB Decimal128 aggregation results (`$sum: "$business_amount"`) serialized to `{ "$numberDecimal": "..." }` in JSON, causing `Number({})` to evaluate to `NaN`.
+   - Backend fix: Serialized Decimal128 to clean numeric float values in `/activity/getactivity` and `/dashboard/getactivity`.
+   - Frontend safeguard: Introduced `parseAmount` in `FunctionalPage.jsx` to robustly parse Decimal128 objects, formatted strings, raw numbers, and null/undefined values.
+2. **Removed Networking Standards Component:**
+   - Removed the "Networking Standards" static guideline card per user direction.
+   - Expanded "Recent Slip Submissions" feed to full width (`w-full`) for cleaner visual balance.
+3. **Comprehensive Mobile View Optimization:**
+   - Hero Banner: Fluid padding, non-breaking headline, and flexible ledger action buttons.
+   - KPI Bar: Responsive 2x2 grid on mobile screens with compact typography and badges.
+   - Action Cards: Refactored card spacing (`gap-3.5`), padding (`p-4`), and full-width buttons for smooth thumb interaction.
+   - Recent Transactions: Clean mobile item rows with right-aligned amount and verification badges.
+
 
 
 
