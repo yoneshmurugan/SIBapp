@@ -180,25 +180,6 @@ export default function Notification() {
     });
   };
 
-  useEffect(() => {
-    if (!detailOpen) return;
-
-    const focusable = detailRef.current?.querySelector(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    focusable?.focus();
-
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        setDetailOpen(false);
-        requestAnimationFrame(() => panelRef.current?.focus?.());
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [detailOpen]);
-
   return (
     <div className="relative inline-block text-left">
       <button

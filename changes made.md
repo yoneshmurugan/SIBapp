@@ -733,6 +733,8 @@ Tracks changes across the 3 production workspaces:
    - Updated `usePushNotifications.jsx` native listener (`notificationActionPerformed`): tapping a referral received push notification on mobile automatically navigates to `/slips` with `{ action: 'OPEN_TYB', referrerName, prefillComments, crossChapter, chapterId }`, which auto-opens the `TYFTBSlip` modal prefilled.
    - Referral notification message text enhanced with `"Tap to punch TYB!"` prompt.
    - Added `clickAction: 'FCM_PLUGIN_ACTIVITY'` and category payload to Android FCM and iOS APNs push payloads.
+4. **Resolved Lingering Reference (`Notification.jsx`):**
+   - Removed unused modal escape key and focus trap `useEffect` in `Notification.jsx` that was listening to `detailOpen`, resolving the runtime error `ReferenceError: Can't find variable: detailOpen`.
 
 
 
