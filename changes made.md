@@ -35,6 +35,7 @@ Tracks changes across the 3 production workspaces:
 | S3-#6 | 2026-11-15 | Executive Alert Broadcast System: Multi-Channel UI, Live Preview & Backend Scoping | [x] Synced | [x] Synced | [x] Synced |
 | S3-#10 | 2026-11-15 | Notification Popover Minimalism, Dedicated M2M & TYB Tabs & Referral Push Auto-Routing | [x] Synced | [x] Synced | [x] Synced |
 | S3-#11 | 2026-11-15 | Executive Notification UI: Stripe/Linear Left Accent Border, Micro Category Chips & Emoji Normalization | [x] Synced | [x] Synced | [x] Synced |
+| S3-#12 | 2026-11-15 | Executive Referral Slips Desk Overhaul (/slips): Real-Time KPIs, Action Cards & Activity Feed | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -769,6 +770,45 @@ Tracks changes across the 3 production workspaces:
    - Displayed an ultra-clean uppercase micro-pill badge (`[REFERRAL]`, `[TYB]`, `[M2M]`, `[MEETING]`, `[ANNOUNCEMENT]`) paired directly with the relative timestamp and red unread indicator dot.
 4. **Leading Emoji Normalization (`cleanNotificationTitle`):**
    - Stripped informal leading emojis (`💸`, `🗓️`, `⏰`, `✅`, `🤝`, `📢`) from notification headers upon display, yielding pure, professional enterprise typography.
+
+---
+
+### S3-#12 [2026-11-15] - Executive Referral Slips Desk Overhaul (/slips): Real-Time KPIs, Action Cards & Activity Feed
+- **Type:** UI/UX Redesign / Feature / Executive Polish
+- **Origin:** Web, Android & iOS
+- **Files:**
+  - `src/ButtonPages/FunctionalPage.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/ButtonPages/TYFTBSlip.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/ButtonPages/M2MSlip.jsx` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Executive Referral Slips Desk (`FunctionalPage.jsx`):**
+   - Overhauled the previously bland wireframe with a comprehensive, executive SIB Business Desk.
+   - Replaced duplicate placeholder cards with 4 distinctive, luxury action cards:
+     - **Business Referral** (`Share2`, amber accent): Connect a chapter or cross-chapter peer with warm customer leads.
+     - **TYB Revenue Slip** (`IndianRupee`, emerald accent): Acknowledge closed deal revenue generated through member referrals.
+     - **1-on-1 M2M Meeting** (`Users`, indigo accent): Document completed bilateral strategic collaboration sessions.
+     - **Visitor Registration** (`UserPlus`, sky accent): Register prospective entrepreneurs for weekly chapter assemblies.
+2. **Real-Time Member KPI Bar:**
+   - Integrated live performance metrics fetching from `GET /activity/getactivity`:
+     - Verified TYB Closed Revenue value (`₹`).
+     - Referrals passed (Given & Received).
+     - 1-on-1 M2M meeting sessions completed.
+     - Chapter guests hosted.
+3. **Recent Submissions Activity Feed:**
+   - Displays the member's latest transactions with transaction type badges, counterparty names, timestamps, amounts, and verification statuses.
+   - Added direct deep-link to the full ledger in `/myactivity`.
+4. **Networking Standards & Guidelines:**
+   - Structured 3 core chapter networking best practices for lead qualification, revenue tracking, and bilateral synergy.
+5. **Emoji Cleanliness:**
+   - Removed informal emojis from slip notification headers, ensuring 100% clean enterprise vector styling.
+
 
 
 

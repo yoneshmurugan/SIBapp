@@ -117,7 +117,7 @@ function ButtonPage({ onClose = () => { }, prefillTo = '', prefillComments = '',
         const notificationData = {
           receiver: data.receiver_displayname,
           sender: getuser?.username ?? "",
-          header: `💸 TYB from ${senderDisplayName}!`,
+          header: `TYB from ${senderDisplayName}!`,
           content: `Amazing job! ${senderDisplayName} just logged a TYB slip of ₹${data.business_amount.toLocaleString('en-IN')} for your referral. Note: ${data.business_description}`,
           read: false,
           data: {
