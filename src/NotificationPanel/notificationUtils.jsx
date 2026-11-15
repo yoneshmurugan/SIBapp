@@ -157,63 +157,55 @@ export function isReferralNotification(n) {
   );
 }
 
+export function cleanNotificationTitle(title) {
+  if (!title) return "";
+  // Strip leading emojis and whitespace for an executive, clean typography appearance
+  return title.replace(/^[\p{Emoji}\p{Extended_Pictographic}\uFE0F\u200D\s]+/gu, "").trim();
+}
+
 export function getCategoryConfig(category) {
   switch (category) {
     case "referral":
       return {
         label: "Referral",
-        Icon: Share2,
         badgeClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
-        iconBgClass: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
-        accentBorder: "border-l-amber-500",
+        borderClass: "border-l-amber-500",
       };
     case "tyb":
       return {
         label: "TYB",
-        Icon: IndianRupee,
         badgeClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
-        iconBgClass: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
-        accentBorder: "border-l-emerald-500",
+        borderClass: "border-l-emerald-500",
       };
     case "m2m":
       return {
         label: "M2M",
-        Icon: Users,
         badgeClass: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20",
-        iconBgClass: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
-        accentBorder: "border-l-indigo-500",
+        borderClass: "border-l-indigo-500",
       };
     case "meeting":
       return {
         label: "Meeting",
-        Icon: Calendar,
         badgeClass: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20",
-        iconBgClass: "bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400",
-        accentBorder: "border-l-sky-500",
+        borderClass: "border-l-sky-500",
       };
     case "event":
       return {
         label: "Event",
-        Icon: Sparkles,
         badgeClass: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20",
-        iconBgClass: "bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400",
-        accentBorder: "border-l-violet-500",
+        borderClass: "border-l-violet-500",
       };
     case "announcement":
       return {
         label: "Announcement",
-        Icon: Megaphone,
         badgeClass: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
-        iconBgClass: "bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400",
-        accentBorder: "border-l-rose-500",
+        borderClass: "border-l-rose-500",
       };
     default:
       return {
         label: "Update",
-        Icon: Bell,
         badgeClass: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20",
-        iconBgClass: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400",
-        accentBorder: "border-l-slate-400",
+        borderClass: "border-l-slate-400",
       };
   }
 }
