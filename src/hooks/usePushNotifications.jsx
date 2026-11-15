@@ -11,12 +11,6 @@ const usePushNotifications = () => {
         if (Capacitor.isNativePlatform()) {
             registerPushNotifications();
         }
-
-        return () => {
-            if (Capacitor.isNativePlatform()) {
-                FirebaseMessaging.removeAllListeners();
-            }
-        };
     }, []);
 
     const registerPushNotifications = async () => {
@@ -36,15 +30,21 @@ const usePushNotifications = () => {
             
             // Register token with backend
             try {
-                await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/register-fcm-token`, {
+                const regRes = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/register-fcm-token`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify({ fcmToken: token })
                 });
+                if (regRes.ok) {
+                    console.log("✅ FCM token successfully registered with backend");
+                }
             } catch (err) {
                 console.error('Failed to register FCM token with backend:', err);
             }
+
+            // Clear any previous listeners before attaching to avoid duplicate triggers
+            await FirebaseMessaging.removeAllListeners();
 
             // Setup listeners for receiving notifications
             await FirebaseMessaging.addListener('notificationReceived', (event) => {

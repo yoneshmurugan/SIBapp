@@ -8,9 +8,11 @@ import SubmitButtons from './SubmitButtons.jsx'
 import { User } from 'lucide-react'
 import UserInfo from './UserInfo.jsx'
 import LeaderboardTeaser from './LeaderboardTeaser.jsx'
+import usePushNotifications from '../hooks/usePushNotifications.jsx'
 
 
 function Dashboard() {
+  usePushNotifications();
   return (
     <div className="w-full min-h-screen bg-gray-100 dark:bg-gray-950">
       <div className="
