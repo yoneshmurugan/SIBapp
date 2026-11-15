@@ -1,80 +1,123 @@
 import { useEffect, useState } from 'react';
-import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { useNavigate } from 'react-router-dom';
-import { Capacitor } from '@capacitor/core';
 
 const usePushNotifications = () => {
     const [fcmToken, setFcmToken] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (Capacitor.isNativePlatform()) {
-            registerPushNotifications();
-        }
-    }, []);
+        let isMounted = true;
 
-    const registerPushNotifications = async () => {
-        try {
-            // Request permissions
-            const permStatus = await FirebaseMessaging.requestPermissions();
-            if (permStatus.receive !== 'granted') {
-                console.log('User denied push notification permissions');
-                return;
-            }
-
-            // Get the unified FCM token
-            const { token } = await FirebaseMessaging.getToken();
-            console.log("Unified FCM Token:", token);
-            setFcmToken(token);
-            localStorage.setItem('fcmToken', token);
-            
-            // Register token with backend
+        const initNativePush = async () => {
             try {
-                const regRes = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/register-fcm-token`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ fcmToken: token })
+                // Dynamically import Capacitor to ensure safe execution on web
+                const capPkg = '@capacitor/core';
+                const msgPkg = '@capacitor-firebase/messaging';
+                const capModule = await import(/* @vite-ignore */ capPkg).catch(() => null);
+                if (!capModule || !capModule.Capacitor || !capModule.Capacitor.isNativePlatform()) {
+                    return;
+                }
+
+                const messagingModule = await import(/* @vite-ignore */ msgPkg).catch(() => null);
+                if (!messagingModule || !messagingModule.FirebaseMessaging) {
+                    return;
+                }
+
+                const { FirebaseMessaging } = messagingModule;
+
+                // Request push permissions
+                const permStatus = await FirebaseMessaging.requestPermissions();
+                if (permStatus.receive !== 'granted') {
+                    console.log('User denied push notification permissions');
+                    return;
+                }
+
+                // Retrieve device FCM token
+                const { token } = await FirebaseMessaging.getToken();
+                if (!isMounted) return;
+                setFcmToken(token);
+                localStorage.setItem('fcmToken', token);
+
+                // Register token with backend
+                try {
+                    await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/register-fcm-token`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ fcmToken: token })
+                    });
+                } catch (err) {
+                    console.error('Failed to register FCM token with backend:', err);
+                }
+
+                // Clear any previous listeners before attaching
+                await FirebaseMessaging.removeAllListeners();
+
+                // Foreground push received listener
+                await FirebaseMessaging.addListener('notificationReceived', (event) => {
+                    console.log('Push received: ', JSON.stringify(event.notification));
                 });
-                if (regRes.ok) {
-                    console.log("✅ FCM token successfully registered with backend");
-                }
-            } catch (err) {
-                console.error('Failed to register FCM token with backend:', err);
+
+                // Deep-link routing on notification tap
+                await FirebaseMessaging.addListener('notificationActionPerformed', (event) => {
+                    console.log('Push action performed: ', JSON.stringify(event.notification));
+                    const notif = event.notification || {};
+                    const data = notif.data || notif.additionalData || {};
+                    const action = data.action;
+                    const title = (notif.title || '').toLowerCase();
+                    const body = (notif.body || '').toLowerCase();
+
+                    // If referral push or action is OPEN_TYB -> Route straight to TYB Slip with details prefilled!
+                    const isReferralPush =
+                        action === 'OPEN_TYB' ||
+                        event.actionId === 'punch_tyb' ||
+                        title.includes('referral') ||
+                        body.includes('referral');
+
+                    if (isReferralPush) {
+                        const comments = data.referralDetails
+                            ? `Regarding referral: ${data.referralDetails}`
+                            : (data.referrerName ? `Business from referral by ${data.referrerName}` : '');
+
+                        navigate('/slips', {
+                            state: {
+                                action: 'OPEN_TYB',
+                                referrerName: data.referrerName || '',
+                                prefillComments: comments,
+                                crossChapter: data.crossChapter === 'true' || data.crossChapter === true,
+                                chapterId: data.chapterId || null
+                            }
+                        });
+                    } else if (action === 'OPEN_M2M' || title.includes('m2m')) {
+                        navigate('/slips', {
+                            state: {
+                                action: 'OPEN_M2M',
+                                partnerName: data.partnerName || ''
+                            }
+                        });
+                    } else if (action === 'VIEW_ACTIVITY') {
+                        navigate('/myactivity');
+                    } else if (action === 'OPEN_MEETINGS' || title.includes('meeting')) {
+                        navigate('/meetings');
+                    } else if (action === 'OPEN_WALL_OF_WISHES') {
+                        navigate('/wall-of-wishes');
+                    } else if (action === 'OPEN_PROFILE_BADGES') {
+                        navigate('/profile');
+                    } else {
+                        navigate('/allnotifications');
+                    }
+                });
+            } catch (error) {
+                console.log('Push notifications registration bypassed:', error?.message);
             }
+        };
 
-            // Clear any previous listeners before attaching to avoid duplicate triggers
-            await FirebaseMessaging.removeAllListeners();
+        initNativePush();
 
-            // Setup listeners for receiving notifications
-            await FirebaseMessaging.addListener('notificationReceived', (event) => {
-                console.log('Push received: ', JSON.stringify(event.notification));
-            });
-
-            await FirebaseMessaging.addListener('notificationActionPerformed', (event) => {
-                console.log('Push action performed: ', JSON.stringify(event.notification));
-                const data = event.notification?.data;
-                if (data && data.action === 'OPEN_TYB') {
-                    navigate('/slips', { state: { action: 'OPEN_TYB', referrerName: data.referrerName } });
-                } else if (data && data.action === 'OPEN_M2M') {
-                    navigate('/slips', { state: { action: 'OPEN_M2M', partnerName: data.partnerName } });
-                } else if (data && data.action === 'VIEW_ACTIVITY') {
-                    navigate('/myactivity');
-                } else if (data && data.action === 'OPEN_MEETINGS') {
-                    navigate('/meetings');
-                } else if (data && data.action === 'OPEN_WALL_OF_WISHES') {
-                    navigate('/wall-of-wishes');
-                } else if (data && data.action === 'OPEN_PROFILE_BADGES') {
-                    navigate('/profile');
-                } else {
-                    navigate('/allnotifications');
-                }
-            });
-
-        } catch (error) {
-            console.error('Error registering push notifications:', error);
-        }
-    };
+        return () => {
+            isMounted = false;
+        };
+    }, [navigate]);
 
     return { fcmToken };
 };

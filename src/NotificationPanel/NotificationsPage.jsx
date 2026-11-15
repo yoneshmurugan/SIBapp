@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import Header from "../MainPage/Header";
 import {
@@ -30,12 +30,13 @@ import {
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showDetail, setShowDetail] = useState(false);
   const [activeNotif, setActiveNotif] = useState(null);
   const [isMarkingRead, setIsMarkingRead] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("all"); // 'all' | 'unread' | 'referral' | 'tyb' | 'meeting' | 'announcement'
+  const [selectedFilter, setSelectedFilter] = useState("all"); // 'all' | 'unread' | 'referral' | 'tyb' | 'm2m' | 'meeting' | 'announcement'
   const detailRef = useRef(null);
 
   const [url, setUrl] = useState(
@@ -51,6 +52,17 @@ export default function NotificationsPage() {
     }
   }, [data]);
 
+  // If navigated from popover with openId, auto-open details modal
+  useEffect(() => {
+    if (location.state?.openId && notifications.length > 0) {
+      const target = notifications.find((n) => n._id === location.state.openId);
+      if (target) {
+        openModal(target);
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [location.state, notifications, navigate, location.pathname]);
+
   // Compute counts
   const counts = useMemo(() => {
     const list = notifications || [];
@@ -59,6 +71,7 @@ export default function NotificationsPage() {
       unread: list.filter((n) => !n.read).length,
       referral: list.filter((n) => getNotificationCategory(n) === "referral").length,
       tyb: list.filter((n) => getNotificationCategory(n) === "tyb").length,
+      m2m: list.filter((n) => getNotificationCategory(n) === "m2m").length,
       meeting: list.filter((n) => {
         const cat = getNotificationCategory(n);
         return cat === "meeting" || cat === "event";
@@ -75,6 +88,7 @@ export default function NotificationsPage() {
       if (selectedFilter === "unread" && n.read) return false;
       if (selectedFilter === "referral" && cat !== "referral") return false;
       if (selectedFilter === "tyb" && cat !== "tyb") return false;
+      if (selectedFilter === "m2m" && cat !== "m2m") return false;
       if (selectedFilter === "meeting" && cat !== "meeting" && cat !== "event") return false;
       if (selectedFilter === "announcement" && cat !== "announcement") return false;
 
@@ -222,7 +236,8 @@ export default function NotificationsPage() {
     { id: "all", label: "All", count: counts.all },
     { id: "unread", label: "Unread", count: counts.unread },
     { id: "referral", label: "Referrals", count: counts.referral },
-    { id: "tyb", label: "Slips & TYB", count: counts.tyb },
+    { id: "tyb", label: "TYB", count: counts.tyb },
+    { id: "m2m", label: "M2M", count: counts.m2m },
     { id: "meeting", label: "Meetings", count: counts.meeting },
     { id: "announcement", label: "Announcements", count: counts.announcement },
   ];

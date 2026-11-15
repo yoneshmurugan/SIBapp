@@ -59,21 +59,8 @@ export function getNotificationCategory(n) {
   const content = (n.content || "").toLowerCase();
   const action = n.data?.action;
 
-  // 1. TYB (Thank You for the Business) Slips
-  // Checked FIRST because TYB messages mention "for your referral"!
-  if (
-    action === "VIEW_ACTIVITY" ||
-    header.includes("tyb") ||
-    header.includes("thank you for the business") ||
-    header.includes("thank you") ||
-    content.includes("logged a tyb slip") ||
-    content.includes("tyb slip") ||
-    content.includes("thank you for the business")
-  ) {
-    return "tyb";
-  }
-
-  // 2. M2M (Member-to-Member) Meeting Slips
+  // 1. M2M (Member-to-Member) Meeting Slips
+  // Checked first because it contains "meeting" and must not fall into general chapter "meeting"
   if (
     action === "OPEN_M2M" ||
     header.includes("m2m") ||
@@ -84,6 +71,20 @@ export function getNotificationCategory(n) {
     content.includes("1-to-1 meeting")
   ) {
     return "m2m";
+  }
+
+  // 2. TYB (Thank You for the Business) Slips
+  // Checked before referral because TYB messages mention "for your referral"!
+  if (
+    action === "VIEW_ACTIVITY" ||
+    header.includes("tyb") ||
+    header.includes("thank you for the business") ||
+    header.includes("thank you") ||
+    content.includes("logged a tyb slip") ||
+    content.includes("tyb slip") ||
+    content.includes("thank you for the business")
+  ) {
+    return "tyb";
   }
 
   // 3. Referral Slips (Only actual referrals received)
@@ -129,17 +130,20 @@ export function isReferralNotification(n) {
   const content = (n.content || "").toLowerCase();
   const action = n.data?.action;
 
-  // Explicitly exclude TYB, M2M, Meetings, Alerts
+  // Explicitly exclude TYB, M2M, Meetings, Events, Alerts
   if (
     action === "VIEW_ACTIVITY" ||
+    action === "OPEN_M2M" ||
     header.includes("tyb") ||
     header.includes("thank you") ||
     content.includes("logged a tyb") ||
     content.includes("tyb slip") ||
-    action === "OPEN_M2M" ||
     header.includes("m2m") ||
     header.includes("meeting") ||
-    header.includes("event")
+    header.includes("event") ||
+    header.includes("announcement") ||
+    header.includes("urgent") ||
+    header.includes("renewal")
   ) {
     return false;
   }
@@ -165,7 +169,7 @@ export function getCategoryConfig(category) {
       };
     case "tyb":
       return {
-        label: "TYB Slip",
+        label: "TYB",
         Icon: IndianRupee,
         badgeClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
         iconBgClass: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
@@ -173,7 +177,7 @@ export function getCategoryConfig(category) {
       };
     case "m2m":
       return {
-        label: "M2M Meeting",
+        label: "M2M",
         Icon: Users,
         badgeClass: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20",
         iconBgClass: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
