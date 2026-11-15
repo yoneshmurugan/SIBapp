@@ -56,6 +56,10 @@ const usePushNotifications = () => {
                 const data = event.notification?.data;
                 if (data && data.action === 'OPEN_TYB') {
                     navigate('/slips', { state: { action: 'OPEN_TYB', referrerName: data.referrerName } });
+                } else if (data && data.action === 'OPEN_M2M') {
+                    navigate('/slips', { state: { action: 'OPEN_M2M', partnerName: data.partnerName } });
+                } else if (data && data.action === 'VIEW_ACTIVITY') {
+                    navigate('/myactivity');
                 } else if (data && data.action === 'OPEN_WALL_OF_WISHES') {
                     navigate('/wall-of-wishes');
                 } else if (data && data.action === 'OPEN_PROFILE_BADGES') {

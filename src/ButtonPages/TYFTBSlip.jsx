@@ -7,14 +7,14 @@ import FilterButton from "../Members/Components/FilterButton";
 import { getDate } from "../utils/getDate.mjs";
 import { X, IndianRupee, Calendar, Briefcase, FileText, User, Layers } from "lucide-react";
 
-function ButtonPage({ onClose = () => { }, prefillTo = "" }) {
+function ButtonPage({ onClose = () => { }, prefillTo = '' }) {
   const todaysDate = getDate();
   const [date, setDate] = useState(todaysDate);
   const [amount, setAmount] = useState("");
   const [businessType, setBusinessType] = useState("new");
   const [referralType, setReferralType] = useState("tier1");
   const [comments, setComments] = useState("");
-  const [to, setTo] = useState(prefillTo);
+  const [to, setTo] = useState(prefillTo || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [response, setResponse] = useState(null);
@@ -76,34 +76,7 @@ function ButtonPage({ onClose = () => { }, prefillTo = "" }) {
     try {
       setLoading(true);
 
-      const userRes = await fetch(
-        `${import.meta.env.VITE_BACKEND_SERVER}/auth/getuser`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
-      const getuser = await userRes.json();
-
-      const notificationData = {
-        receiver: data.receiver_displayname,
-        sender: getuser?.username ?? "",
-        header: `💸 Thank You for the Business (TYB) from ${(getuser?.username ?? "").toString()}!`,
-        content: `Amazing job! ${(getuser?.username ?? "").toString()} just logged a TYB slip for your referral.\n\nAmount Generated: ₹${data.business_amount}\nNote: ${data.business_description}\n\nKeep up the great work!`,
-        read: false
-      };
-
-      await fetch(
-        `${import.meta.env.VITE_BACKEND_SERVER}/notification/createnotification`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(notificationData),
-          credentials: "include",
-        }
-      );
-
+      // 1. Submit TYB slip first
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_SERVER}/slips/tyftb/createtyftb`,
         {
@@ -114,6 +87,50 @@ function ButtonPage({ onClose = () => { }, prefillTo = "" }) {
         }
       );
       const result = await res.json();
+
+      if (result?.errors || result?.message === "error" || result?.error || !res.ok) {
+        const errMsg = result?.errors?.[0]
+          ? `${result?.errors?.[0].path} : ${result?.errors?.[0].msg}`
+          : (result?.message || result?.error || "An error occurred.");
+        setError(String(errMsg));
+        return;
+      }
+
+      // 2. Only upon confirmed slip creation success, dispatch notification
+      try {
+        const userRes = await fetch(
+          `${import.meta.env.VITE_BACKEND_SERVER}/auth/getuser`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+          }
+        );
+        const getuser = await userRes.json();
+
+        const notificationData = {
+          receiver: data.receiver_displayname,
+          sender: getuser?.username ?? "",
+          header: `💸 TYB received from ${(getuser?.username ?? "").toString()}`,
+          content: `Thank you for the business! ₹${data.business_amount.toLocaleString('en-IN')} has been logged for your referral. Note: ${data.business_description}`,
+          read: false,
+          data: {
+            action: "VIEW_ACTIVITY"
+          }
+        };
+
+        await fetch(
+          `${import.meta.env.VITE_BACKEND_SERVER}/notification/createnotification`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(notificationData),
+            credentials: "include",
+          }
+        );
+      } catch (notifErr) {
+        console.error("Failed to send TYB notification:", notifErr);
+      }
 
       if (result?.errors || result?.message === "error" || result?.error) {
         const errMsg = result?.errors?.[0]
@@ -158,7 +175,7 @@ function ButtonPage({ onClose = () => { }, prefillTo = "" }) {
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 pb-64 sm:p-8 sm:pb-8 space-y-6 sm:space-y-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 custom-scrollbar">
           
           {/* Section 1: Who & When */}
           <section className="space-y-4">
