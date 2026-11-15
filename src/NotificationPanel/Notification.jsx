@@ -16,7 +16,8 @@ import {
   getNotificationCategory,
   getCategoryConfig,
   isReferralNotification,
-  extractReferrerInfo
+  extractReferrerInfo,
+  cleanNotificationTitle
 } from "./notificationUtils";
 
 export default function Notification() {
@@ -274,46 +275,43 @@ export default function Notification() {
               const cat = getNotificationCategory(n);
               const conf = getCategoryConfig(cat);
               const isRef = isReferralNotification(n);
-              const CategoryIcon = conf.Icon;
 
               return (
                 <li key={n._id}>
                   <div
                     onClick={() => handleItemClick(n)}
-                    className={`group relative flex items-center justify-between gap-3 px-4 py-3 text-left transition-all cursor-pointer hover:bg-amber-50/50 dark:hover:bg-gray-800/60 ${
+                    className={`group relative flex items-start justify-between gap-3 px-4 py-3 text-left transition-all cursor-pointer border-l-4 ${conf.borderClass} ${
                       !n.read
-                        ? "bg-amber-500/5 dark:bg-amber-500/5"
+                        ? "bg-amber-500/[0.04] dark:bg-amber-500/[0.04]"
                         : "bg-white dark:bg-gray-900"
-                    }`}
+                    } hover:bg-gray-50 dark:hover:bg-gray-800/60`}
                   >
-                    {/* Left: Category Icon + Title + Timestamp */}
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className={`flex-shrink-0 p-2 rounded-xl ${conf.iconBgClass} shadow-sm`}>
-                        <CategoryIcon className="w-4 h-4" />
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className={`text-sm font-bold break-words line-clamp-2 leading-snug ${!n.read ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
-                            {n.header}
-                          </p>
-                          {!n.read && (
-                            <span
-                              className="h-2 w-2 flex-none rounded-full bg-red-500 ring-4 ring-red-500/20"
-                              aria-hidden="true"
-                            />
-                          )}
-                        </div>
-
-                        <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 inline-block">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      {/* Category Chip & Time */}
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${conf.badgeClass}`}>
+                          {conf.label}
+                        </span>
+                        <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
                           {formatNotificationTime(n.createdAt)}
                         </span>
+                        {!n.read && (
+                          <span
+                            className="h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-red-500/20 ml-auto"
+                            aria-hidden="true"
+                          />
+                        )}
                       </div>
+
+                      {/* Clean Title */}
+                      <p className={`text-sm font-bold break-words line-clamp-2 leading-snug ${!n.read ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
+                        {cleanNotificationTitle(n.header)}
+                      </p>
                     </div>
 
                     {/* Right: "Punch TYB" button for Referral Notifications */}
                     {isRef && (
-                      <div className="shrink-0">
+                      <div className="shrink-0 self-center">
                         <button
                           type="button"
                           onClick={(e) => handlePunchTYB(n, e)}

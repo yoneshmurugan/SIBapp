@@ -25,7 +25,8 @@ import {
   getNotificationCategory,
   getCategoryConfig,
   isReferralNotification,
-  extractReferrerInfo
+  extractReferrerInfo,
+  cleanNotificationTitle
 } from "./notificationUtils";
 
 export default function NotificationsPage() {
@@ -409,51 +410,43 @@ export default function NotificationsPage() {
               const cat = getNotificationCategory(n);
               const conf = getCategoryConfig(cat);
               const isRef = isReferralNotification(n);
-              const CategoryIcon = conf.Icon;
 
               return (
                 <div
                   key={n._id}
                   onClick={() => openModal(n)}
-                  className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border transition-all cursor-pointer hover:shadow-md ${
+                  className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border-y border-r border-l-4 ${conf.borderClass} transition-all cursor-pointer hover:shadow-md ${
                     !n.read
-                      ? "bg-amber-500/[0.04] dark:bg-amber-500/[0.06] border-amber-300/50 dark:border-amber-500/30 ring-1 ring-amber-400/10"
+                      ? "bg-amber-500/[0.04] dark:bg-amber-500/[0.06] border-gray-200/80 dark:border-gray-800 ring-1 ring-amber-400/10"
                       : "bg-white dark:bg-gray-900 border-gray-200/80 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700"
                   }`}
                 >
                   {/* Left Content Area */}
-                  <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                    {/* Category Icon */}
-                    <div className={`p-2.5 rounded-xl ${conf.iconBgClass} shrink-0 mt-0.5 shadow-sm`}>
-                      <CategoryIcon className="w-5 h-5" />
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${conf.badgeClass}`}>
+                        {conf.label}
+                      </span>
+
+                      {!n.read && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 dark:text-red-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-red-500/30" />
+                          New
+                        </span>
+                      )}
+
+                      <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto whitespace-nowrap">
+                        {formatNotificationTime(n.createdAt)}
+                      </span>
                     </div>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold ${conf.badgeClass}`}>
-                          {conf.label}
-                        </span>
+                    <h3 className={`text-base font-bold leading-snug break-words ${!n.read ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
+                      {cleanNotificationTitle(n.header)}
+                    </h3>
 
-                        {!n.read && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 dark:text-red-400">
-                            <span className="h-2 w-2 rounded-full bg-red-500 ring-2 ring-red-500/30" />
-                            New
-                          </span>
-                        )}
-
-                        <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto whitespace-nowrap">
-                          {formatNotificationTime(n.createdAt)}
-                        </span>
-                      </div>
-
-                      <h3 className={`text-base font-bold leading-snug break-words ${!n.read ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
-                        {n.header}
-                      </h3>
-
-                      <p className="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                        {n.content}
-                      </p>
-                    </div>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                      {n.content}
+                    </p>
                   </div>
 
                   {/* Right Actions Area */}
@@ -500,7 +493,7 @@ export default function NotificationsPage() {
                   {getCategoryConfig(getNotificationCategory(activeNotif)).label}
                 </span>
                 <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-snug">
-                  {activeNotif.header}
+                  {cleanNotificationTitle(activeNotif.header)}
                 </h4>
               </div>
               <button

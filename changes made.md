@@ -34,6 +34,7 @@ Tracks changes across the 3 production workspaces:
 | S3-#5 | 2026-11-15 | Member Renewal Reminders: Multi-Channel Delivery (In-App & Push Checkboxes) | [x] Synced | [x] Synced | [x] Synced |
 | S3-#6 | 2026-11-15 | Executive Alert Broadcast System: Multi-Channel UI, Live Preview & Backend Scoping | [x] Synced | [x] Synced | [x] Synced |
 | S3-#10 | 2026-11-15 | Notification Popover Minimalism, Dedicated M2M & TYB Tabs & Referral Push Auto-Routing | [x] Synced | [x] Synced | [x] Synced |
+| S3-#11 | 2026-11-15 | Executive Notification UI: Stripe/Linear Left Accent Border, Micro Category Chips & Emoji Normalization | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -735,6 +736,40 @@ Tracks changes across the 3 production workspaces:
    - Added `clickAction: 'FCM_PLUGIN_ACTIVITY'` and category payload to Android FCM and iOS APNs push payloads.
 4. **Resolved Lingering Reference (`Notification.jsx`):**
    - Removed unused modal escape key and focus trap `useEffect` in `Notification.jsx` that was listening to `detailOpen`, resolving the runtime error `ReferenceError: Can't find variable: detailOpen`.
+
+---
+
+### S3-#11 [2026-11-15] - Executive Notification UI: Stripe/Linear Left Accent Border, Micro Category Chips & Emoji Normalization
+- **Type:** UI/UX Redesign / Executive Styling / Typography Polish
+- **Origin:** Web, Android & iOS
+- **Files:**
+  - `src/NotificationPanel/notificationUtils.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/NotificationPanel/Notification.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/NotificationPanel/NotificationsPage.jsx` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Elimination of Childish Icon Boxes:**
+   - Completely eliminated the oversized, colorful left icon boxes (speakers, rupees, calendars, bells) that created visual clutter and felt childish.
+2. **Executive Left Accent Border (Stripe & Linear Pattern):**
+   - Implemented high-contrast 4px vertical status border lines along the left edge of each notification card:
+     - **Gold (`border-l-amber-500`):** Referral slips
+     - **Emerald (`border-l-emerald-500`):** TYB slips
+     - **Indigo (`border-l-indigo-500`):** M2M slips
+     - **Sky Blue (`border-l-sky-500`):** Chapter meetings
+     - **Violet (`border-l-violet-500`):** Events
+     - **Rose (`border-l-rose-500`):** Announcements & Broadcasts
+     - **Slate (`border-l-slate-400`):** General system updates
+3. **Refined Micro Category Chips:**
+   - Displayed an ultra-clean uppercase micro-pill badge (`[REFERRAL]`, `[TYB]`, `[M2M]`, `[MEETING]`, `[ANNOUNCEMENT]`) paired directly with the relative timestamp and red unread indicator dot.
+4. **Leading Emoji Normalization (`cleanNotificationTitle`):**
+   - Stripped informal leading emojis (`💸`, `🗓️`, `⏰`, `✅`, `🤝`, `📢`) from notification headers upon display, yielding pure, professional enterprise typography.
+
 
 
 
