@@ -31,6 +31,7 @@ Tracks changes across the 3 production workspaces:
 | S3-#2 | 2026-11-15 | Global Member Count: Suspended Account Exclusion | [x] Synced | [x] Synced | [x] Synced |
 | S3-#3 | 2026-11-15 | End-to-End Notification System: Slips, Chapter Meetings & Mobile Push (FCM + APNs) | [x] Synced | [x] Synced | [x] Synced |
 | S3-#4 | 2026-11-15 | Executive Direct Detail Modals & Complete Overhaul: Meetings & Event Management | [x] Synced | [x] Synced | [x] Synced |
+| S3-#5 | 2026-11-15 | Member Renewal Reminders: Multi-Channel Delivery (In-App & Push Checkboxes) | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -530,3 +531,30 @@ Tracks changes across the 3 production workspaces:
    - Updated `POST /event/createevent` in `SIB_backend` to atomically dispatch in-app notifications and mobile push notifications (FCM + APNs) strictly to active chapter members (`chapter_id: req.chapter._id, membership_status: true`).
    - Scoped `GET /event/getlatestevent` to `chapter_id: req.chapter._id` to eliminate cross-chapter leakage.
    - Removed client-side redundant notification creation in `CreateEvent.jsx`.
+
+### S3-#5 [2026-11-15] - Member Renewal Reminders: Multi-Channel Delivery (In-App & Push Checkboxes)
+- **Type:** Feature / Notifications / Mobile Push / UI/UX
+- **Origin:** Web, Android, iOS & Backend
+- **Files:**
+  - `src/PresidentPortal/MemberRenewalManagement.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `SIB_backend/src/pages/notifications/notificationRoute.mjs`
+  - `SIB_backend/src/validators.mjs`
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Interactive Multi-Channel Delivery Selectors:**
+   - Added dedicated checkboxes in `MemberRenewalManagement.jsx`: **In-App Notification** and **Push Notification (Mobile)**.
+   - Allows leadership to send reminders through In-App, Push, or both simultaneously.
+2. **Individual & Bulk Targeted Reminders:**
+   - Added **Remind Selected (N)** action to the sticky bulk action bar, allowing leadership to notify selected members in one click.
+   - Updated individual **Remind** buttons and **Auto-Send Reminders** to respect active channel selections with informative delivery feedback.
+3. **Backend Multi-Channel Dispatch & Bugfix:**
+   - In `POST /notification/createnotificationwithoutsender`, fixed a `ReferenceError: data is not defined` bug and added support for `notifyInApp` and `notifyPush` boolean flags.
+   - Added `notifyInApp`, `notifyPush`, and `data` to `createNotificationValidation` in `validators.mjs`.
+   - Dispatches individual high-priority push notifications to the member's registered mobile device tokens via Firebase Admin SDK.
+
