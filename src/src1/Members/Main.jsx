@@ -1,7 +1,38 @@
 import React, { useRef, useEffect, useMemo, useState } from 'react';
-import { Search, RefreshCw, ChevronDown, MapPin, SlidersHorizontal, X, Check } from 'lucide-react';
+import { Search, RefreshCw, ChevronDown, MapPin, SlidersHorizontal, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import MemberCard from './MemberCard';
 import HalfPageLoader from '../../Members/Components/Loader';
+
+const ITEMS_PER_PAGE = 20;
+
+function getPaginationRange(current, total) {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const leftSibling = Math.max(current - 1, 1);
+  const rightSibling = Math.min(current + 1, total);
+
+  const showLeftDots = leftSibling > 2;
+  const showRightDots = rightSibling < total - 2;
+
+  if (!showLeftDots && showRightDots) {
+    const leftItemCount = 4;
+    return [...Array.from({ length: leftItemCount }, (_, i) => i + 1), "...", total];
+  }
+
+  if (showLeftDots && !showRightDots) {
+    const rightItemCount = 4;
+    const rightRange = Array.from({ length: rightItemCount }, (_, i) => total - rightItemCount + i + 1);
+    return [1, "...", ...rightRange];
+  }
+
+  if (showLeftDots && showRightDots) {
+    return [1, "...", leftSibling, current, rightSibling, "...", total];
+  }
+
+  return Array.from({ length: total }, (_, i) => i + 1);
+}
 
 // Custom Mobile-Friendly Dropdown (Prevents screen overflow)
 const CustomSelect = ({ label, value, options, onChange, icon: Icon }) => {
@@ -70,12 +101,26 @@ function Main({
   onChange, onClear
 }) {
   const debounceTimeout = useRef(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
 
   const sorts = ["Name A-Z", "Name Z-A", "Chapter", "Region"];
 
   useEffect(() => {
     onChange({ region, chapter, vertical, sort, search });
   }, [region, chapter, vertical, sort, search]);
+
+  // Reset to page 1 whenever filters or data length change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [region, chapter, vertical, sort, search, data.length]);
+
+  // Bounds safeguard
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
 
   const clearAllFilters = () => {
     onClear({ region: "All Regions", chapter: "All Chapters", vertical: "All Verticals", sort: "Name A-Z", search: "" });
@@ -87,16 +132,33 @@ function Main({
     debounceTimeout.current = setTimeout(() => setSearch(value), 300);
   };
 
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentMembers = useMemo(
+    () => data.slice(startIndex, startIndex + ITEMS_PER_PAGE),
+    [data, startIndex]
+  );
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    setCurrentPage(page);
+    window.scrollTo({ top: 350, behavior: "smooth" });
+  };
+
+  const paginationRange = useMemo(
+    () => getPaginationRange(currentPage, totalPages),
+    [currentPage, totalPages]
+  );
+
   const MemberGrid = useMemo(() => {
-    if (data.length === 0) return null;
+    if (currentMembers.length === 0) return null;
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-500 w-full place-items-center">
-        {data.map((member, index) => (
+        {currentMembers.map((member, index) => (
           <MemberCard key={member._id || index} member={member} />
         ))}
       </div>
     );
-  }, [data]);
+  }, [currentMembers]);
 
   return (
     <div className="w-full max-w-full">
@@ -158,7 +220,80 @@ function Main({
       </section>
 
       <section className="w-full min-h-[400px]">
-        {loading ? <div className="flex justify-center py-20"><HalfPageLoader /></div> : data.length > 0 ? MemberGrid : <div className="py-20 text-center"><Search className="w-8 h-8 text-gray-200 mx-auto mb-4" /><p className="text-gray-500 text-sm font-bold">No results found</p></div>}
+        {loading ? (
+          <div className="flex justify-center py-20"><HalfPageLoader /></div>
+        ) : data.length > 0 ? (
+          <>
+            {MemberGrid}
+
+            {/* Sliding Ellipsis Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-12 pt-6 border-t border-gray-100 dark:border-gray-800">
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 order-2 sm:order-1">
+                  Showing <span className="font-bold text-gray-900 dark:text-white">{startIndex + 1}</span>–
+                  <span className="font-bold text-gray-900 dark:text-white">{Math.min(startIndex + ITEMS_PER_PAGE, data.length)}</span> of{" "}
+                  <span className="font-bold text-gray-900 dark:text-white">{data.length}</span> members
+                </span>
+
+                <div className="flex items-center justify-center gap-1 sm:gap-1.5 order-1 sm:order-2 flex-wrap">
+                  {/* Prev Button */}
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold transition-all border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span className="hidden sm:inline">Prev</span>
+                  </button>
+
+                  {/* Page Numbers with Sliding Ellipsis */}
+                  {paginationRange.map((page, idx) => {
+                    if (page === "...") {
+                      return (
+                        <span
+                          key={`dots-${idx}`}
+                          className="px-2 py-1 text-gray-400 dark:text-gray-500 font-bold select-none text-xs"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+
+                    const isCurrent = page === currentPage;
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        aria-current={isCurrent ? "page" : undefined}
+                        className={`min-w-[36px] h-9 px-2.5 rounded-xl text-xs font-black transition-all ${
+                          isCurrent
+                            ? "bg-amber-400 text-amber-950 shadow-md shadow-amber-400/20 scale-105"
+                            : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+
+                  {/* Next Button */}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold transition-all border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                    aria-label="Next page"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="py-20 text-center"><Search className="w-8 h-8 text-gray-200 mx-auto mb-4" /><p className="text-gray-500 text-sm font-bold">No results found</p></div>
+        )}
       </section>
 
       <style jsx>{`
