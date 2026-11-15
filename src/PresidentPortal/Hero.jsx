@@ -36,16 +36,13 @@ export default function Hero({ onRefresh }) {
       }
       const data = await res.json();
       setMeetings(Array.isArray(data) ? data : []);
-      if (typeof onRefresh === 'function') {
-        onRefresh();
-      }
     } catch (err) {
       console.error("Error fetching meetings:", err);
       setError(err.message || "Failed to fetch meetings");
     } finally {
       setLoading(false);
     }
-  }, [onRefresh]);
+  }, []);
 
   useEffect(() => {
     fetchMeetings();
@@ -209,7 +206,7 @@ export default function Hero({ onRefresh }) {
             </button>
 
             <div className="flex-1 sm:flex-none">
-              <CreateMeeting onCreated={fetchMeetings} />
+              <CreateMeeting onCreated={() => { fetchMeetings(); if (typeof onRefresh === "function") onRefresh(); }} />
             </div>
           </div>
         </div>
@@ -300,7 +297,7 @@ export default function Hero({ onRefresh }) {
               </p>
               {activeTab === 'upcoming' && (
                 <div className="inline-block">
-                  <CreateMeeting onCreated={fetchMeetings} />
+                  <CreateMeeting onCreated={() => { fetchMeetings(); if (typeof onRefresh === "function") onRefresh(); }} />
                 </div>
               )}
             </div>
