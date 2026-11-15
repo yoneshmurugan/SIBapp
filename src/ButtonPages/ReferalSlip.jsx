@@ -130,7 +130,10 @@ function ButtonPage({ onClose = () => { } }) {
           read: false,
           data: {
             action: "OPEN_TYB",
-            referrerName: data.referrer_username
+            referrerName: data.referrer_username,
+            referralDetails: data.description,
+            crossChapter: !!userData?.chapter_id,
+            chapterId: userData?.chapter_id || null
           }
         };
 
