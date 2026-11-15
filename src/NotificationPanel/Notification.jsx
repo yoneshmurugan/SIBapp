@@ -231,7 +231,7 @@ export default function Notification() {
           role="dialog"
           aria-label="Notifications"
           aria-modal="true"
-          className="absolute right-0 sm:-right-4 z-50 mt-2 w-88 sm:w-96 origin-top-right rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden"
+          className="absolute right-0 sm:-right-4 z-50 mt-2 w-88 sm:w-[420px] max-w-[calc(100vw-1.5rem)] origin-top-right rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-5 py-4 bg-gray-50/70 dark:bg-gray-900/90 backdrop-blur-sm">
@@ -320,7 +320,7 @@ export default function Notification() {
                       {/* Content */}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <p className={`text-sm font-bold truncate ${!n.read ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
+                          <p className={`text-sm font-bold break-words line-clamp-2 leading-snug ${!n.read ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
                             {n.header}
                           </p>
                           {!n.read && (
