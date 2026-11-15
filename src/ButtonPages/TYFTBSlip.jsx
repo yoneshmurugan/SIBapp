@@ -113,11 +113,12 @@ function ButtonPage({ onClose = () => { }, prefillTo = '', prefillComments = '',
         );
         const getuser = await userRes.json();
 
+        const senderDisplayName = getuser?.name || getuser?.username || "A Member";
         const notificationData = {
           receiver: data.receiver_displayname,
           sender: getuser?.username ?? "",
-          header: `💸 TYB received from ${(getuser?.username ?? "").toString()}`,
-          content: `Thank you for the business! ₹${data.business_amount.toLocaleString('en-IN')} has been logged for your referral. Note: ${data.business_description}`,
+          header: `💸 TYB from ${senderDisplayName}!`,
+          content: `Amazing job! ${senderDisplayName} just logged a TYB slip of ₹${data.business_amount.toLocaleString('en-IN')} for your referral. Note: ${data.business_description}`,
           read: false,
           data: {
             action: "VIEW_ACTIVITY"

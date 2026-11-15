@@ -664,6 +664,42 @@ Tracks changes across the 3 production workspaces:
      - Registered `Chapter` alias for `chapterSchema` (`mongoose.model("chapters", ...)`).
      - Updated `NotificationSchema` `receiver` and `sender` refs to `'users'` and `meetingSchema` `chapter_id` ref to `'chapters'`.
 
+---
+
+### S3-#9 [2026-11-15] - Notification Classification Integrity, Full Title Legibility & Chapter Broadcast UI Refinement
+- **Type:** Bug Fix / UI/UX Polish / Notification Integrity / Workflow Alignment
+- **Origin:** Web, Android & iOS
+- **Files:**
+  - `src/NotificationPanel/notificationUtils.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/NotificationPanel/Notification.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/NotificationPanel/NotificationsPage.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/ButtonPages/TYFTBSlip.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/ButtonPages/M2MSlip.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/PresidentPortal/AlertSystem.jsx` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Notification Classification Integrity (TYB vs Referral Fix):**
+   - Corrected classification priority in `notificationUtils.jsx`. TYB slip notifications mentioning *"for your referral"* are now strictly categorized as `"tyb"` (under "Slips & TYB") and never as `"referral"`.
+   - The **"Punch TYB"** button now appears **exclusively** on true referral received notifications (`OPEN_TYB` / `New Referral Received from...`), preventing any erroneous "Punch TYB" CTA on TYB confirmation slips.
+2. **Notification Title Legibility & Clutter Removal:**
+   - Removed aggressive `truncate` ellipsis from notification headers in both `Notification.jsx` and `NotificationsPage.jsx`.
+   - Replaced with `break-words line-clamp-2 leading-snug`, and widened the bell dropdown popover (`w-88 sm:w-[420px] max-w-[calc(100vw-1.5rem)]`) so notification titles are fully readable without awkward cutoff.
+3. **Refined TYB & Past-Tense M2M Slip Messages:**
+   - **TYB Slip (`TYFTBSlip.jsx`):** Refined header to `💸 TYB from ${senderName}!` and content to acknowledge the business revenue logged for the recipient's referral.
+   - **M2M Slip (`M2MSlip.jsx`):** Refined notification to past tense: `🤝 M2M Meeting Completed with ${username}` and content *"Hi there! ${username} has logged a completed Member-to-Member (M2M) meeting with you. Topic: ${topic}. Let's grow together!"*, accurately reflecting that meetings are logged after they take place.
+4. **Chapter Broadcast UI Reversion & Polish (`AlertSystem.jsx`):**
+   - Reverted Alert Type and Notification Methods to the previous interactive visual cards with badges and icons.
+   - Restored the multi-channel live device preview tabs (In-App Feed, Mobile Push, Email Message).
+   - Set the official heading to **CHAPTER BROADCAST**.
+   - Removed the "Active Chapter" badge and removed placeholder "e.g." text from the title and message fields.
+
+
 
 
 

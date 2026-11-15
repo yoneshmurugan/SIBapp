@@ -59,44 +59,98 @@ export function getNotificationCategory(n) {
   const content = (n.content || "").toLowerCase();
   const action = n.data?.action;
 
-  if (action === "OPEN_TYB" || header.includes("referral") || content.includes("referral")) {
-    return "referral";
-  }
+  // 1. TYB (Thank You for the Business) Slips
+  // Checked FIRST because TYB messages mention "for your referral"!
   if (
     action === "VIEW_ACTIVITY" ||
     header.includes("tyb") ||
-    content.includes("tyb") ||
+    header.includes("thank you for the business") ||
     header.includes("thank you") ||
+    content.includes("logged a tyb slip") ||
+    content.includes("tyb slip") ||
     content.includes("thank you for the business")
   ) {
     return "tyb";
   }
+
+  // 2. M2M (Member-to-Member) Meeting Slips
   if (
     action === "OPEN_M2M" ||
     header.includes("m2m") ||
-    header.includes("one-to-one") ||
     header.includes("1-to-1") ||
-    content.includes("one-to-one")
+    header.includes("one-to-one") ||
+    content.includes("member-to-member (m2m)") ||
+    content.includes("m2m meeting") ||
+    content.includes("1-to-1 meeting")
   ) {
     return "m2m";
   }
-  if (header.includes("meeting") || content.includes("meeting")) {
+
+  // 3. Referral Slips (Only actual referrals received)
+  if (
+    action === "OPEN_TYB" ||
+    header.includes("new referral") ||
+    header.includes("referral received") ||
+    header.includes("referral from") ||
+    (header.includes("referral") && !header.includes("tyb") && !content.includes("logged a tyb"))
+  ) {
+    return "referral";
+  }
+
+  // 4. Chapter Meetings
+  if (header.includes("chapter meeting") || header.includes("meeting")) {
     return "meeting";
   }
-  if (header.includes("event") || content.includes("event")) {
+
+  // 5. Events
+  if (header.includes("event")) {
     return "event";
   }
+
+  // 6. Broadcast / Alert / Announcement
   if (
-    header.includes("alert") ||
-    header.includes("urgent") ||
     header.includes("announcement") ||
+    header.includes("urgent") ||
+    header.includes("broadcast") ||
+    header.includes("alert") ||
     header.includes("renewal") ||
-    content.includes("urgent") ||
-    content.includes("announcement")
+    content.includes("announcement") ||
+    content.includes("urgent")
   ) {
     return "announcement";
   }
+
   return "general";
+}
+
+export function isReferralNotification(n) {
+  if (!n) return false;
+  const header = (n.header || "").toLowerCase();
+  const content = (n.content || "").toLowerCase();
+  const action = n.data?.action;
+
+  // Explicitly exclude TYB, M2M, Meetings, Alerts
+  if (
+    action === "VIEW_ACTIVITY" ||
+    header.includes("tyb") ||
+    header.includes("thank you") ||
+    content.includes("logged a tyb") ||
+    content.includes("tyb slip") ||
+    action === "OPEN_M2M" ||
+    header.includes("m2m") ||
+    header.includes("meeting") ||
+    header.includes("event")
+  ) {
+    return false;
+  }
+
+  return (
+    action === "OPEN_TYB" ||
+    header.includes("new referral") ||
+    header.includes("referral received") ||
+    header.includes("referral from") ||
+    (header.includes("referral") && !header.includes("tyb"))
+  );
 }
 
 export function getCategoryConfig(category) {
@@ -158,10 +212,6 @@ export function getCategoryConfig(category) {
         accentBorder: "border-l-slate-400",
       };
   }
-}
-
-export function isReferralNotification(n) {
-  return getNotificationCategory(n) === "referral";
 }
 
 export function extractReferrerInfo(n) {

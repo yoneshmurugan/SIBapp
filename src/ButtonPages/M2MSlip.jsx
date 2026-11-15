@@ -216,8 +216,8 @@ function ButtonPage({ onClose = () => {}, prefillPartner = "" }) {
         const notificationData = {
           receiver: formData.member2_name,
           sender: formData.created_by_username,
-          header: `1-to-1 Meeting with ${formData.created_by_username}`,
-          content: `Member-to-Member (M2M) meeting scheduled by ${formData.created_by_username}. Topic: ${formData.discussion_points}`,
+          header: `🤝 M2M Meeting Completed with ${formData.created_by_username}`,
+          content: `Hi there! ${formData.created_by_username} has logged a completed Member-to-Member (M2M) meeting with you. Topic: ${formData.discussion_points}. Let's grow together!`,
           read: false,
           data: {
             action: "OPEN_M2M",

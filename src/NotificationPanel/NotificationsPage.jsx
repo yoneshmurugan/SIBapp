@@ -431,7 +431,7 @@ export default function NotificationsPage() {
                         </span>
                       </div>
 
-                      <h3 className={`text-base font-bold leading-snug truncate ${!n.read ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
+                      <h3 className={`text-base font-bold leading-snug break-words ${!n.read ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-300"}`}>
                         {n.header}
                       </h3>
 
