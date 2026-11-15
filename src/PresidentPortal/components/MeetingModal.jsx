@@ -1,17 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
-  HiOutlineExclamationCircle,
-  HiX,
-  HiPencil,
-  HiCheck,
-  HiClock,
-  HiCalendar,
-  HiLocationMarker,
-} from "react-icons/hi";
+  X,
+  Pencil,
+  Check,
+  Clock,
+  Calendar,
+  MapPin,
+  Building2,
+  Tag,
+  FileText,
+  Timer,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+  Save,
+  Loader2
+} from "lucide-react";
 import useFetch from "../../hooks/useFetch";
 
-export function MeetingsModal({ meetings = [], isOpen, onClose }) {
-  const [selectedMeeting, setSelectedMeeting] = useState(null);
+export function MeetingDetailModal({ meeting, isOpen, onClose, onUpdated }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedMeeting, setEditedMeeting] = useState(null);
   const [canedit, setCanedit] = useState(false);
@@ -32,79 +39,15 @@ export function MeetingsModal({ meetings = [], isOpen, onClose }) {
     }
   }, [access]);
 
-  const handleViewDetails = (meeting) => {
-    setSelectedMeeting(meeting);
-    setEditedMeeting({ ...meeting });
-    setIsEditing(false);
-  };
-
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing);
-    if (!isEditing) {
-      setEditedMeeting({ ...selectedMeeting });
+  useEffect(() => {
+    if (meeting) {
+      setEditedMeeting({ ...meeting });
+      setIsEditing(false);
+      setSaveError(null);
     }
-  };
+  }, [meeting, isOpen]);
 
-  const handleInputChange = (field, value) => {
-    setEditedMeeting({ ...editedMeeting, [field]: value });
-  };
-
-  const handleSave = async () => {
-    setSaveError(null);
-    setIsSaving(true);
-
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_SERVER}/meeting/updatemeeting`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(editedMeeting),
-        }
-      );
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result.message || "Failed to update meeting");
-      }
-
-      if (result.message === "success") {
-        setSelectedMeeting(editedMeeting);
-        setIsEditing(false);
-      } else {
-        throw new Error(result.message || "Failed to update meeting");
-      }
-    } catch (error) {
-      setSaveError(error.message || "An unexpected error occurred");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleCloseDetail = () => {
-    setSelectedMeeting(null);
-    setIsEditing(false);
-    setSaveError(null);
-  };
-
-  const handleMainClose = () => {
-    setSelectedMeeting(null);
-    setIsEditing(false);
-    setSaveError(null);
-    onClose();
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toISOString().split("T")[0];
-  };
-
-  const getEffectiveMeetingStatus = (meeting) => {
+  const effectiveStatus = useMemo(() => {
     if (!meeting) return "upcoming";
     const status = meeting.meeting_status || "upcoming";
     if (status === "completed" || status === "cancelled") return status;
@@ -131,367 +74,372 @@ export function MeetingsModal({ meetings = [], isOpen, onClose }) {
       if (nowMs >= endUtcMs) return "completed";
       if (nowMs >= startUtcMs) return "inprogress";
       return status;
-    } catch (e) {
+    } catch {
       return status;
+    }
+  }, [meeting]);
+
+  const isCompletedOrCancelled = effectiveStatus === "completed" || effectiveStatus === "cancelled";
+
+  if (!isOpen || !meeting) return null;
+
+  const handleInputChange = (field, value) => {
+    setEditedMeeting((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    setSaveError(null);
+    setIsSaving(true);
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_SERVER}/meeting/updatemeeting`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(editedMeeting),
+        }
+      );
+
+      const result = await res.json();
+      if (!res.ok || result.message !== "success") {
+        throw new Error(result.message || "Failed to update meeting");
+      }
+
+      setIsEditing(false);
+      if (typeof onUpdated === "function") {
+        onUpdated(editedMeeting);
+      }
+    } catch (error) {
+      setSaveError(error.message || "An unexpected error occurred");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  if (!isOpen) return null;
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    try {
+      const d = new Date(dateString);
+      return d.toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    try {
+      const d = new Date(dateString);
+      return d.toISOString().split("T")[0];
+    } catch {
+      return dateString;
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "inprogress":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 animate-pulse">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+            Live Now
+          </span>
+        );
+      case "completed":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+            <CheckCircle2 size={13} className="text-gray-500" />
+            Completed
+          </span>
+        );
+      case "cancelled":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+            <AlertCircle size={13} className="text-red-500" />
+            Cancelled
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+            <Sparkles size={13} className="text-amber-500" />
+            Upcoming
+          </span>
+        );
+    }
+  };
 
   return (
-    <>
-      <div className="fixed inset-0 z-50 flex items-center bg-black/30 justify-center overflow-y-auto overflow-x-hidden bg-opacity-50 dark:bg-opacity-70">
-        <div className="relative max-h-full w-full max-w-4xl p-4">
-          <div className="relative rounded-lg bg-white shadow dark:bg-gray-800">
-            <div className="flex items-center justify-between rounded-t border-b border-gray-200 p-4 dark:border-gray-700">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                All Meetings
-              </h3>
-              <button
-                type="button"
-                onClick={handleMainClose}
-                className="ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"
-                aria-label="Close modal"
-              >
-                <HiX className="h-5 w-5" />
-              </button>
-            </div>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-h-[92vh] overflow-hidden">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+              {isEditing ? "Edit Meeting" : "Meeting Details"}
+            </h3>
+            {getStatusBadge(effectiveStatus)}
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            title="Close"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-            <div className="space-y-4 p-6">
-              {meetings.length === 0 ? (
-                <div className="text-center py-8">
-                  <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-500" />
-                  <p className="text-gray-500 dark:text-gray-400">No meetings found</p>
+        {/* Scrollable Content */}
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 custom-scrollbar flex-1">
+          {saveError && (
+            <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-xs sm:text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0" />
+              <span>{saveError}</span>
+            </div>
+          )}
+
+          {!isEditing ? (
+            /* VIEW MODE */
+            <div className="space-y-5">
+              {/* Meeting Title & Chapter */}
+              <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white break-words">
+                  {meeting.title}
+                </h4>
+                {meeting.chapter?.chapter_name && (
+                  <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                    <Building2 size={13} />
+                    <span>{meeting.chapter.chapter_name}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Grid Information */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="p-3.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/20 flex items-start gap-3">
+                  <Calendar size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-gray-400 font-medium uppercase tracking-wider block">Date</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5 block">
+                      {formatDate(meeting.meeting_date)}
+                    </span>
+                  </div>
                 </div>
-              ) : (
-                <div className="max-h-96 overflow-y-auto space-y-3">
-                  {meetings.map((meeting) => (
-                    <div
-                      key={meeting._id}
-                      className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-700"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                            {meeting.title}
-                          </h4>
-                          <div className="space-y-1.5">
-                            {meeting.chapter && (
-                              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                <span className="font-semibold">Chapter:</span>
-                                <span>{meeting.chapter.chapter_name}</span>
-                              </div>
-                            )}
-                            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                              <HiCalendar className="mr-2 h-4 w-4 text-amber-300" />
-                              <span>{formatDate(meeting.meeting_date)}</span>
-                              <HiClock className="ml-4 mr-2 h-4 w-4 text-amber-300" />
-                              <span>
-                                {meeting.meeting_time} ({meeting.duration || "N/A"}) Minutes
-                              </span>
-                            </div>
-                            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                              <HiLocationMarker className="mr-2 h-4 w-4 text-amber-300" />
-                              <span>{meeting.location || "Not specified"}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium px-2.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 capitalize">
-                                {meeting.meeting_type}
-                              </span>
-                              {(() => {
-                                const currentStatus = getEffectiveMeetingStatus(meeting);
-                                return (
-                                  <span
-                                    className={`text-xs font-medium px-2.5 py-0.5 rounded capitalize ${
-                                      currentStatus === "completed"
-                                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                        : currentStatus === "cancelled"
-                                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                                        : currentStatus === "inprogress"
-                                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                                    }`}
-                                  >
-                                    {currentStatus}
-                                  </span>
-                                );
-                              })()}
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleViewDetails(meeting)}
-                          className="ml-4 rounded-lg bg-amber-300 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800"
-                        >
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+
+                <div className="p-3.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/20 flex items-start gap-3">
+                  <Clock size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-gray-400 font-medium uppercase tracking-wider block">Time & Duration</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5 block">
+                      {meeting.meeting_time || "07:30 AM"}
+                      {meeting.duration && ` (${meeting.duration} mins)`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/20 flex items-start gap-3">
+                  <MapPin size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs text-gray-400 font-medium uppercase tracking-wider block">Location</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5 block break-words">
+                      {meeting.location || "Not specified"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/20 flex items-start gap-3">
+                  <Tag size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-gray-400 font-medium uppercase tracking-wider block">Meeting Type</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5 capitalize block">
+                      {meeting.meeting_type || "Weekly"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description / Agenda */}
+              {meeting.meeting_notes && (
+                <div className="p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/30">
+                  <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <FileText size={15} className="text-amber-500" />
+                    <span>Meeting Notes & Agenda</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    {meeting.meeting_notes}
+                  </p>
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </div>
+          ) : (
+            /* EDIT MODE */
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                  Meeting Title *
+                </label>
+                <input
+                  type="text"
+                  value={editedMeeting.title || ""}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  placeholder="Enter meeting title"
+                />
+              </div>
 
-      {selectedMeeting && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/40 bg-opacity-60 dark:bg-opacity-80">
-          <div className="relative max-h-full w-full max-w-2xl p-4">
-            <div className="relative rounded-lg bg-white shadow-xl dark:bg-gray-800">
-              <div className="flex items-center justify-between rounded-t border-b border-gray-200 p-4 dark:border-gray-700">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  {isEditing ? "Edit Meeting" : "Meeting Details"}
-                </h3>
-                <div className="flex items-center space-x-2">
-                  {!isEditing && canedit && (
-                    <button
-                      type="button"
-                      onClick={handleEditToggle}
-                      className="inline-flex items-center rounded-lg bg-amber-300 px-3 py-1.5 text-sm font-medium text-gray-900 hover:bg-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-300"
-                    >
-                      <HiPencil className="mr-1 h-4 w-4" />
-                      Edit
-                    </button>
-                  )}
-                  {isEditing && canedit && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className={`inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-green-300 ${
-                          isSaving
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-green-600 hover:bg-green-700"
-                        }`}
-                      >
-                        {isSaving ? (
-                          <svg
-                            className="animate-spin h-5 w-5 mr-1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            />
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                            />
-                          </svg>
-                        ) : (
-                          <HiCheck className="mr-1 h-4 w-4" />
-                        )}
-                        Save
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleEditToggle}
-                        className="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  )}
-                  <button
-                    type="button"
-                    onClick={handleCloseDetail}
-                    className="ml-2 inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"
-                    aria-label="Close details modal"
-                  >
-                    <HiX className="h-5 w-5" />
-                  </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Meeting Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={formatDateForInput(editedMeeting.meeting_date)}
+                    onChange={(e) => handleInputChange("meeting_date", e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Meeting Time *
+                  </label>
+                  <input
+                    type="text"
+                    value={editedMeeting.meeting_time || ""}
+                    onChange={(e) => handleInputChange("meeting_time", e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                    placeholder="e.g. 07:30 AM"
+                  />
                 </div>
               </div>
 
-              <div className="space-y-6 p-6">
-                {saveError && (
-                  <div className="p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
-                    <p className="text-sm text-red-700 dark:text-red-400">{saveError}</p>
-                  </div>
-                )}
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    Meeting Title
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Duration (Minutes)
                   </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editedMeeting.title || ""}
-                      onChange={(e) => handleInputChange("title", e.target.value)}
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-amber-300 focus:ring-amber-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    />
-                  ) : (
-                    <p className="text-base text-gray-900 dark:text-white">
-                      {selectedMeeting.title}
-                    </p>
-                  )}
+                  <input
+                    type="number"
+                    value={editedMeeting.duration || 180}
+                    onChange={(e) => handleInputChange("duration", Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    Description / Notes
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Meeting Type
                   </label>
-                  {isEditing ? (
-                    <textarea
-                      rows="4"
-                      value={editedMeeting.meeting_notes || ""}
-                      onChange={(e) =>
-                        handleInputChange("meeting_notes", e.target.value)
-                      }
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-amber-300 focus:ring-amber-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    />
-                  ) : (
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      {selectedMeeting.meeting_notes || "No description provided"}
-                    </p>
-                  )}
+                  <select
+                    value={editedMeeting.meeting_type || "weekly"}
+                    onChange={(e) => handleInputChange("meeting_type", e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="others">Others</option>
+                  </select>
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                      Date
-                    </label>
-                    {isEditing ? (
-                      <input
-                        type="date"
-                        value={formatDate(editedMeeting.meeting_date)}
-                        onChange={(e) =>
-                          handleInputChange("meeting_date", e.target.value)
-                        }
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-amber-300 focus:ring-amber-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-900 dark:text-white flex items-center">
-                        <HiCalendar className="mr-2 h-4 w-4 text-amber-300" />
-                        {formatDate(selectedMeeting.meeting_date)}
-                      </p>
-                    )}
-                  </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                  Location *
+                </label>
+                <input
+                  type="text"
+                  value={editedMeeting.location || ""}
+                  onChange={(e) => handleInputChange("location", e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  placeholder="Meeting venue or address"
+                />
+              </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                      Time
-                    </label>
-                    {isEditing ? (
-                      <input
-                        type="time"
-                        value={editedMeeting.meeting_time || ""}
-                        onChange={(e) =>
-                          handleInputChange("meeting_time", e.target.value)
-                        }
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-amber-300 focus:ring-amber-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-900 dark:text-white flex items-center">
-                        <HiClock className="mr-2 h-4 w-4 text-amber-300" />
-                        {selectedMeeting.meeting_time}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                      Meeting Type
-                    </label>
-                    {isEditing ? (
-                      <select
-                        value={editedMeeting.meeting_type || ""}
-                        onChange={(e) =>
-                          handleInputChange("meeting_type", e.target.value)
-                        }
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-amber-300 focus:ring-amber-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                      >
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="others">Others</option>
-                      </select>
-                    ) : (
-                      <span className="inline-block rounded bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-300 capitalize">
-                        {selectedMeeting.meeting_type}
-                      </span>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                      Location
-                    </label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editedMeeting.location || ""}
-                        onChange={(e) =>
-                          handleInputChange("location", e.target.value)
-                        }
-                        placeholder="Meeting location or link"
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-amber-300 focus:ring-amber-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-900 dark:text-white flex items-center">
-                        <HiLocationMarker className="mr-2 h-4 w-4 text-amber-300" />
-                        {selectedMeeting.location || "Not specified"}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    Meeting Status
-                  </label>
-                  {isEditing ? (
-                    <select
-                      value={editedMeeting.meeting_status || "upcoming"}
-                      onChange={(e) =>
-                        handleInputChange("meeting_status", e.target.value)
-                      }
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-amber-300 focus:ring-amber-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    >
-                      <option value="upcoming">Upcoming</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                      <option value="inprogress">In Progress</option>
-                    </select>
-                  ) : (
-                    (() => {
-                      const detailStatus = getEffectiveMeetingStatus(selectedMeeting);
-                      return (
-                        <span
-                          className={`inline-block rounded px-2.5 py-1 text-xs font-medium capitalize ${
-                            detailStatus === "completed"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : detailStatus === "cancelled"
-                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                              : detailStatus === "inprogress"
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                              : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                          }`}
-                        >
-                          {detailStatus}
-                        </span>
-                      );
-                    })()
-                  )}
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                  Notes & Agenda
+                </label>
+                <textarea
+                  rows={3}
+                  value={editedMeeting.meeting_notes || ""}
+                  onChange={(e) => handleInputChange("meeting_notes", e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  placeholder="Enter agenda items or notes..."
+                />
               </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
-    </>
+
+        {/* Footer Actions */}
+        <div className="p-4 sm:p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 flex items-center justify-end gap-2.5 shrink-0">
+          {isEditing ? (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditedMeeting({ ...meeting });
+                }}
+                disabled={isSaving}
+                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 text-xs sm:text-sm font-bold shadow-sm transition-all disabled:opacity-50"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Close
+              </button>
+              {/* EDIT BUTTON: strictly removed for completed or cancelled meetings */}
+              {!isCompletedOrCancelled && canedit && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 text-xs sm:text-sm font-bold shadow-sm transition-all"
+                >
+                  <Pencil size={15} />
+                  <span>Edit Meeting</span>
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+      </div>
+    </div>
   );
 }
+
+// Backwards-compatible alias
+export const MeetingsModal = MeetingDetailModal;
+export default MeetingDetailModal;

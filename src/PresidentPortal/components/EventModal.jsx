@@ -1,22 +1,28 @@
-import { useEffect, useState } from "react";
-import useFetch from "../../hooks/useFetch";
+import { useState, useEffect, useMemo } from "react";
 import {
-  HiX,
-  HiPencil,
-  HiCheck,
-  HiClock,
-  HiCalendar,
-  HiLocationMarker,
-  HiUserGroup,
-} from "react-icons/hi";
+  X,
+  Pencil,
+  Clock,
+  Calendar,
+  MapPin,
+  Building2,
+  Tag,
+  FileText,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+  Save,
+  Loader2,
+  Briefcase
+} from "lucide-react";
+import useFetch from "../../hooks/useFetch";
 
-export function EventsModal({ events = [], isOpen, onClose }) {
-  const [selectedEvent, setSelectedEvent] = useState(null);
+export function EventDetailModal({ event, isOpen, onClose, onUpdated }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedEvent, setEditedEvent] = useState(null);
-  const [errors, setErrors] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
   const [canedit, setCanedit] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   const { data: access } = useFetch(
     `${import.meta.env.VITE_BACKEND_SERVER}/dashboard/caneditevents`,
@@ -32,414 +38,414 @@ export function EventsModal({ events = [], isOpen, onClose }) {
     }
   }, [access]);
 
-  const handleViewDetails = (event) => {
-    setSelectedEvent(event);
-    setEditedEvent({ ...event });
-    setIsEditing(false);
-  };
-
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing);
-    if (!isEditing) {
-      setEditedEvent({ ...selectedEvent });
+  useEffect(() => {
+    if (event) {
+      setEditedEvent({ ...event });
+      setIsEditing(false);
+      setSaveError(null);
     }
-  };
+  }, [event, isOpen]);
+
+  const effectiveStatus = useMemo(() => {
+    if (!event) return "upcoming";
+    const status = event.event_status || "upcoming";
+    if (status === "completed" || status === "cancelled") return status;
+    try {
+      if (!event.event_date) return status;
+      const d = new Date(event.event_date);
+      let hours = 9;
+      let minutes = 0;
+      if (event.event_time) {
+        const match = String(event.event_time).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+        if (match) {
+          hours = parseInt(match[1], 10);
+          minutes = parseInt(match[2], 10);
+          if (match[3]?.toUpperCase() === "PM" && hours < 12) hours += 12;
+          if (match[3]?.toUpperCase() === "AM" && hours === 12) hours = 0;
+        }
+      }
+      const istOffsetMs = 5.5 * 60 * 60 * 1000;
+      const startUtcMs = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), hours, minutes) - istOffsetMs;
+      const endUtcMs = startUtcMs + 4 * 60 * 60 * 1000; // default 4 hours
+      const nowMs = Date.now();
+
+      if (nowMs >= endUtcMs) return "completed";
+      if (nowMs >= startUtcMs) return "ongoing";
+      return status;
+    } catch {
+      return status;
+    }
+  }, [event]);
+
+  const isCompletedOrCancelled = effectiveStatus === "completed" || effectiveStatus === "cancelled";
+
+  if (!isOpen || !event) return null;
 
   const handleInputChange = (field, value) => {
-    setEditedEvent({ ...editedEvent, [field]: value });
+    setEditedEvent((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {
-    setErrors(null);
+    setSaveError(null);
     setIsSaving(true);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/event/updateevent`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(editedEvent),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_SERVER}/event/updateevent`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(editedEvent),
+        }
+      );
 
       const result = await res.json();
-
-      if (!res.ok) {
+      if (!res.ok || result.message !== "success") {
         throw new Error(result.message || "Failed to update event");
       }
 
-      if (result.message === "success") {
-        setSelectedEvent(editedEvent);
-        setIsEditing(false);
-      } else {
-        throw new Error(result.message || "Failed to update event");
+      setIsEditing(false);
+      if (typeof onUpdated === "function") {
+        onUpdated(editedEvent);
       }
     } catch (error) {
-      setErrors(error.message || "An unexpected error occurred");
+      setSaveError(error.message || "An unexpected error occurred");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleCloseDetail = () => {
-    setSelectedEvent(null);
-    setIsEditing(false);
-  };
-
-  const handleMainClose = () => {
-    setSelectedEvent(null);
-    setIsEditing(false);
-    onClose();
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toISOString().split("T")[0];
+    try {
+      const d = new Date(dateString);
+      return d.toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return dateString;
+    }
   };
 
-  if (!isOpen) return null;
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    try {
+      const d = new Date(dateString);
+      return d.toISOString().split("T")[0];
+    } catch {
+      return dateString;
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "ongoing":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 animate-pulse">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+            Live Now
+          </span>
+        );
+      case "completed":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+            <CheckCircle2 size={13} className="text-gray-500" />
+            Completed
+          </span>
+        );
+      case "cancelled":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+            <AlertCircle size={13} className="text-red-500" />
+            Cancelled
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+            <Sparkles size={13} className="text-amber-500" />
+            Upcoming
+          </span>
+        );
+    }
+  };
 
   return (
-    <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/40 bg-opacity-50 dark:bg-opacity-70">
-        <div className="relative max-h-full w-full max-w-4xl p-4">
-          <div className="relative rounded-lg bg-white shadow dark:bg-gray-800">
-            <div className="flex items-center justify-between rounded-t border-b border-gray-200 p-4 dark:border-gray-700">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                All Events
-              </h3>
-              <button
-                type="button"
-                onClick={handleMainClose}
-                className="ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"
-                aria-label="Close modal"
-              >
-                <HiX className="h-5 w-5" />
-              </button>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-h-[92vh] overflow-hidden">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+              {isEditing ? "Edit Event" : "Event Details"}
+            </h3>
+            {getStatusBadge(effectiveStatus)}
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            title="Close"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 custom-scrollbar flex-1">
+          {saveError && (
+            <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-xs sm:text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0" />
+              <span>{saveError}</span>
             </div>
-            
-            <div className="space-y-4 p-6">
-              {events.length === 0 ? (
-                <div className="text-center py-8">
-                  <HiUserGroup className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-500" />
-                  <p className="text-gray-500 dark:text-gray-400">No events found</p>
-                </div>
-              ) : (
-                <div className="max-h-96 overflow-y-auto space-y-3">
-                  {events.map((event) => (
-                    <div
-                      key={event._id}
-                      className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-700"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                            {event.event_title}
-                          </h4>
-                          <div className="space-y-1.5">
-                            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                              <HiUserGroup className="mr-2 h-4 w-4 text-amber-300" />
-                              <span>{event.organizer_company || "Not specified"}</span>
-                            </div>
-                            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                              <HiCalendar className="mr-2 h-4 w-4 text-amber-300" />
-                              <span>{formatDate(event.event_date)}</span>
-                              <HiClock className="ml-4 mr-2 h-4 w-4 text-amber-300" />
-                              <span>{event.event_time}</span>
-                            </div>
-                            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                              <HiLocationMarker className="mr-2 h-4 w-4 text-amber-300" />
-                              <span>{event.location || "Not specified"}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium px-2.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 capitalize">
-                                {event.event_type}
-                              </span>
-                              <span
-                                className={`inline-block rounded px-2.5 py-0.5 text-xs font-medium capitalize ${
-                                  event.event_status === "completed"
-                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                    : event.event_status === "cancelled"
-                                    ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                                    : event.event_status === "upcoming"
-                                    ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                                    : "bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-300"
-                                }`}
-                              >
-                                {event.event_status || "upcoming"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleViewDetails(event)}
-                          className="ml-4 rounded-lg bg-amber-300 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800"
-                        >
-                          View Details
-                        </button>
-                      </div>
+          )}
+
+          {!isEditing ? (
+            /* VIEW MODE */
+            <div className="space-y-5">
+              {/* Event Title & Organizer */}
+              <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white break-words">
+                  {event.event_title}
+                </h4>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  {event.organizer_company && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-200/70 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300">
+                      <Briefcase size={13} />
+                      <span>{event.organizer_company}</span>
                     </div>
-                  ))}
+                  )}
+                  {event.chapter?.chapter_name && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                      <Building2 size={13} />
+                      <span>{event.chapter.chapter_name}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Grid Information */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="p-3.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/20 flex items-start gap-3">
+                  <Calendar size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-gray-400 font-medium uppercase tracking-wider block">Date</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5 block">
+                      {formatDate(event.event_date)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/20 flex items-start gap-3">
+                  <Clock size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-gray-400 font-medium uppercase tracking-wider block">Time</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5 block">
+                      {event.event_time || "09:00 AM"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/20 flex items-start gap-3">
+                  <MapPin size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs text-gray-400 font-medium uppercase tracking-wider block">Location</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5 block break-words">
+                      {event.location || "Not specified"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/20 flex items-start gap-3">
+                  <Tag size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs text-gray-400 font-medium uppercase tracking-wider block">Event Type</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5 capitalize block">
+                      {event.event_type || "Weekly"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              {event.event_description && (
+                <div className="p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/30">
+                  <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <FileText size={15} className="text-amber-500" />
+                    <span>Event Description</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    {event.event_description}
+                  </p>
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </div>
+          ) : (
+            /* EDIT MODE */
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                  Event Title *
+                </label>
+                <input
+                  type="text"
+                  value={editedEvent.event_title || ""}
+                  onChange={(e) => handleInputChange("event_title", e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  placeholder="Enter event title"
+                />
+              </div>
 
-      {selectedEvent && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/40 bg-opacity-60 dark:bg-opacity-80">
-          <div className="relative max-h-full w-full max-w-2xl p-4">
-            <div className="relative rounded-lg bg-white shadow-xl dark:bg-gray-800">
-              <div className="flex items-center justify-between rounded-t border-b border-gray-200 p-4 dark:border-gray-700">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  {isEditing ? "Edit Event" : "Event Details"}
-                </h3>
-                <div className="flex items-center space-x-2">
-                  {!isEditing && canedit ? (
-                    <button
-                      type="button"
-                      onClick={handleEditToggle}
-                      className="inline-flex items-center rounded-lg bg-amber-300 px-3 py-1.5 text-sm font-medium text-gray-900 hover:bg-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-300"
-                    >
-                      <HiPencil className="mr-1 h-4 w-4" />
-                      Edit
-                    </button>
-                  ) : canedit ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className={`inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-medium ${
-                          isSaving ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-                        } text-white focus:outline-none focus:ring-4 focus:ring-green-300`}
-                      >
-                        {isSaving ? (
-                          <svg
-                            className="animate-spin h-5 w-5 mr-1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            />
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                            />
-                          </svg>
-                        ) : (
-                          <HiCheck className="mr-1 h-4 w-4" />
-                        )}
-                        Save
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleEditToggle}
-                        className="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={handleCloseDetail}
-                    className="ml-2 inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"
-                    aria-label="Close details modal"
-                  >
-                    <HiX className="h-5 w-5" />
-                  </button>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                  Organizer Company *
+                </label>
+                <input
+                  type="text"
+                  value={editedEvent.organizer_company || ""}
+                  onChange={(e) => handleInputChange("organizer_company", e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  placeholder="Organizer company name"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Event Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={formatDateForInput(editedEvent.event_date)}
+                    onChange={(e) => handleInputChange("event_date", e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Event Time *
+                  </label>
+                  <input
+                    type="text"
+                    value={editedEvent.event_time || ""}
+                    onChange={(e) => handleInputChange("event_time", e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                    placeholder="e.g. 09:00 AM"
+                  />
                 </div>
               </div>
 
-              <div className="space-y-6 p-6">
-                {errors && (
-                  <p className="mt-2 text-red-600 dark:text-red-400 text-sm font-medium">{errors}</p>
-                )}
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    Event Title
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Location *
                   </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editedEvent.event_title || ""}
-                      onChange={(e) => handleInputChange("event_title", e.target.value)}
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    />
-                  ) : (
-                    <p className="text-base text-gray-900 dark:text-white">{selectedEvent.event_title}</p>
-                  )}
+                  <input
+                    type="text"
+                    value={editedEvent.location || ""}
+                    onChange={(e) => handleInputChange("location", e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                    placeholder="Event venue or location"
+                  />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    Organizer / Company Name
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Event Type
                   </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editedEvent.organizer_company || ""}
-                      onChange={(e) => handleInputChange("organizer_company", e.target.value)}
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    />
-                  ) : (
-                    <p className="text-sm text-gray-900 dark:text-white flex items-center">
-                      <HiUserGroup className="mr-2 h-4 w-4 text-amber-300" />
-                      {selectedEvent.organizer_company || "Not specified"}
-                    </p>
-                  )}
+                  <select
+                    value={editedEvent.event_type || "weekly"}
+                    onChange={(e) => handleInputChange("event_type", e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="others">Others</option>
+                  </select>
                 </div>
+              </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    Description / Notes
-                  </label>
-                  {isEditing ? (
-                    <textarea
-                      rows="4"
-                      value={editedEvent.event_description || ""}
-                      onChange={(e) => handleInputChange("event_description", e.target.value)}
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    />
-                  ) : (
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      {selectedEvent.event_description || "No description provided"}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                      Date
-                    </label>
-                    {isEditing ? (
-                      <input
-                        type="date"
-                        value={formatDate(editedEvent.event_date)}
-                        onChange={(e) => handleInputChange("event_date", e.target.value)}
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-900 dark:text-white flex items-center">
-                        <HiCalendar className="mr-2 h-4 w-4 text-amber-300" />
-                        {formatDate(selectedEvent.event_date)}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                      Time
-                    </label>
-                    {isEditing ? (
-                      <input
-                        type="time"
-                        value={editedEvent.event_time || ""}
-                        onChange={(e) => handleInputChange("event_time", e.target.value)}
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-900 dark:text-white flex items-center">
-                        <HiClock className="mr-2 h-4 w-4 text-amber-300" />
-                        {selectedEvent.event_time}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                      Event Type
-                    </label>
-                    {isEditing ? (
-                      <select
-                        value={editedEvent.event_type || ""}
-                        onChange={(e) => handleInputChange("event_type", e.target.value)}
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                      >
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="others">Others</option>
-                      </select>
-                    ) : (
-                      <span className="inline-block rounded bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-300 capitalize">
-                        {selectedEvent.event_type}
-                      </span>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                      Location
-                    </label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editedEvent.location || ""}
-                        onChange={(e) => handleInputChange("location", e.target.value)}
-                        placeholder="Event location or link"
-                        className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-900 dark:text-white flex items-center">
-                        <HiLocationMarker className="mr-2 h-4 w-4 text-amber-300" />
-                        {selectedEvent.location || "Not specified"}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    Event Status
-                  </label>
-                  {isEditing ? (
-                    <select
-                      value={editedEvent.event_status || "upcoming"}
-                      onChange={(e) => handleInputChange("event_status", e.target.value)}
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    >
-                      <option value="upcoming">Upcoming</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                      <option value="inprogress">In Progress</option>
-                    </select>
-                  ) : (
-                    <span
-                      className={`inline-block rounded px-2.5 py-1 text-xs font-medium capitalize ${
-                        selectedEvent.event_status === "completed"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                          : selectedEvent.event_status === "cancelled"
-                          ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                          : selectedEvent.event_status === "inprogress"
-                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                          : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                      }`}
-                    >
-                      {selectedEvent.event_status}
-                    </span>
-                  )}
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                  Event Description
+                </label>
+                <textarea
+                  rows={3}
+                  value={editedEvent.event_description || ""}
+                  onChange={(e) => handleInputChange("event_description", e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                  placeholder="Enter details about this event..."
+                />
               </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
-    </>
+
+        {/* Footer Actions */}
+        <div className="p-4 sm:p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 flex items-center justify-end gap-2.5 shrink-0">
+          {isEditing ? (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditedEvent({ ...event });
+                }}
+                disabled={isSaving}
+                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 text-xs sm:text-sm font-bold shadow-sm transition-all disabled:opacity-50"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Close
+              </button>
+              {/* EDIT BUTTON: strictly removed for completed or cancelled events */}
+              {!isCompletedOrCancelled && canedit && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 text-xs sm:text-sm font-bold shadow-sm transition-all"
+                >
+                  <Pencil size={15} />
+                  <span>Edit Event</span>
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+      </div>
+    </div>
   );
 }
+
+// Backwards-compatible alias
+export const EventsModal = EventDetailModal;
+export default EventDetailModal;
