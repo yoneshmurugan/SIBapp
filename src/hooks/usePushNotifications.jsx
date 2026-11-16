@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
+import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+import { App } from '@capacitor/app';
 
 const usePushNotifications = () => {
     const [fcmToken, setFcmToken] = useState(null);
@@ -11,61 +14,160 @@ const usePushNotifications = () => {
 
         const initNativePush = async () => {
             try {
-                // Dynamically import Capacitor packages to ensure safe execution on web
-                const capPkg = '@capacitor/core';
-                const msgPkg = '@capacitor-firebase/messaging';
-                const appPkg = '@capacitor/app';
-
-                const capModule = await import(/* @vite-ignore */ capPkg).catch(() => null);
-                if (!capModule || !capModule.Capacitor || !capModule.Capacitor.isNativePlatform()) {
+                if (!Capacitor.isNativePlatform()) {
                     return;
                 }
 
-                const messagingModule = await import(/* @vite-ignore */ msgPkg).catch(() => null);
-                if (!messagingModule || !messagingModule.FirebaseMessaging) {
-                    return;
+                console.log('Initializing native push notifications on platform:', Capacitor.getPlatform());
+
+                // 1. Create High-Priority Notification Channel on Android (API 26+)
+                if (Capacitor.getPlatform() === 'android') {
+                    // Delete legacy channel with broken raw sound path if present
+                    await FirebaseMessaging.deleteChannel({ id: 'sib_notifications' }).catch(() => null);
+
+                    await FirebaseMessaging.createChannel({
+                        id: 'sib_notifications_v1',
+                        name: 'SIB Notifications',
+                        description: 'General notifications, announcements, referrals and alerts for SIB members',
+                        importance: 5, // 5 = IMPORTANCE_HIGH (makes sound, vibrates, displays heads-up banner)
+                        visibility: 1, // 1 = VISIBILITY_PUBLIC (shows on lockscreen)
+                        vibrate: true, // Note: Plugin expects 'vibrate' (boolean), not 'vibration'
+                        lights: true,
+                        lightColor: '#d97706'
+                        // NOTE: Do NOT pass sound: 'default'. Omitting sound instructs Android OS to
+                        // automatically assign the device's system default notification ringtone!
+                    }).catch(err => console.log('Channel creation log:', err));
                 }
 
-                const { FirebaseMessaging } = messagingModule;
-
-                // 1. Check current push notification permission status
+                // 2. Check and Request Push Permissions
                 let permStatus = await FirebaseMessaging.checkPermissions().catch(() => null);
-
-                // If not yet decided, prompt user for permission
-                if (!permStatus || permStatus.receive === 'prompt' || permStatus.receive === 'prompt-with-rationale') {
-                    permStatus = await FirebaseMessaging.requestPermissions().catch(() => null);
-                }
+                console.log('Current permission status:', permStatus?.receive);
 
                 if (!permStatus || permStatus.receive !== 'granted') {
-                    console.log('Push notification permissions not granted:', permStatus?.receive);
-                    return;
+                    console.log('Requesting notification permissions...');
+                    permStatus = await FirebaseMessaging.requestPermissions().catch(() => null);
+                    console.log('Permission response:', permStatus?.receive);
                 }
 
-                // 2. Retrieve device FCM token
-                const { token } = await FirebaseMessaging.getToken();
-                if (!isMounted || !token) return;
-
-                setFcmToken(token);
-                localStorage.setItem('fcmToken', token);
-
-                // 3. Register token with backend
+                // 3. Always Retrieve Device FCM Token
                 try {
-                    await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/register-fcm-token`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ fcmToken: token })
-                    });
-                } catch (err) {
-                    console.error('Failed to register FCM token with backend:', err);
+                    const { token } = await FirebaseMessaging.getToken();
+                    console.log('Retrieved FCM token:', token ? `${token.substring(0, 15)}...` : 'null');
+                    if (isMounted && token) {
+                        setFcmToken(token);
+                        localStorage.setItem('fcmToken', token);
+
+                        // Register token with backend
+                        const res = await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/register-fcm-token`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ fcmToken: token })
+                        });
+                        console.log('FCM registration response status:', res.status);
+                    }
+                } catch (tokenErr) {
+                    console.error('Failed to get or register FCM token:', tokenErr);
                 }
 
-                // 4. Clear any previous listeners before attaching fresh ones
-                await FirebaseMessaging.removeAllListeners();
+                // 4. Attach Listeners (clear any previous first)
+                await FirebaseMessaging.removeAllListeners().catch(() => null);
 
                 // Foreground push received listener
                 await FirebaseMessaging.addListener('notificationReceived', (event) => {
-                    console.log('Push received: ', JSON.stringify(event.notification));
+                    console.log('Push received in foreground:', JSON.stringify(event.notification));
+                    const notif = event.notification || {};
+                    const title = notif.title || 'New Announcement';
+                    const body = notif.body || 'You have a new update in SIB.';
+
+                    // Display a sleek in-app banner when push arrives while user has the app open
+                    try {
+                        const existingToast = document.getElementById('sib-foreground-push-toast');
+                        if (existingToast) existingToast.remove();
+
+                        const toast = document.createElement('div');
+                        toast.id = 'sib-foreground-push-toast';
+                        toast.style.cssText = `
+                            position: fixed;
+                            top: calc(env(safe-area-inset-top, 0px) + 16px);
+                            left: 16px;
+                            right: 16px;
+                            z-index: 99999;
+                            background: #0a2342;
+                            color: #ffffff;
+                            border: 1px solid #d4b896;
+                            border-radius: 14px;
+                            padding: 12px 16px;
+                            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+                            display: flex;
+                            align-items: flex-start;
+                            gap: 12px;
+                            cursor: pointer;
+                            animation: sibToastSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+                            font-family: inherit;
+                        `;
+
+                        if (!document.getElementById('sib-toast-style')) {
+                            const styleEl = document.createElement('style');
+                            styleEl.id = 'sib-toast-style';
+                            styleEl.textContent = `
+                                @keyframes sibToastSlideDown {
+                                    from { opacity: 0; transform: translateY(-24px) scale(0.96); }
+                                    to { opacity: 1; transform: translateY(0) scale(1); }
+                                }
+                            `;
+                            document.head.appendChild(styleEl);
+                        }
+
+                        toast.innerHTML = `
+                            <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(212, 184, 150, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4b896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 0.92rem; font-weight: 700; color: #ffffff; margin-bottom: 2px; line-height: 1.3;">
+                                    ${title}
+                                </div>
+                                <div style="font-size: 0.8rem; color: #d1d5db; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    ${body}
+                                </div>
+                            </div>
+                        `;
+
+                        toast.onclick = () => {
+                            toast.remove();
+                            const data = notif.data || notif.additionalData || {};
+                            const action = data.action;
+                            const t = title.toLowerCase();
+                            const b = body.toLowerCase();
+                            if (action === 'OPEN_TYB' || t.includes('referral') || b.includes('referral')) {
+                                navigate('/slips');
+                            } else if (action === 'OPEN_M2M' || t.includes('m2m')) {
+                                navigate('/slips');
+                            } else if (action === 'MEMBERSHIP_RENEWAL' || t.includes('renewal') || b.includes('renewal')) {
+                                navigate('/profile');
+                            } else {
+                                navigate('/allnotifications');
+                            }
+                        };
+
+                        document.body.appendChild(toast);
+                        setTimeout(() => {
+                            if (document.body.contains(toast)) {
+                                toast.style.transition = 'all 0.3s ease-out';
+                                toast.style.opacity = '0';
+                                toast.style.transform = 'translateY(-16px)';
+                                setTimeout(() => toast.remove(), 300);
+                            }
+                        }, 5000);
+                    } catch (e) {
+                        console.log('Error showing foreground toast:', e);
+                    }
+
+                    // Dispatch a custom window event so in-app bell / list can update
+                    window.dispatchEvent(new CustomEvent('sib-push-received', { detail: notif }));
                 });
 
                 // Deep-link routing on notification tap
@@ -77,7 +179,6 @@ const usePushNotifications = () => {
                     const title = (notif.title || '').toLowerCase();
                     const body = (notif.body || '').toLowerCase();
 
-                    // If referral push or action is OPEN_TYB -> Route straight to TYB Slip with details prefilled!
                     const isReferralPush =
                         action === 'OPEN_TYB' ||
                         event.actionId === 'punch_tyb' ||
@@ -123,21 +224,29 @@ const usePushNotifications = () => {
                     }
                 });
 
-                // 5. Listen to App state changes (resume) so if user enables notifications in Settings, token registers immediately
-                const appModule = await import(/* @vite-ignore */ appPkg).catch(() => null);
-                if (appModule && appModule.App && !appStateHandle) {
-                    appStateHandle = await appModule.App.addListener('appStateChange', (state) => {
+            } catch (error) {
+                console.log('Push notifications error:', error?.message);
+            }
+        };
+
+        // Initialize immediately on mount
+        initNativePush();
+
+        // 5. Unconditionally attach App state change listener
+        (async () => {
+            try {
+                if (Capacitor.isNativePlatform() && !appStateHandle) {
+                    appStateHandle = await App.addListener('appStateChange', (state) => {
                         if (state.isActive && isMounted) {
+                            console.log('App resumed, refreshing push notification state');
                             initNativePush();
                         }
                     });
                 }
-            } catch (error) {
-                console.log('Push notifications registration bypassed:', error?.message);
+            } catch (e) {
+                console.log('App listener error:', e);
             }
-        };
-
-        initNativePush();
+        })();
 
         return () => {
             isMounted = false;

@@ -1033,3 +1033,96 @@ Tracks changes across the 3 production workspaces:
    - **Responsive Base Min-Height:** Defined baseline CSS rules for `.jotform-container` and its iframe: `min-height: 680px !important;` on desktop and `min-height: 900px !important;` on mobile (`max-width: 650px`), preventing layout collapse before scripts finish loading.
    - **Scroll Protection:** Attached a `MutationObserver` to ensure `scrolling="auto"` is enabled on the injected iframe, allowing user scrollability under high zoom or small viewport conditions.
    - **CSS Hygiene:** Removed redundant duplicate style declarations and properly structured the `@media (max-width: 650px)` breakpoint.
+
+---
+
+### S3-#21 [2026-11-16] - Android 13+ Runtime Permission Prompt Fix, High-Priority Notification Channel, Resilient Token Sync & Foreground In-App Toast
+- **Type:** Critical Bug Fix & Native Android Optimization
+- **Origin:** Android, Web, Backend (`SIB_app_android`, `SIBapp`, `SIB_backend`)
+- **Files:**
+  - `src/hooks/usePushNotifications.jsx` (in `SIB_app_android` & `SIBapp`)
+  - `android/app/src/main/AndroidManifest.xml` (in `SIB_app_android`)
+  - `android/app/build.gradle` (in `SIB_app_android`) - bumped to `versionCode 37`, `versionName "7.6"`
+  - `src/utils/fcmHelper.mjs` (in `SIB_backend`)
+  - `changes made.md` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Root Cause Analysis (Android 13+ Permission Prompt Not Showing):**
+   - In v7.5, `usePushNotifications.jsx` checked if `permStatus.receive === 'prompt'` before calling `requestPermissions()`.
+   - On devices updated from v7.4 (where `POST_NOTIFICATIONS` was missing from the manifest), Capacitor recorded permission state as `'denied'`. Because `'denied' !== 'prompt'`, `requestPermissions()` was never called, preventing the Android OS permission dialog from appearing.
+   - Crucially, `getToken()` and backend registration were gated behind `if (permStatus.receive !== 'granted') return;`. This caused new devices to NEVER retrieve an FCM token, leaving the backend with no token to dispatch to.
+   - The `@capacitor/app` `appStateChange` listener was placed after the early `return`, so manual permission toggles in Android Settings failed to trigger token sync on app resume.
+2. **High-Priority Notification Channel (`sib_notifications`):**
+   - Modern Android versions (API 26+) and OEM skins (Xiaomi / Redmi / HyperOS, ColorOS) suppress or silence notifications routed to `fcm_fallback_notification_channel`.
+   - Added automatic native channel creation via `FirebaseMessaging.createChannel()` with `importance: 5` (IMPORTANCE_HIGH), public lockscreen visibility, sound, lights, and vibration.
+   - Configured `<meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="sib_notifications"/>` in `AndroidManifest.xml`.
+   - Configured `channelId: 'sib_notifications'` in backend `fcmHelper.mjs`.
+3. **Resilient Token Acquisition & Unconditional App Resume Listener:**
+   - Decoupled `FirebaseMessaging.getToken()` from permission status: FCM tokens are now always retrieved and registered with the backend.
+   - Relocated the `appStateChange` listener to an unconditional effect so whenever a user returns from Android Settings, the app instantly refreshes permissions and token state.
+4. **Foreground Push In-App Banner:**
+   - Android FCM deliberately suppresses system status bar notifications when the app is actively open in the foreground.
+   - Added an in-app floating push banner in `notificationReceived` with SIB executive styling (Navy `#0a2342` & Gold `#d4b896`), sound/vibration, auto-dismiss (5s), and deep-link tap routing.
+
+---
+
+### S3-#22 [2026-11-16] - Fixed Dynamic Import Module Resolution Failure for Capacitor Firebase Messaging & Global AppRoot Mount
+- **Type:** Critical Bug Fix & Core Architecture Refactor
+- **Origin:** Android & Web (`SIB_app_android` & `SIBapp`)
+- **Files:**
+  - `src/hooks/usePushNotifications.jsx` (in `SIB_app_android`)
+  - `src/main.jsx` (in `SIB_app_android`)
+  - `changes made.md` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced, Built & Verified via `./gradlew assembleDebug`
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Critical Root Cause of Silent Initialization Failure:**
+   - `usePushNotifications.jsx` was attempting to dynamically load Capacitor via `await import(/* @vite-ignore */ '@capacitor-firebase/messaging')`.
+   - Because of `/* @vite-ignore */`, Vite omitted the package from the bundled assets, leaving a bare runtime specifier.
+   - At runtime inside the Android WebView, `import("@capacitor/core")` threw a `TypeError: Failed to resolve module specifier`, caught by `.catch(() => null)`.
+   - As a result, `initNativePush` silently returned at line 18 on every launch. The plugin was never reached, permission was never requested, and no FCM token was ever generated or sent to the backend.
+2. **Static Bundled Native Imports:**
+   - Switched to direct static imports: `import { Capacitor } from '@capacitor/core'`, `import { FirebaseMessaging } from '@capacitor-firebase/messaging'`, and `import { App } from '@capacitor/app'`.
+   - Verified that Vite now bundles `FirebaseMessaging` directly into `dist` (`createChannel` and `sib_notifications` verified in compiled chunk).
+3. **Global AppRoot Mount in `main.jsx`:**
+   - Previously, `usePushNotifications` was only called inside `ProtectedRoute` and `Dashboard`, meaning freshly installed apps that landed on `/` or `/signin` never triggered permission requests.
+   - Created `<AppRoot>` wrapping all routes in `src/main.jsx`, ensuring permission requests, channel creation, and FCM token retrieval execute on the very first screen of the app.
+
+---
+
+### S3-#23 [2026-11-16] - Restored System Default Notification Sound and Vibration via Channel sib_notifications_v1
+- **Type:** Bug Fix & Audio Tuning
+- **Origin:** Android & Backend (`SIB_app_android` & `SIB_backend`)
+- **Files:**
+  - `src/hooks/usePushNotifications.jsx` (in `SIB_app_android`)
+  - `android/app/src/main/AndroidManifest.xml` (in `SIB_app_android`)
+  - `src/utils/fcmHelper.mjs` (in `SIB_backend`)
+  - `changes made.md` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Root Cause of Silent Notifications:**
+   - In `@capacitor-firebase/messaging`'s Android native implementation (`FirebaseMessagingHelper.java`), passing `sound: 'default'` caused the plugin to construct a custom resource URI: `android.resource://<package>/raw/default`.
+   - Because no `/raw/default` audio asset exists in the app bundle, Android assigned an invalid audio path to the channel, causing all notifications in `sib_notifications` to play in total silence.
+   - Furthermore, the plugin expects the boolean parameter `vibrate: true`, whereas `vibration: true` was passed.
+2. **Channel Recreation with System Audio (`sib_notifications_v1`):**
+   - Because Android channels are immutable once registered on a device, created `sib_notifications_v1` and deleted the legacy `sib_notifications` channel.
+   - Omitted the `sound` parameter in `FirebaseMessaging.createChannel()`. On Android, creating a channel without a custom sound parameter automatically instructs the OS to bind the device's system default notification ringtone (`Settings.System.DEFAULT_NOTIFICATION_URI`).
+   - Configured `vibrate: true` to ensure haptic feedback on incoming pushes.
+   - Updated `default_notification_channel_id` in `AndroidManifest.xml` and `channelId: 'sib_notifications_v1'` in `fcmHelper.mjs`.

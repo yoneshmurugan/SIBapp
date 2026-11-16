@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { StrictMode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -47,6 +47,13 @@ import AdminRoute from './hooks/AdminRoute';
 import ChapterDetails from './Admin/Chapterdetails.jsx';
 import PrivacyPanel from "./Settings/components/PrivacyPanel";
 import VersionChecker from './Components/VersionChecker';
+import usePushNotifications from './hooks/usePushNotifications';
+
+// AppRoot ensures push notifications, channel creation, and permission prompts initialize globally on app open
+function AppRoot() {
+  usePushNotifications();
+  return <Outlet />;
+}
 
 // We must import Preferences here to read the native storage!
 import { Preferences } from "@capacitor/preferences";
@@ -97,58 +104,63 @@ window.fetch = async (input, init) => {
 
 const router = createBrowserRouter([
   {
-    path: '/sib', element: <ExistingSession />, errorElement: <ErrorDisplay />
-  },
-  { path: '/signin', element: <SignInPage /> },
-  { path: '/public-members', element: <PublicMembers /> },
-  {path:'/privacy-policy', element:<PrivacyPanel />},
-  {
-    element: <ProtectedRoute />,
-    errorElement: <ErrorDisplay />,
+    element: <AppRoot />,
     children: [
-      { path: '/dashboard', element: <Dashboard /> },
-      { path: '/members', element: <Members /> },
-      { path: '/myactivity', element: <Myactivity /> },
-      { path: '/meetings', element: <Meetings /> },
-      { path: '/mychapter', element: <Mychapter /> },
-      { path: '/settings', element: <Settings /> },
-      { path: '/slips', element: <FunctionalPage /> },
-      { path: '/profile', element: <Profile /> },
-      { path: '/allnotifications', element: <NotificationsPage /> },
-      { path: '/wall-of-wishes', element: <WallOfWishes /> },
-      { path: '/leaderboard', element: <LeaderboardPage /> },
+      {
+        path: '/sib', element: <ExistingSession />, errorElement: <ErrorDisplay />
+      },
+      { path: '/signin', element: <SignInPage /> },
+      { path: '/public-members', element: <PublicMembers /> },
+      {path:'/privacy-policy', element:<PrivacyPanel />},
+      {
+        element: <ProtectedRoute />,
+        errorElement: <ErrorDisplay />,
+        children: [
+          { path: '/dashboard', element: <Dashboard /> },
+          { path: '/members', element: <Members /> },
+          { path: '/myactivity', element: <Myactivity /> },
+          { path: '/meetings', element: <Meetings /> },
+          { path: '/mychapter', element: <Mychapter /> },
+          { path: '/settings', element: <Settings /> },
+          { path: '/slips', element: <FunctionalPage /> },
+          { path: '/profile', element: <Profile /> },
+          { path: '/allnotifications', element: <NotificationsPage /> },
+          { path: '/wall-of-wishes', element: <WallOfWishes /> },
+          { path: '/leaderboard', element: <LeaderboardPage /> },
+        ]
+      },
+      {
+        element: <AdminRoute />,
+        children: [
+          { path: '/admin', element: <Admin /> },
+          { path: '/chapterdetails/:id', element: <ChapterDetails /> },
+        ]
+      },
+      {
+        element: <PresidentRoute />,
+        children: [
+          { path: '/presidentportal', element: <PresidentPortal /> },
+        ]
+      }, {
+        element: <CoordinatorRoute />,
+        children: [
+          { path: '/memberdetailedanalytics', element: <MembersAnalytics /> },
+          { path: '/memberdetailedanalytics/mtom', element: <MembersAnalytics /> },
+          { path: '/memberdetailedanalytics/tyb', element: <MembersAnalytics /> },
+          { path: '/memberdetailedanalytics/referrals', element: <MembersAnalytics /> },
+          { path: '/coordinatorsportal', element: <Coordinatorsportal /> },
+        ]
+      },
+      { path: '/profile/:id', element: <Profile /> },
+      { path: '/reset-password', element: <ResetPassword /> },
+      { path: '/noteligible', element: <NotEligibleRole /> },
+      { path: '/child-safety-standards', element: <CSAEPolicy /> },
+      { path: '/', element: <MainPage /> },
+      { path: '/album', element: <Album /> },
+      {path:'/events-meetings', element:<EventsMeetingsPage />},
+      { path: '*', element: <NotFound404 /> },
     ]
-  },
-  {
-    element: <AdminRoute />,
-    children: [
-      { path: '/admin', element: <Admin /> },
-      { path: '/chapterdetails/:id', element: <ChapterDetails /> },
-    ]
-  },
-  {
-    element: <PresidentRoute />,
-    children: [
-      { path: '/presidentportal', element: <PresidentPortal /> },
-    ]
-  }, {
-    element: <CoordinatorRoute />,
-    children: [
-      { path: '/memberdetailedanalytics', element: <MembersAnalytics /> },
-      { path: '/memberdetailedanalytics/mtom', element: <MembersAnalytics /> },
-      { path: '/memberdetailedanalytics/tyb', element: <MembersAnalytics /> },
-      { path: '/memberdetailedanalytics/referrals', element: <MembersAnalytics /> },
-      { path: '/coordinatorsportal', element: <Coordinatorsportal /> },
-    ]
-  },
-  { path: '/profile/:id', element: <Profile /> },
-  { path: '/reset-password', element: <ResetPassword /> },
-  { path: '/noteligible', element: <NotEligibleRole /> },
-  { path: '/child-safety-standards', element: <CSAEPolicy /> },
-  { path: '/', element: <MainPage /> },
-  { path: '/album', element: <Album /> },
-  {path:'/events-meetings', element:<EventsMeetingsPage />},
-  { path: '*', element: <NotFound404 /> },
+  }
 ]);
 
 const rootEl = document.getElementById('root');
