@@ -495,128 +495,14 @@ textarea.form-input {
     margin-bottom: 1.5rem;
   }
 
-  
-/* -----------------------------------------------------------
-   SOCIAL FOLLOW CARD
------------------------------------------------------------ */
-.social-follow-card {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
+  .jotform-container {
+    padding: 0.5rem;
+    min-height: 900px;
+  }
 
-.social-follow-header h4 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--sib-navy);
-  margin: 0 0 0.25rem 0;
-}
-
-.social-follow-header p {
-  color: var(--sib-text-light);
-  font-size: 0.85rem;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.social-links-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.social-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--sib-border);
-  background-color: #faf9f6;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  color: inherit;
-}
-
-.social-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(10, 35, 66, 0.08);
-  border-color: var(--sib-gold);
-}
-
-.social-btn-left {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.social-btn-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.social-btn-icon.instagram {
-  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-  color: #fff;
-}
-
-.social-btn-icon.facebook {
-  background-color: #1877f2;
-  color: #fff;
-}
-
-.social-btn-text h5 {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--sib-navy);
-}
-
-.social-btn-text span {
-  font-size: 0.75rem;
-  color: var(--sib-text-light);
-}
-
-.social-arrow-icon {
-  color: #9ca3af;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.social-btn:hover .social-arrow-icon {
-  color: var(--sib-navy);
-  transform: translate(2px, -2px);
-}
-
-.jotform-container {
-  background: var(--sib-white);
-  border: 1px solid var(--sib-border);
-  border-radius: 1rem;
-  padding: 0.75rem;
-  box-shadow: var(--sib-shadow);
-  width: 100%;
-  min-height: 680px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.jotform-container iframe {
-  width: 100% !important;
-  min-width: 100% !important;
-  border: none !important;
-  min-height: 680px !important;
-  height: 680px;
-  flex: 1;
-}
-
-.contact-form {
-    padding: 1.5rem;
+  .jotform-container iframe {
+    min-height: 900px !important;
+    height: 900px;
   }
 }
 `;
@@ -636,7 +522,48 @@ function Contact() {
     script.async = true;
     container.appendChild(script);
 
+    // Jotform's dynamic height calculation only measures standard inputs,
+    // which causes its fixed 56px bottom branding banner ("Jotform - Create your own Jotform")
+    // to overlay and hide the Submit button. We intercept the postMessage setHeight event
+    // and add +100px so the Submit button is always fully visible, spaced, and clickable.
+    const handleMessage = (e) => {
+      if (typeof e.data === "string" && e.data.startsWith("setHeight:")) {
+        const parts = e.data.split(":");
+        if (parts[2] === "263192106281048" || !parts[2]) {
+          const rawHeight = parseInt(parts[1], 10);
+          if (!isNaN(rawHeight) && rawHeight > 0) {
+            const adjustedHeight = `${rawHeight + 100}px`;
+            setTimeout(() => {
+              const iframe =
+                document.getElementById("263192106281048") ||
+                container.querySelector("iframe");
+              if (iframe) {
+                iframe.style.setProperty("height", adjustedHeight, "important");
+                iframe.style.setProperty("min-height", adjustedHeight, "important");
+                if (iframe.getAttribute("scrolling") === "no") {
+                  iframe.setAttribute("scrolling", "auto");
+                }
+              }
+            }, 30);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("message", handleMessage, false);
+
+    // Ensure scrolling inside the iframe is never restricted
+    const observer = new MutationObserver(() => {
+      const iframe = container.querySelector("iframe");
+      if (iframe && iframe.getAttribute("scrolling") === "no") {
+        iframe.setAttribute("scrolling", "auto");
+      }
+    });
+    observer.observe(container, { childList: true, subtree: true });
+
     return () => {
+      window.removeEventListener("message", handleMessage, false);
+      observer.disconnect();
       if (container) {
         container.innerHTML = "";
       }
