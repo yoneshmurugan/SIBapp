@@ -175,7 +175,7 @@ function Footer({ margin = "auto", ismember = false }) {
                                     </div>
                                     <div className="contact-item">
                                         <Mail size={18} className="contact-icon" />
-                                        <p>members@senguntharinbusiness.in</p>
+                                        <p>senguntharinbusinesserode@gmail.com</p>
                                     </div>
                                 </div>
                                 

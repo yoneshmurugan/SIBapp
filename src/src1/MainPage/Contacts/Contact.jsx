@@ -211,6 +211,104 @@ const styles = `
 /* -----------------------------------------------------------
    FORM STYLES
 ----------------------------------------------------------- */
+
+/* -----------------------------------------------------------
+   SOCIAL FOLLOW CARD
+----------------------------------------------------------- */
+.social-follow-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.social-follow-header h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sib-navy);
+  margin: 0 0 0.25rem 0;
+}
+
+.social-follow-header p {
+  color: var(--sib-text-light);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.social-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--sib-border);
+  background-color: #faf9f6;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  color: inherit;
+}
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(10, 35, 66, 0.08);
+  border-color: var(--sib-gold);
+}
+
+.social-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.social-btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.social-btn-icon.instagram {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #fff;
+}
+
+.social-btn-icon.facebook {
+  background-color: #1877f2;
+  color: #fff;
+}
+
+.social-btn-text h5 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sib-navy);
+}
+
+.social-btn-text span {
+  font-size: 0.75rem;
+  color: var(--sib-text-light);
+}
+
+.social-arrow-icon {
+  color: #9ca3af;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.social-btn:hover .social-arrow-icon {
+  color: var(--sib-navy);
+  transform: translate(2px, -2px);
+}
+
 .jotform-container {
   background: var(--sib-white);
   border: 1px solid var(--sib-border);
@@ -391,7 +489,105 @@ textarea.form-input {
     margin-bottom: 1.5rem;
   }
 
-  .jotform-container {
+  
+/* -----------------------------------------------------------
+   SOCIAL FOLLOW CARD
+----------------------------------------------------------- */
+.social-follow-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.social-follow-header h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sib-navy);
+  margin: 0 0 0.25rem 0;
+}
+
+.social-follow-header p {
+  color: var(--sib-text-light);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.social-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--sib-border);
+  background-color: #faf9f6;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  color: inherit;
+}
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(10, 35, 66, 0.08);
+  border-color: var(--sib-gold);
+}
+
+.social-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.social-btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.social-btn-icon.instagram {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #fff;
+}
+
+.social-btn-icon.facebook {
+  background-color: #1877f2;
+  color: #fff;
+}
+
+.social-btn-text h5 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sib-navy);
+}
+
+.social-btn-text span {
+  font-size: 0.75rem;
+  color: var(--sib-text-light);
+}
+
+.social-arrow-icon {
+  color: #9ca3af;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.social-btn:hover .social-arrow-icon {
+  color: var(--sib-navy);
+  transform: translate(2px, -2px);
+}
+
+.jotform-container {
   background: var(--sib-white);
   border: 1px solid var(--sib-border);
   border-radius: 1rem;
@@ -482,6 +678,86 @@ function Contact() {
                 <div className="info-text">
                   <h4>Call Us</h4>
                   <a href="tel:+919842761144" className="link-hover">+91 9842761144</a>
+                </div>
+              </div>
+
+              {/* Email Card */}
+              <div className="sib-card info-card">
+                <div className="icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                </div>
+                <div className="info-text" style={{ minWidth: 0 }}>
+                  <h4>Email Us</h4>
+                  <a 
+                    href="mailto:senguntharinbusinesserode@gmail.com" 
+                    className="link-hover" 
+                    style={{ wordBreak: 'break-all', fontSize: '0.88rem' }}
+                  >
+                    senguntharinbusinesserode@gmail.com
+                  </a>
+                </div>
+              </div>
+
+              {/* Follow Us Card */}
+              <div className="sib-card social-follow-card">
+                <div className="social-follow-header">
+                  <h4>Follow Us</h4>
+                  <p>Stay updated with member stories, events & business reels.</p>
+                </div>
+
+                <div className="social-links-list">
+                  {/* Instagram */}
+                  <a
+                    href="https://www.instagram.com/sengunthar_in_business/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-btn"
+                    aria-label="Follow SIB on Instagram"
+                  >
+                    <div className="social-btn-left">
+                      <div className="social-btn-icon instagram">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
+                      </div>
+                      <div className="social-btn-text">
+                        <h5>Instagram</h5>
+                        <span>@sengunthar_in_business</span>
+                      </div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="social-arrow-icon">
+                      <path d="M7 17l9.2-9.2M17 17V8H8" />
+                    </svg>
+                  </a>
+
+                  {/* Facebook */}
+                  <a
+                    href="https://www.facebook.com/profile.php?id=61584546941155&sk=reels_tab"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-btn"
+                    aria-label="Follow SIB on Facebook"
+                  >
+                    <div className="social-btn-left">
+                      <div className="social-btn-icon facebook">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                      </div>
+                      <div className="social-btn-text">
+                        <h5>Facebook</h5>
+                        <span>Sengunthar In Business</span>
+                      </div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="social-arrow-icon">
+                      <path d="M7 17l9.2-9.2M17 17V8H8" />
+                    </svg>
+                  </a>
                 </div>
               </div>
 

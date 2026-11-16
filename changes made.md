@@ -982,3 +982,31 @@ Tracks changes across the 3 production workspaces:
    - Replaced old custom Web3Forms form and previous placeholder cards with dynamic JotForm script embed: `<script type="text/javascript" src="https://form.jotform.com/jsform/263192106281048"></script>`.
    - Managed via React `useEffect` + `useRef` lifecycle with automatic container cleanup on unmount to prevent duplicate iframe instances or memory leaks.
    - Preserved left-column office location and phone contact cards while housing the responsive JotForm inside a dedicated `.jotform-container` card.
+
+---
+
+### S3-#19 [2026-11-16] - Restored Email Card, Added Social Follow Section, and Updated Site Email to senguntharinbusinesserode@gmail.com
+- **Type:** UI Enhancement & Content Update
+- **Origin:** Web, Android, iOS (`SIBapp`, `SIB_app_android`, `feat/ios-build`)
+- **Files:**
+  - `src/src1/MainPage/Contacts/Contact.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/src1/MainPage/Footer/Footer.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `index.html` (in `SIBapp`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced & Built (`npx cap sync ios`)
+
+#### Summary:
+1. **Restored Official Email Card in Contact Section:**
+   - Added `Email Us` card in `Contact.jsx` pointing to `mailto:senguntharinbusinesserode@gmail.com` with responsive wrapping and hover transitions.
+2. **Integrated Executive "Follow Us" Social Channels Card:**
+   - Designed a branded `.social-follow-card` filling the left column whitespace below contact details.
+   - Includes direct interactive action buttons with branded gradient/color badges for:
+     - **Instagram:** Direct link to `@sengunthar_in_business` (`https://www.instagram.com/sengunthar_in_business/`).
+     - **Facebook:** Direct link to SIB Page Reels (`https://www.facebook.com/profile.php?id=61584546941155&sk=reels_tab`).
+   - Symmetrically balances vertical height against the embedded JotForm.
+3. **Site-Wide Email Migration:**
+   - Replaced old email `members@senguntharinbusiness.in` across the footer (`Footer.jsx`) and Schema.org metadata (`index.html`) with official email `senguntharinbusinesserode@gmail.com`.
