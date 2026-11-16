@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 // Embedded styles to ensure single-file compatibility and reliability
 const styles = `
@@ -211,6 +211,22 @@ const styles = `
 /* -----------------------------------------------------------
    FORM STYLES
 ----------------------------------------------------------- */
+.jotform-container {
+  background: var(--sib-white);
+  border: 1px solid var(--sib-border);
+  border-radius: 1rem;
+  padding: 0.75rem;
+  box-shadow: var(--sib-shadow);
+  min-height: 560px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.jotform-container iframe {
+  width: 100% !important;
+  border: none !important;
+}
+
 .contact-form {
   padding: 2.5rem;
 }
@@ -375,48 +391,49 @@ textarea.form-input {
     margin-bottom: 1.5rem;
   }
 
-  .contact-form {
+  .jotform-container {
+  background: var(--sib-white);
+  border: 1px solid var(--sib-border);
+  border-radius: 1rem;
+  padding: 0.75rem;
+  box-shadow: var(--sib-shadow);
+  min-height: 560px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.jotform-container iframe {
+  width: 100% !important;
+  border: none !important;
+}
+
+.contact-form {
     padding: 1.5rem;
   }
 }
 `;
 
 function Contact() {
-  const [result, setResult] = useState("");
+  const jotformRef = useRef(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setResult("Please wait...");
+  useEffect(() => {
+    const container = jotformRef.current;
+    if (!container) return;
 
-    const formData = new FormData(e.target);
-    const object = Object.fromEntries(formData);
-    const json = JSON.stringify(object);
+    // Clear to avoid duplicate embeds on re-render / hot reload
+    container.innerHTML = "";
+    const script = document.createElement("script");
+    script.src = "https://form.jotform.com/jsform/263192106281048";
+    script.type = "text/javascript";
+    script.async = true;
+    container.appendChild(script);
 
-    try {
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: json,
-      });
-
-      const jsonResponse = await response.json();
-
-      if (response.status === 200) {
-        setResult("Form submitted successfully!");
-        e.target.reset();
-      } else {
-        setResult(jsonResponse.message || "Something went wrong!");
+    return () => {
+      if (container) {
+        container.innerHTML = "";
       }
-    } catch (error) {
-      console.error(error);
-      setResult("Something went wrong!");
-    }
-
-    setTimeout(() => setResult(""), 5000);
-  };
+    };
+  }, []);
 
   return (
     <>
@@ -468,87 +485,13 @@ function Contact() {
                 </div>
               </div>
 
-              {/* Email Card */}
-              <div className="sib-card info-card">
-                <div className="icon-wrapper">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                </div>
-                <div className="info-text">
-                  <h4>Email Us</h4>
-                  <a href="mailto:members@senguntharinbusiness.in" className="link-hover">
-                    members@senguntharinbusiness.in
-                  </a>
-                </div>
-              </div>
-
-              {/* Join Now CTA Card (Added to fill gap) */}
-              <div className="sib-card cta-card">
-                <h4 className="cta-title">Become a Member</h4>
-                <p className="cta-desc">
-                  Join our growing network of Sengunthar business professionals. Connect, collaborate, and succeed together.
-                </p>
-                <a 
-                  href="https://docs.google.com/forms/d/e/1FAIpQLSdol7x6QjDP-KsewX1hImi8sU3RqUR2dmn-arttsVt57h6yrA/viewform?usp=header"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="sib-cta-btn"
-                >
-                  <span>Join Now</span>
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </a>
-              </div>
-
             </div>
 
-            {/* Right Column: Contact Form */}
-            <form className="sib-card contact-form" onSubmit={handleSubmit} noValidate>
-              <input type="hidden" name="access_key" value="6e2f9332-1b79-4754-849a-1cd5b267d650" />
-              
-              <div className="form-header-internal">
-                <h3>Send a Message</h3>
-                <p>Fill out the form below and we will get back to you shortly.</p>
-              </div>
-
-              <div className="form-grid-row">
-                <div className="form-group">
-                  <label htmlFor="name">Full Name</label>
-                  <input type="text" id="name" name="name" className="form-input" placeholder="" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="email">Email Address</label>
-                  <input type="email" id="email" name="email" className="form-input" placeholder="" required />
-                </div>
-              </div>
-
-              <div className="form-grid-row">
-                <div className="form-group">
-                  <label htmlFor="business">Business Name</label>
-                  <input type="text" id="business" name="business" className="form-input" placeholder="SIB Enterprise" />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="phone">Phone Number</label>
-                  <input type="tel" id="phone" name="phone" className="form-input" placeholder="+91 90000 00000" />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="message">Message</label>
-                <textarea id="message" name="message" className="form-input" rows="4" placeholder="How can we help you?" required />
-              </div>
-
-              <button type="submit" className="sib-btn-primary">
-                <span>Send Message</span>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-              </button>
-
-              <input type="checkbox" name="botcheck" style={{ display: "none" }} />
-
-              {result && (
-                <div className={`form-message ${result.includes("success") ? "success" : "error"}`}>
-                  {result}
-                </div>
-              )}
-            </form>
+            {/* Right Column: Embedded JotForm */}
+            <div 
+              ref={jotformRef} 
+              className="sib-card jotform-container"
+            />
 
           </div>
         </div>

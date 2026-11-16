@@ -962,3 +962,23 @@ Tracks changes across the 3 production workspaces:
 1. **Updated Official Facebook URL:**
    - Replaced old profile link (`https://www.facebook.com/people/Sengunthar-In-Business/61580019027353/#`) with new direct reels tab URL: `https://www.facebook.com/profile.php?id=61584546941155&sk=reels_tab`.
    - Updated in Floating Action Button (`Fab.jsx`), Footer social section (`Footer.jsx`), Top navigation bar (`Header.jsx`), JSON data (`FooterSocialLinks.json`), and Schema.org metadata (`index.html`).
+
+---
+
+### S3-#18 [2026-11-16] - Embedded Official JotForm Contact & Business Inquiry Form in Contact Section
+- **Type:** Feature & UI Upgrade
+- **Origin:** Web, Android, iOS (`SIBapp`, `SIB_app_android`, `feat/ios-build`)
+- **Files:**
+  - `src/src1/MainPage/Contacts/Contact.jsx` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced & Built (`npx cap sync ios`)
+
+#### Summary:
+1. **JotForm Embedded Integration:**
+   - Replaced old custom Web3Forms form and previous placeholder cards with dynamic JotForm script embed: `<script type="text/javascript" src="https://form.jotform.com/jsform/263192106281048"></script>`.
+   - Managed via React `useEffect` + `useRef` lifecycle with automatic container cleanup on unmount to prevent duplicate iframe instances or memory leaks.
+   - Preserved left-column office location and phone contact cards while housing the responsive JotForm inside a dedicated `.jotform-container` card.
