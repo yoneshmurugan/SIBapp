@@ -1033,3 +1033,39 @@ Tracks changes across the 3 production workspaces:
    - **Responsive Base Min-Height:** Defined baseline CSS rules for `.jotform-container` and its iframe: `min-height: 680px !important;` on desktop and `min-height: 900px !important;` on mobile (`max-width: 650px`), preventing layout collapse before scripts finish loading.
    - **Scroll Protection:** Attached a `MutationObserver` to ensure `scrolling="auto"` is enabled on the injected iframe, allowing user scrollability under high zoom or small viewport conditions.
    - **CSS Hygiene:** Removed redundant duplicate style declarations and properly structured the `@media (max-width: 650px)` breakpoint.
+
+---
+
+### S3-#21 [2026-11-16] - Android 13+ Runtime Permission Prompt Fix, High-Priority Notification Channel, Resilient Token Sync & Foreground In-App Toast
+- **Type:** Critical Bug Fix & Native Android Optimization
+- **Origin:** Android, Web, Backend (`SIB_app_android`, `SIBapp`, `SIB_backend`)
+- **Files:**
+  - `src/hooks/usePushNotifications.jsx` (in `SIB_app_android` & `SIBapp`)
+  - `android/app/src/main/AndroidManifest.xml` (in `SIB_app_android`)
+  - `android/app/build.gradle` (in `SIB_app_android`) - bumped to `versionCode 37`, `versionName "7.6"`
+  - `src/utils/fcmHelper.mjs` (in `SIB_backend`)
+  - `changes made.md` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Root Cause Analysis (Android 13+ Permission Prompt Not Showing):**
+   - In v7.5, `usePushNotifications.jsx` checked if `permStatus.receive === 'prompt'` before calling `requestPermissions()`.
+   - On devices updated from v7.4 (where `POST_NOTIFICATIONS` was missing from the manifest), Capacitor recorded permission state as `'denied'`. Because `'denied' !== 'prompt'`, `requestPermissions()` was never called, preventing the Android OS permission dialog from appearing.
+   - Crucially, `getToken()` and backend registration were gated behind `if (permStatus.receive !== 'granted') return;`. This caused new devices to NEVER retrieve an FCM token, leaving the backend with no token to dispatch to.
+   - The `@capacitor/app` `appStateChange` listener was placed after the early `return`, so manual permission toggles in Android Settings failed to trigger token sync on app resume.
+2. **High-Priority Notification Channel (`sib_notifications`):**
+   - Modern Android versions (API 26+) and OEM skins (Xiaomi / Redmi / HyperOS, ColorOS) suppress or silence notifications routed to `fcm_fallback_notification_channel`.
+   - Added automatic native channel creation via `FirebaseMessaging.createChannel()` with `importance: 5` (IMPORTANCE_HIGH), public lockscreen visibility, sound, lights, and vibration.
+   - Configured `<meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="sib_notifications"/>` in `AndroidManifest.xml`.
+   - Configured `channelId: 'sib_notifications'` in backend `fcmHelper.mjs`.
+3. **Resilient Token Acquisition & Unconditional App Resume Listener:**
+   - Decoupled `FirebaseMessaging.getToken()` from permission status: FCM tokens are now always retrieved and registered with the backend.
+   - Relocated the `appStateChange` listener to an unconditional effect so whenever a user returns from Android Settings, the app instantly refreshes permissions and token state.
+4. **Foreground Push In-App Banner:**
+   - Android FCM deliberately suppresses system status bar notifications when the app is actively open in the foreground.
+   - Added an in-app floating push banner in `notificationReceived` with SIB executive styling (Navy `#0a2342` & Gold `#d4b896`), sound/vibration, auto-dismiss (5s), and deep-link tap routing.
