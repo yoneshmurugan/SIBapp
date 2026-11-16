@@ -939,3 +939,26 @@ Tracks changes across the 3 production workspaces:
    - Added `<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />` to `AndroidManifest.xml`. Without this declaration, Android 13+ (API 33+) disables push by default and refuses to display the runtime permission dialog to the user.
    - Updated `usePushNotifications.jsx` to check permissions via `checkPermissions()` and request via `requestPermissions()`.
    - Attached an active `@capacitor/app` `appStateChange` listener so when users enable notification permissions in Android Settings and return to the app, the device FCM token is immediately registered and synced to the backend without restarting or re-logging in.
+
+---
+
+### S3-#17 [2026-11-16] - Updated Official SIB Facebook Profile & Reels Link Across Platforms
+- **Type:** Content & Configuration Update
+- **Origin:** Web, Android, iOS (`SIBapp`, `SIB_app_android`, `feat/ios-build`)
+- **Files:**
+  - `src/src1/MainPage/FAB/Fab.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/src1/MainPage/Footer/Footer.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/src1/MainPage/Header/Header.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/src1/data/MainPage/FooterSocialLinks.json` (in `SIBapp` & `SIB_app_android`)
+  - `index.html` (in `SIBapp`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced & Built (`npx cap sync ios`)
+
+#### Summary:
+1. **Updated Official Facebook URL:**
+   - Replaced old profile link (`https://www.facebook.com/people/Sengunthar-In-Business/61580019027353/#`) with new direct reels tab URL: `https://www.facebook.com/profile.php?id=61584546941155&sk=reels_tab`.
+   - Updated in Floating Action Button (`Fab.jsx`), Footer social section (`Footer.jsx`), Top navigation bar (`Header.jsx`), JSON data (`FooterSocialLinks.json`), and Schema.org metadata (`index.html`).

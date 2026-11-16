@@ -1,0 +1,8 @@
+now i want you to build an implemenetation plan for the visitors slips 
+ui -- the slip msut have the visitor detail Visit Date from the upcloming meeting drop down of that chapter , Personal & Contact Details:  - name pno optional email, 
+Business & Profession: Company name 
+Visitor Type: A classification dropdown to separate a First-Time / True Visitor (which counts toward PALMS conversion rates) from a Guest (non-qualifying visitor), Substitute, or visiting BNI Member
+Invited By (autofilled)
+the slip must be available in dashboard near the 3 slips and in slips page , the chapter overview must have the total vistors(only approved) with the other 3 data and near the Next meeting: 21 Nov 2026 it must have the that respected meeting visitors count , my activity component must show the visitors  details approved , pending
+
+the activity page must show the visitors slip and details and once approved the slip must not be editable like the other slips 

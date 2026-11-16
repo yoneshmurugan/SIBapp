@@ -9,7 +9,7 @@ function Header({ isMembers = false, style = { background: "rgba(242, 240, 234, 
     const socialLinks = {
         youtube: "https://www.youtube.com/",
         instagram: "https://www.instagram.com/sengunthar_in_business/",
-        facebook: "https://www.facebook.com/people/Sengunthar-In-Business/61580019027353/#"
+        facebook: "https://www.facebook.com/profile.php?id=61584546941155&sk=reels_tab"
     };
 
     const toggleMenu = () => {

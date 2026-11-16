@@ -279,7 +279,7 @@ const Fab = () => {
       id: "facebook",
       icon: <IconFacebook />,
       label: "Facebook",
-      url: "https://www.facebook.com/people/Sengunthar-In-Business/61580019027353/#",
+      url: "https://www.facebook.com/profile.php?id=61584546941155&sk=reels_tab",
       className: "facebook"
     },
     {
