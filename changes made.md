@@ -1010,3 +1010,26 @@ Tracks changes across the 3 production workspaces:
    - Symmetrically balances vertical height against the embedded JotForm.
 3. **Site-Wide Email Migration:**
    - Replaced old email `members@senguntharinbusiness.in` across the footer (`Footer.jsx`) and Schema.org metadata (`index.html`) with official email `senguntharinbusinesserode@gmail.com`.
+
+---
+
+### S3-#20 [2026-11-16] - Fixed JotForm Submit Button Hidden Under Fixed Branding Banner
+- **Type:** Bug Fix & UI Enhancement
+- **Origin:** Web, Android, iOS (`SIBapp`, `SIB_app_android`, `feat/ios-build`)
+- **Files:**
+  - `src/src1/MainPage/Contacts/Contact.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `changes made.md` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced & Built (`npx cap sync ios`)
+
+#### Summary:
+1. **Resolved JotForm Submit Button Clipping:**
+   - **Root Cause:** JotForm's internal `handleIFrameHeight` measures `.jotform-form` inputs without accounting for its 56px fixed bottom branding footer (`.formFooter` with `position: fixed; bottom: 0`). When the iframe height was constrained or matched the exact input height, the fixed blue footer was pinned directly over the brown Submit button, hiding it from the user.
+   - **Dynamic PostMessage Interceptor:** Added a `message` listener in `Contact.jsx` that intercepts JotForm's `setHeight` events, dynamically appending a +100px buffer to the calculated height using `setProperty('height', adjusted, 'important')`. This ensures the Submit button always sits comfortably above the footer with clean breathing room.
+   - **Responsive Base Min-Height:** Defined baseline CSS rules for `.jotform-container` and its iframe: `min-height: 680px !important;` on desktop and `min-height: 900px !important;` on mobile (`max-width: 650px`), preventing layout collapse before scripts finish loading.
+   - **Scroll Protection:** Attached a `MutationObserver` to ensure `scrolling="auto"` is enabled on the injected iframe, allowing user scrollability under high zoom or small viewport conditions.
+   - **CSS Hygiene:** Removed redundant duplicate style declarations and properly structured the `@media (max-width: 650px)` breakpoint.
