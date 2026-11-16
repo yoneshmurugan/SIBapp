@@ -1069,3 +1069,32 @@ Tracks changes across the 3 production workspaces:
 4. **Foreground Push In-App Banner:**
    - Android FCM deliberately suppresses system status bar notifications when the app is actively open in the foreground.
    - Added an in-app floating push banner in `notificationReceived` with SIB executive styling (Navy `#0a2342` & Gold `#d4b896`), sound/vibration, auto-dismiss (5s), and deep-link tap routing.
+
+---
+
+### S3-#22 [2026-11-16] - Fixed Dynamic Import Module Resolution Failure for Capacitor Firebase Messaging & Global AppRoot Mount
+- **Type:** Critical Bug Fix & Core Architecture Refactor
+- **Origin:** Android & Web (`SIB_app_android` & `SIBapp`)
+- **Files:**
+  - `src/hooks/usePushNotifications.jsx` (in `SIB_app_android`)
+  - `src/main.jsx` (in `SIB_app_android`)
+  - `changes made.md` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced, Built & Verified via `./gradlew assembleDebug`
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Critical Root Cause of Silent Initialization Failure:**
+   - `usePushNotifications.jsx` was attempting to dynamically load Capacitor via `await import(/* @vite-ignore */ '@capacitor-firebase/messaging')`.
+   - Because of `/* @vite-ignore */`, Vite omitted the package from the bundled assets, leaving a bare runtime specifier.
+   - At runtime inside the Android WebView, `import("@capacitor/core")` threw a `TypeError: Failed to resolve module specifier`, caught by `.catch(() => null)`.
+   - As a result, `initNativePush` silently returned at line 18 on every launch. The plugin was never reached, permission was never requested, and no FCM token was ever generated or sent to the backend.
+2. **Static Bundled Native Imports:**
+   - Switched to direct static imports: `import { Capacitor } from '@capacitor/core'`, `import { FirebaseMessaging } from '@capacitor-firebase/messaging'`, and `import { App } from '@capacitor/app'`.
+   - Verified that Vite now bundles `FirebaseMessaging` directly into `dist` (`createChannel` and `sib_notifications` verified in compiled chunk).
+3. **Global AppRoot Mount in `main.jsx`:**
+   - Previously, `usePushNotifications` was only called inside `ProtectedRoute` and `Dashboard`, meaning freshly installed apps that landed on `/` or `/signin` never triggered permission requests.
+   - Created `<AppRoot>` wrapping all routes in `src/main.jsx`, ensuring permission requests, channel creation, and FCM token retrieval execute on the very first screen of the app.
