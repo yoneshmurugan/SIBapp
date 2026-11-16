@@ -60,7 +60,11 @@ export default function Notification() {
       close();
     };
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("touchstart", handleClick, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("touchstart", handleClick);
+    };
   }, [open, close]);
 
   useEffect(() => {
@@ -201,14 +205,20 @@ export default function Notification() {
       </button>
 
       {open && (
-        <div
-          ref={panelRef}
-          id="notification-panel"
-          role="dialog"
-          aria-label="Notifications"
-          aria-modal="true"
-          className="absolute right-0 sm:-right-4 z-50 mt-2 w-88 sm:w-[420px] max-w-[calc(100vw-1.5rem)] origin-top-right rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden"
-        >
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/25 backdrop-blur-[1px] sm:hidden"
+            onClick={close}
+            aria-hidden="true"
+          />
+          <div
+            ref={panelRef}
+            id="notification-panel"
+            role="dialog"
+            aria-label="Notifications"
+            aria-modal="true"
+            className="fixed left-3 right-3 top-[calc(env(safe-area-inset-top,0px)+64px)] sm:absolute sm:left-auto sm:right-0 sm:top-full z-50 mt-2 sm:w-[420px] max-w-[calc(100vw-1.5rem)] origin-top-right rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl ring-1 ring-black/5 focus:outline-none overflow-hidden"
+          >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-5 py-4 bg-gray-50/70 dark:bg-gray-900/90 backdrop-blur-sm">
             <div className="flex items-center gap-2.5">
@@ -345,6 +355,7 @@ export default function Notification() {
             </span>
           </div>
         </div>
+        </>
       )}
     </div>
   );

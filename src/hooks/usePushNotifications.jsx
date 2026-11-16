@@ -7,12 +7,15 @@ const usePushNotifications = () => {
 
     useEffect(() => {
         let isMounted = true;
+        let appStateHandle = null;
 
         const initNativePush = async () => {
             try {
-                // Dynamically import Capacitor to ensure safe execution on web
+                // Dynamically import Capacitor packages to ensure safe execution on web
                 const capPkg = '@capacitor/core';
                 const msgPkg = '@capacitor-firebase/messaging';
+                const appPkg = '@capacitor/app';
+
                 const capModule = await import(/* @vite-ignore */ capPkg).catch(() => null);
                 if (!capModule || !capModule.Capacitor || !capModule.Capacitor.isNativePlatform()) {
                     return;
@@ -25,20 +28,27 @@ const usePushNotifications = () => {
 
                 const { FirebaseMessaging } = messagingModule;
 
-                // Request push permissions
-                const permStatus = await FirebaseMessaging.requestPermissions();
-                if (permStatus.receive !== 'granted') {
-                    console.log('User denied push notification permissions');
+                // 1. Check current push notification permission status
+                let permStatus = await FirebaseMessaging.checkPermissions().catch(() => null);
+
+                // If not yet decided, prompt user for permission
+                if (!permStatus || permStatus.receive === 'prompt' || permStatus.receive === 'prompt-with-rationale') {
+                    permStatus = await FirebaseMessaging.requestPermissions().catch(() => null);
+                }
+
+                if (!permStatus || permStatus.receive !== 'granted') {
+                    console.log('Push notification permissions not granted:', permStatus?.receive);
                     return;
                 }
 
-                // Retrieve device FCM token
+                // 2. Retrieve device FCM token
                 const { token } = await FirebaseMessaging.getToken();
-                if (!isMounted) return;
+                if (!isMounted || !token) return;
+
                 setFcmToken(token);
                 localStorage.setItem('fcmToken', token);
 
-                // Register token with backend
+                // 3. Register token with backend
                 try {
                     await fetch(`${import.meta.env.VITE_BACKEND_SERVER}/auth/register-fcm-token`, {
                         method: 'POST',
@@ -50,7 +60,7 @@ const usePushNotifications = () => {
                     console.error('Failed to register FCM token with backend:', err);
                 }
 
-                // Clear any previous listeners before attaching
+                // 4. Clear any previous listeners before attaching fresh ones
                 await FirebaseMessaging.removeAllListeners();
 
                 // Foreground push received listener
@@ -101,12 +111,27 @@ const usePushNotifications = () => {
                         navigate('/meetings');
                     } else if (action === 'OPEN_WALL_OF_WISHES') {
                         navigate('/wall-of-wishes');
-                    } else if (action === 'OPEN_PROFILE_BADGES') {
+                    } else if (
+                        action === 'OPEN_PROFILE_BADGES' ||
+                        action === 'MEMBERSHIP_RENEWAL' ||
+                        title.includes('renewal') ||
+                        body.includes('renewal')
+                    ) {
                         navigate('/profile');
                     } else {
                         navigate('/allnotifications');
                     }
                 });
+
+                // 5. Listen to App state changes (resume) so if user enables notifications in Settings, token registers immediately
+                const appModule = await import(/* @vite-ignore */ appPkg).catch(() => null);
+                if (appModule && appModule.App && !appStateHandle) {
+                    appStateHandle = await appModule.App.addListener('appStateChange', (state) => {
+                        if (state.isActive && isMounted) {
+                            initNativePush();
+                        }
+                    });
+                }
             } catch (error) {
                 console.log('Push notifications registration bypassed:', error?.message);
             }
@@ -116,6 +141,9 @@ const usePushNotifications = () => {
 
         return () => {
             isMounted = false;
+            if (appStateHandle && typeof appStateHandle.remove === 'function') {
+                appStateHandle.remove();
+            }
         };
     }, [navigate]);
 
