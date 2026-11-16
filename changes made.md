@@ -900,3 +900,42 @@ Tracks changes across the 3 production workspaces:
 
 
 
+
+### S3-#16 [2026-11-16] - Mobile Notification Modal Alignment, Android 13+ Permission Fix, SIB Push Icon & Notification Action Deep-Linking
+- **Type:** Bug Fix & Native Android Optimization
+- **Origin:** Android & Web (`SIB_app_android` & `SIBapp`)
+- **Files:**
+  - `src/NotificationPanel/Notification.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/PresidentPortal/MemberRenewalManagement.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/hooks/usePushNotifications.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `android/app/src/main/AndroidManifest.xml` (in `SIB_app_android`)
+  - `android/app/src/main/res/drawable/ic_stat_notification.png` & densities (in `SIB_app_android`)
+  - `android/app/src/main/res/values/colors.xml` (in `SIB_app_android`)
+  - `src/utils/fcmHelper.mjs` (in `SIB_backend`)
+  - `src/middlewares.mjs` (in `SIB_backend`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced & Built (`npx cap sync ios`)
+
+#### Summary:
+1. **SS1: Fixed Mobile Notification Popover Viewport Cutoff:**
+   - On mobile viewports (`max-sm:`), replaced container-relative `absolute right-0 w-88` (which shifted the modal off the left screen edge by ~42px) with `fixed left-3 right-3 top-[calc(env(safe-area-inset-top,0px)+64px)]`.
+   - Popover now adapts symmetrically across all screen widths (320px–430px) with clean 12px margins and no clipped text.
+   - Added native backdrop (`fixed inset-0 z-40 bg-black/25 sm:hidden`) and dual `mousedown` + `touchstart` listeners for instant outside-tap dismissal.
+2. **SS2: SIB Push Notification Icon & Tap-to-Open Fix:**
+   - Generated native `ic_stat_notification.png` silhouette icons across all density buckets (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`, `drawable`).
+   - Configured `com.google.firebase.messaging.default_notification_icon` and `default_notification_color` (`#d97706`) in `AndroidManifest.xml` and created `res/values/colors.xml`.
+   - Removed legacy `clickAction: 'FCM_PLUGIN_ACTIVITY'` in `fcmHelper.mjs` so Android standard launcher delivers intents to `MainActivity`.
+   - Added `<action android:name="FCM_PLUGIN_ACTIVITY" />` to `MainActivity`'s intent filter in `AndroidManifest.xml` as a resilient backward-compatibility fallback.
+   - Enhanced `usePushNotifications.jsx` deep-link action routing for renewal notifications (`action === 'MEMBERSHIP_RENEWAL'`) directly to `/profile`.
+3. **Issue 3: Renewal Push Reliability & Android Tag Deduplication:**
+   - Removed static `tag: sanitizedData.action || 'GENERAL'` from backend `fcmHelper.mjs`. Static notification tags caused Android's OS to overwrite previous notifications of the same category and throttle alerts, squashing 5 test pushes into 1-2.
+   - Updated `MemberRenewalManagement.jsx` to pass `receiver: member.userId || member.name`, prioritizing exact MongoDB ObjectIds.
+   - Made username / display_name matching case-insensitive in `src/middlewares.mjs` (`mapNamesToIds`) so username casing variations never drop push dispatch.
+4. **Issue 4: Android 13+ Runtime Permission & Real-Time Token Sync:**
+   - Added `<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />` to `AndroidManifest.xml`. Without this declaration, Android 13+ (API 33+) disables push by default and refuses to display the runtime permission dialog to the user.
+   - Updated `usePushNotifications.jsx` to check permissions via `checkPermissions()` and request via `requestPermissions()`.
+   - Attached an active `@capacitor/app` `appStateChange` listener so when users enable notification permissions in Android Settings and return to the app, the device FCM token is immediately registered and synced to the backend without restarting or re-logging in.

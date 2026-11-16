@@ -280,7 +280,7 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
 
     try {
       const payload = {
-        receiver: member.name,
+        receiver: member.userId || member.name,
         header: "Action Required: Membership Renewal",
         content: `Hi ${member.name}!\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}.\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active!`,
         notifyInApp,
@@ -345,7 +345,7 @@ const MemberRenewalManagement = ({ refreshTrigger }) => {
     for (let member of targetMembers) {
       try {
         const payload = {
-          receiver: member.name,
+          receiver: member.userId || member.name,
           header: "Action Required: Membership Renewal",
           content: `Hi ${member.name}!\n\nYour SIB membership in the ${member.chapter} chapter is up for renewal on ${member.dueDate}.\n\nDon't lose out on your exclusive network and benefits. Please complete your renewal soon to stay active!`,
           notifyInApp,
