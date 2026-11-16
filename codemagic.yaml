@@ -31,7 +31,7 @@ workflows:
         script: npm run build
       - name: Update iOS Version and Build Number
         script: |
-          # Sets Marketing Version to 7.5 (New Train)
+          # Sets Marketing Version to 7.6 (New Train)
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 7.6" ios/App/App/Info.plist
           # Sets Build Number to the unique Codemagic build ID
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
