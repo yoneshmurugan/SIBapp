@@ -8,7 +8,7 @@ const Backend_Server_URL = import.meta.env.VITE_BACKEND_SERVER;
 
 // --- MOCK DATA (Replace with your actual imports) ---
 const socialData = [
-    { name: "Facebook", link: "https://www.facebook.com/people/Sengunthar-In-Business/61580019027353/#", icon: <Facebook size={20} /> },
+    { name: "Facebook", link: "https://www.facebook.com/profile.php?id=61584546941155&sk=reels_tab", icon: <Facebook size={20} /> },
     { name: "Instagram", link: "https://www.instagram.com/sengunthar_in_business/", icon: <Instagram size={20} /> },
     { name: "YouTube", link: "#", icon: <Youtube size={20} /> }
 ];
