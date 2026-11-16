@@ -1098,3 +1098,31 @@ Tracks changes across the 3 production workspaces:
 3. **Global AppRoot Mount in `main.jsx`:**
    - Previously, `usePushNotifications` was only called inside `ProtectedRoute` and `Dashboard`, meaning freshly installed apps that landed on `/` or `/signin` never triggered permission requests.
    - Created `<AppRoot>` wrapping all routes in `src/main.jsx`, ensuring permission requests, channel creation, and FCM token retrieval execute on the very first screen of the app.
+
+---
+
+### S3-#23 [2026-11-16] - Restored System Default Notification Sound and Vibration via Channel sib_notifications_v1
+- **Type:** Bug Fix & Audio Tuning
+- **Origin:** Android & Backend (`SIB_app_android` & `SIB_backend`)
+- **Files:**
+  - `src/hooks/usePushNotifications.jsx` (in `SIB_app_android`)
+  - `android/app/src/main/AndroidManifest.xml` (in `SIB_app_android`)
+  - `src/utils/fcmHelper.mjs` (in `SIB_backend`)
+  - `changes made.md` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+
+#### Summary:
+1. **Root Cause of Silent Notifications:**
+   - In `@capacitor-firebase/messaging`'s Android native implementation (`FirebaseMessagingHelper.java`), passing `sound: 'default'` caused the plugin to construct a custom resource URI: `android.resource://<package>/raw/default`.
+   - Because no `/raw/default` audio asset exists in the app bundle, Android assigned an invalid audio path to the channel, causing all notifications in `sib_notifications` to play in total silence.
+   - Furthermore, the plugin expects the boolean parameter `vibrate: true`, whereas `vibration: true` was passed.
+2. **Channel Recreation with System Audio (`sib_notifications_v1`):**
+   - Because Android channels are immutable once registered on a device, created `sib_notifications_v1` and deleted the legacy `sib_notifications` channel.
+   - Omitted the `sound` parameter in `FirebaseMessaging.createChannel()`. On Android, creating a channel without a custom sound parameter automatically instructs the OS to bind the device's system default notification ringtone (`Settings.System.DEFAULT_NOTIFICATION_URI`).
+   - Configured `vibrate: true` to ensure haptic feedback on incoming pushes.
+   - Updated `default_notification_channel_id` in `AndroidManifest.xml` and `channelId: 'sib_notifications_v1'` in `fcmHelper.mjs`.
