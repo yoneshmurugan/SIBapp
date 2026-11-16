@@ -315,14 +315,20 @@ const styles = `
   border-radius: 1rem;
   padding: 0.75rem;
   box-shadow: var(--sib-shadow);
-  min-height: 560px;
   width: 100%;
+  min-height: 680px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .jotform-container iframe {
   width: 100% !important;
+  min-width: 100% !important;
   border: none !important;
+  min-height: 680px !important;
+  height: 680px;
+  flex: 1;
 }
 
 .contact-form {
@@ -593,14 +599,20 @@ textarea.form-input {
   border-radius: 1rem;
   padding: 0.75rem;
   box-shadow: var(--sib-shadow);
-  min-height: 560px;
   width: 100%;
+  min-height: 680px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .jotform-container iframe {
   width: 100% !important;
+  min-width: 100% !important;
   border: none !important;
+  min-height: 680px !important;
+  height: 680px;
+  flex: 1;
 }
 
 .contact-form {
