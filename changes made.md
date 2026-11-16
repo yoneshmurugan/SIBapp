@@ -939,3 +939,97 @@ Tracks changes across the 3 production workspaces:
    - Added `<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />` to `AndroidManifest.xml`. Without this declaration, Android 13+ (API 33+) disables push by default and refuses to display the runtime permission dialog to the user.
    - Updated `usePushNotifications.jsx` to check permissions via `checkPermissions()` and request via `requestPermissions()`.
    - Attached an active `@capacitor/app` `appStateChange` listener so when users enable notification permissions in Android Settings and return to the app, the device FCM token is immediately registered and synced to the backend without restarting or re-logging in.
+
+---
+
+### S3-#17 [2026-11-16] - Updated Official SIB Facebook Profile & Reels Link Across Platforms
+- **Type:** Content & Configuration Update
+- **Origin:** Web, Android, iOS (`SIBapp`, `SIB_app_android`, `feat/ios-build`)
+- **Files:**
+  - `src/src1/MainPage/FAB/Fab.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/src1/MainPage/Footer/Footer.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/src1/MainPage/Header/Header.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/src1/data/MainPage/FooterSocialLinks.json` (in `SIBapp` & `SIB_app_android`)
+  - `index.html` (in `SIBapp`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced & Built (`npx cap sync ios`)
+
+#### Summary:
+1. **Updated Official Facebook URL:**
+   - Replaced old profile link (`https://www.facebook.com/people/Sengunthar-In-Business/61580019027353/#`) with new direct reels tab URL: `https://www.facebook.com/profile.php?id=61584546941155&sk=reels_tab`.
+   - Updated in Floating Action Button (`Fab.jsx`), Footer social section (`Footer.jsx`), Top navigation bar (`Header.jsx`), JSON data (`FooterSocialLinks.json`), and Schema.org metadata (`index.html`).
+
+---
+
+### S3-#18 [2026-11-16] - Embedded Official JotForm Contact & Business Inquiry Form in Contact Section
+- **Type:** Feature & UI Upgrade
+- **Origin:** Web, Android, iOS (`SIBapp`, `SIB_app_android`, `feat/ios-build`)
+- **Files:**
+  - `src/src1/MainPage/Contacts/Contact.jsx` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced & Built (`npx cap sync ios`)
+
+#### Summary:
+1. **JotForm Embedded Integration:**
+   - Replaced old custom Web3Forms form and previous placeholder cards with dynamic JotForm script embed: `<script type="text/javascript" src="https://form.jotform.com/jsform/263192106281048"></script>`.
+   - Managed via React `useEffect` + `useRef` lifecycle with automatic container cleanup on unmount to prevent duplicate iframe instances or memory leaks.
+   - Preserved left-column office location and phone contact cards while housing the responsive JotForm inside a dedicated `.jotform-container` card.
+
+---
+
+### S3-#19 [2026-11-16] - Restored Email Card, Added Social Follow Section, and Updated Site Email to senguntharinbusinesserode@gmail.com
+- **Type:** UI Enhancement & Content Update
+- **Origin:** Web, Android, iOS (`SIBapp`, `SIB_app_android`, `feat/ios-build`)
+- **Files:**
+  - `src/src1/MainPage/Contacts/Contact.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `src/src1/MainPage/Footer/Footer.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `index.html` (in `SIBapp`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced & Built (`npx cap sync ios`)
+
+#### Summary:
+1. **Restored Official Email Card in Contact Section:**
+   - Added `Email Us` card in `Contact.jsx` pointing to `mailto:senguntharinbusinesserode@gmail.com` with responsive wrapping and hover transitions.
+2. **Integrated Executive "Follow Us" Social Channels Card:**
+   - Designed a branded `.social-follow-card` filling the left column whitespace below contact details.
+   - Includes direct interactive action buttons with branded gradient/color badges for:
+     - **Instagram:** Direct link to `@sengunthar_in_business` (`https://www.instagram.com/sengunthar_in_business/`).
+     - **Facebook:** Direct link to SIB Page Reels (`https://www.facebook.com/profile.php?id=61584546941155&sk=reels_tab`).
+   - Symmetrically balances vertical height against the embedded JotForm.
+3. **Site-Wide Email Migration:**
+   - Replaced old email `members@senguntharinbusiness.in` across the footer (`Footer.jsx`) and Schema.org metadata (`index.html`) with official email `senguntharinbusinesserode@gmail.com`.
+
+---
+
+### S3-#20 [2026-11-16] - Fixed JotForm Submit Button Hidden Under Fixed Branding Banner
+- **Type:** Bug Fix & UI Enhancement
+- **Origin:** Web, Android, iOS (`SIBapp`, `SIB_app_android`, `feat/ios-build`)
+- **Files:**
+  - `src/src1/MainPage/Contacts/Contact.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `changes made.md` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Backend (`SIB_backend:main`):** N/A
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced & Built (`npx cap sync ios`)
+
+#### Summary:
+1. **Resolved JotForm Submit Button Clipping:**
+   - **Root Cause:** JotForm's internal `handleIFrameHeight` measures `.jotform-form` inputs without accounting for its 56px fixed bottom branding footer (`.formFooter` with `position: fixed; bottom: 0`). When the iframe height was constrained or matched the exact input height, the fixed blue footer was pinned directly over the brown Submit button, hiding it from the user.
+   - **Dynamic PostMessage Interceptor:** Added a `message` listener in `Contact.jsx` that intercepts JotForm's `setHeight` events, dynamically appending a +100px buffer to the calculated height using `setProperty('height', adjusted, 'important')`. This ensures the Submit button always sits comfortably above the footer with clean breathing room.
+   - **Responsive Base Min-Height:** Defined baseline CSS rules for `.jotform-container` and its iframe: `min-height: 680px !important;` on desktop and `min-height: 900px !important;` on mobile (`max-width: 650px`), preventing layout collapse before scripts finish loading.
+   - **Scroll Protection:** Attached a `MutationObserver` to ensure `scrolling="auto"` is enabled on the injected iframe, allowing user scrollability under high zoom or small viewport conditions.
+   - **CSS Hygiene:** Removed redundant duplicate style declarations and properly structured the `@media (max-width: 650px)` breakpoint.
