@@ -1210,3 +1210,29 @@ Tracks changes across the 3 production workspaces:
    - Reduced authenticated app header height from `calc(64px + env(...))` down to `calc(50px + env(...))`, vertical padding to `0.15rem`, and logo to `32px`/`36px`.
    - Compacted public floating header padding from `0.75rem 1.5rem` to `0.35rem 1.25rem` and logo to `36px`, reclaiming vital vertical screen real estate.
 
+---
+
+### S4-#4 [2026-11-23] - Android V7.7 Release: R8 DEX Code Optimization & Obfuscation
+- **Type:** Build / Performance & Google Play Compliance
+- **Origin:** Android (`SIB_app_android`)
+- **Files:**
+  - `android/app/build.gradle`
+  - `android/app/proguard-rules.pro`
+  - `changes made.md`
+
+#### Sync Status:
+- [x] **Android (`SIB_app_android:main`):** Built (`bundleRelease` & `assembleRelease`)
+- [x] **Artifacts:** `senguntharinbusinessV7.7.aab` & `senguntharinbusinessV7.7.apk` in `apk realeses`
+
+#### Summary:
+1. **Resolved Google Play DEX Code Optimization Deficit:**
+   - Enabled Android R8 compiler with `minifyEnabled true` in `build.gradle` (release buildType).
+   - Bumped `versionCode` to `40` and `versionName` to `"7.7"`.
+2. **Hardened ProGuard Keep Rules (`proguard-rules.pro`):**
+   - Added explicit protection for `@com.getcapacitor.PluginMethod`, `@com.getcapacitor.annotation.CapacitorPlugin`, and `JavascriptInterface` to prevent native bridge stripping.
+   - Configured keep rules for Firebase, Google Play Services, Biometric auth (`ee.forgr.biometric`), and Cordova plugins.
+   - Configured line number preservation (`-keepattributes SourceFile,LineNumberTable`) for accurate crash telemetry in Google Play Console.
+3. **Artifact Generation:**
+   - Successfully generated optimized production bundle: `senguntharinbusinessV7.7.aab` (33.00 MB).
+   - Successfully generated release APK: `senguntharinbusinessV7.7.apk` (32.47 MB).
+
