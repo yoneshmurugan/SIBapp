@@ -1210,3 +1210,28 @@ Tracks changes across the 3 production workspaces:
    - Reduced authenticated app header height from `calc(64px + env(...))` down to `calc(50px + env(...))`, vertical padding to `0.15rem`, and logo to `32px`/`36px`.
    - Compacted public floating header padding from `0.75rem 1.5rem` to `0.35rem 1.25rem` and logo to `36px`, reclaiming vital vertical screen real estate.
 
+---
+
+### S4-#5 [2026-11-23] - Native SIB Contact Form (Replaced JotForm with Zero-Limit Backend Integration)
+- **Type:** Feature & Cost/Limit Optimization
+- **Origin:** Web (`SIBapp:main`) & Backend (`SIB_backend`)
+- **Files:**
+  - `src/src1/MainPage/Contacts/Contact.jsx` (in `SIBapp:main`)
+  - `src/pages/public/public.mjs` (in `SIB_backend`)
+  - `src/schemas.mjs` (in `SIB_backend`)
+  - `changes made.md`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Built & Verified (`npm run build`)
+- [x] **Backend (`SIB_backend:main`):** Synced & Committed
+- [ ] **Mobile (`feat/ios-build` & `SIB_app_android`):** Pending manual verification before sync
+
+#### Summary:
+1. **Replaced JotForm Free-Tier Limit with Unlimited Native Form:**
+   - Removed external JotForm script and iframe (`https://form.jotform.com/jsform/263192106281048`), bypassing JotForm's 100 submissions/month cap and removing all third-party branding.
+   - Built a sleek, responsive native React form directly styled with SIB's Navy & Gold palette.
+2. **Backend Email Dispatch & Database Archival (`/public/contact-us`):**
+   - Created `POST /public/contact-us` in `SIB_backend` utilizing the existing Nodemailer Gmail transporter (`sibconnect2025@gmail.com`).
+   - Dispatches formatted HTML notification emails to `senguntharinbusinesserode@gmail.com` with sender details and direct email reply (`replyTo`).
+   - Automatically stores all inquiries permanently in MongoDB (`Inquiry` model) to guarantee zero message loss.
+
