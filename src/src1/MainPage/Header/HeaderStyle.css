@@ -229,6 +229,7 @@
     .hed .burger-menu { display: flex; }
     .hed .header:not(.scrolled) {
         margin: 0.5rem 1rem;
+        margin-top: calc(0.5rem + env(safe-area-inset-top, 0px));
     }
 }
 

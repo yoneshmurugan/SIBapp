@@ -135,7 +135,7 @@ export default function WallOfWishes() {
         <Header />
       </div>
 
-      <main className="mt-[80px] w-full max-w-7xl px-3 sm:px-6 md:px-10 pb-16 relative z-10">
+      <main className="mt-[calc(80px+env(safe-area-inset-top,0px))] w-full max-w-7xl px-3 sm:px-6 md:px-10 pb-16 relative z-10">
 
         {/* ═══════════════════════════════════════════════════════════════ */}
         {/*  PAGE HERO HEADER                                             */}

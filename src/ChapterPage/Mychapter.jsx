@@ -44,7 +44,7 @@ function Meetings() {
         <Header />
       </div>
 
-      <div className="mt-[80px] w-full max-w-7xl px-3 sm:px-6 md:px-10">
+      <div className="mt-[calc(80px+env(safe-area-inset-top,0px))] w-full max-w-7xl px-3 sm:px-6 md:px-10">
         <h1 className="m-3 pb-2 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
           Chapter Details
         </h1>

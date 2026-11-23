@@ -153,7 +153,7 @@ function Members() {
         <Header />
       </div>
 
-      <main className="mt-[80px] w-full max-w-7xl px-4 sm:px-6 md:px-10 mx-auto">
+      <main className="mt-[calc(80px+env(safe-area-inset-top,0px))] w-full max-w-7xl px-4 sm:px-6 md:px-10 mx-auto">
         <h1 className="mb-4 text-2xl font-black text-gray-900 dark:text-white tracking-tight">
           Members Directory
         </h1>

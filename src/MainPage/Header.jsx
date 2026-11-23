@@ -88,14 +88,18 @@ function Header() {
 
   return (
     <header
-      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.35rem)',
+        paddingBottom: '0.35rem',
+        minHeight: 'calc(64px + env(safe-area-inset-top, 0px))',
+      }}
       className="
         relative z-[100]
         bg-white dark:bg-gray-900
         text-gray-900 dark:text-gray-100
         flex justify-between items-center 
         transition-all duration-300
-        px-3 sm:px-4 min-h-[64px] border-b border-gray-200/80 dark:border-gray-800
+        px-3 sm:px-4 border-b border-gray-200/80 dark:border-gray-800
         shadow-sm
       "
     >
