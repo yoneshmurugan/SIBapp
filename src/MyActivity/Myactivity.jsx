@@ -156,11 +156,11 @@ function MyActivity() {
 
   return (
     <div className="flex flex-col items-center justify-start w-full min-h-screen bg-stone-50 dark:bg-black/90 transition-colors duration-300">
-      <div className="fixed top-0 left-0 w-full z-10 bg-transparent">
+      <div className="sticky top-0 left-0 w-full z-40 bg-white dark:bg-gray-900 shadow-sm">
         <Header />
       </div>
 
-      <main className="w-full max-w-5xl px-3 sm:px-6 md:px-10 text-gray-900 dark:text-gray-100 pt-[calc(120px+env(safe-area-inset-top,0px))] pb-20">
+      <main className="w-full max-w-5xl px-3 sm:px-6 md:px-10 text-gray-900 dark:text-gray-100 py-6 pb-20">
 
         {/* Type filter + date range (Hero) */}
         <section className="mb-4 w-full">

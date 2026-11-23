@@ -148,12 +148,12 @@ function Members() {
   const verticalOptions = ["All Verticals", ...verticalnames];
 
   return (
-    <div className="flex flex-col items-center justify-start w-full min-h-screen transition-colors duration-300">
-      <div className="fixed top-[10px] left-0 w-full z-10 bg-transparent">
+    <div className="flex flex-col items-center justify-start w-full min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-950">
+      <div className="sticky top-0 left-0 w-full z-40 bg-white dark:bg-gray-900 shadow-sm">
         <Header />
       </div>
 
-      <main className="mt-[calc(80px+env(safe-area-inset-top,0px))] w-full max-w-7xl px-4 sm:px-6 md:px-10 mx-auto">
+      <main className="mt-4 w-full max-w-7xl px-4 sm:px-6 md:px-10 mx-auto">
         <h1 className="mb-4 text-2xl font-black text-gray-900 dark:text-white tracking-tight">
           Members Directory
         </h1>

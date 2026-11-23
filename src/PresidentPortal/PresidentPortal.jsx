@@ -16,12 +16,12 @@ function PresidentPortal() {
   }, [])
 
   return (
-    <div className="min-h-screen w-full  transition-colors duration-300">
-      <div className="fixed top-2 left-0 right-0 z-50  shadow-md">
+    <div className="min-h-screen w-full transition-colors duration-300 bg-gray-50 dark:bg-gray-950">
+      <div className="sticky top-0 left-0 right-0 z-50 shadow-sm bg-white dark:bg-gray-900">
         <Header />
       </div>
 
-      <div className="pt-20 w-full px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="w-full">

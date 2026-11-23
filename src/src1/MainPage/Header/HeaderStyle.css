@@ -27,8 +27,8 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 0.5rem 0;
-    padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+    padding: 0.35rem 0;
+    padding-top: calc(0.35rem + env(safe-area-inset-top, 0px));
     background: var(--glass-bg);
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -38,12 +38,12 @@
 
 /* Floating effect */
 .hed .header:not(.scrolled) {
-    margin: 0.75rem 1.5rem;
-    margin-top: calc(0.75rem + env(safe-area-inset-top, 0px));
-    padding-top: 0.5rem; /* Override the scrolled state's safe-area padding so we don't double up */
-    border-radius: 24px;
+    margin: 0.5rem 1.25rem;
+    margin-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+    padding-top: 0.35rem; /* Override the scrolled state's safe-area padding so we don't double up */
+    border-radius: 20px;
     border: 1px solid var(--glass-border);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
 }
 
 /* On scroll, remove floating effect and make it full width */
@@ -70,7 +70,7 @@
 }
 
 .hed .logo-image {
-    height: 44px;
+    height: 36px;
     width: auto;
     object-fit: contain;
     transition: transform 0.3s ease;
@@ -129,9 +129,9 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     background: rgba(128, 128, 128, 0.08);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -228,8 +228,9 @@
     .hed .desktop-menu { display: none; }
     .hed .burger-menu { display: flex; }
     .hed .header:not(.scrolled) {
-        margin: 0.5rem 1rem;
-        margin-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+        margin: 0.35rem 0.75rem;
+        margin-top: calc(0.35rem + env(safe-area-inset-top, 0px));
+        border-radius: 18px;
     }
 }
 

@@ -114,7 +114,7 @@ export default function WallOfWishes() {
       }}
     >
       {/* Dark overlay for readability (Optimized for mobile scroll) */}
-      <div className="absolute inset-0 bg-[#030712]/95 z-0"></div>
+      <div className="absolute inset-0 bg-slate-50/70 dark:bg-[#030712]/95 z-0 pointer-events-none"></div>
 
       {/* ── Confetti layer (only when there are today's celebrants) ── */}
       {hasCelebrants && (
@@ -131,11 +131,11 @@ export default function WallOfWishes() {
       )}
 
       {/* ── Header ── */}
-      <div className="fixed top-[10px] left-0 w-full z-40 bg-transparent">
+      <div className="sticky top-0 left-0 w-full z-40 bg-white dark:bg-gray-900 shadow-sm">
         <Header />
       </div>
 
-      <main className="mt-[calc(80px+env(safe-area-inset-top,0px))] w-full max-w-7xl px-3 sm:px-6 md:px-10 pb-16 relative z-10">
+      <main className="mt-4 w-full max-w-7xl px-3 sm:px-6 md:px-10 pb-16 relative z-10">
 
         {/* ═══════════════════════════════════════════════════════════════ */}
         {/*  PAGE HERO HEADER                                             */}
@@ -149,10 +149,10 @@ export default function WallOfWishes() {
           </div>
 
           <div className="flex flex-col items-center text-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-700 dark:from-indigo-200 dark:via-purple-200 dark:to-pink-200 leading-tight">
               Wall of Wishes
             </h1>
-            <p className="mt-4 text-lg sm:text-xl text-gray-400 font-medium max-w-lg">
+            <p className="mt-4 text-lg sm:text-xl text-gray-600 dark:text-gray-400 font-medium max-w-lg">
               Celebrate the special moments of our SIB family ✨
             </p>
 
@@ -178,7 +178,7 @@ export default function WallOfWishes() {
                   <PartyPopper size={20} />
                 </div>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-amber-200 to-orange-200">
+              <h2 className="text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-amber-600 via-orange-600 to-yellow-600 dark:from-yellow-200 dark:via-amber-200 dark:to-orange-200">
                 🎉 Today's Celebrations!
               </h2>
             </div>

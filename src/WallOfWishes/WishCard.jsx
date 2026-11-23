@@ -115,10 +115,10 @@ export default function WishCard({ memberName, profileImage, type, date, targetD
       )} />
 
       <div className={clsx(
-        "relative overflow-hidden rounded-3xl border transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl",
+        "relative overflow-hidden rounded-3xl border shadow-sm dark:shadow-none transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl",
         isBirthday
-          ? "bg-gradient-to-br from-[#2a1306] via-[#200d05] to-[#2a0808] border-amber-700/40"
-          : "bg-gradient-to-br from-[#2a0b16] via-[#200610] to-[#2a061c] border-pink-700/40"
+          ? "bg-gradient-to-br from-amber-50 via-orange-50/60 to-red-50/50 border-amber-200/80 dark:from-[#2a1306] dark:via-[#200d05] dark:to-[#2a0808] dark:border-amber-700/40"
+          : "bg-gradient-to-br from-pink-50 via-rose-50/60 to-fuchsia-50/50 border-pink-200/80 dark:from-[#2a0b16] dark:via-[#200610] dark:to-[#2a061c] dark:border-pink-700/40"
       )}>
 
         {/* Static background orbs (Optimized) */}
@@ -157,7 +157,7 @@ export default function WishCard({ memberName, profileImage, type, date, targetD
               )}
             />
             <div className={clsx(
-              "absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 p-1.5 sm:p-2.5 rounded-full text-white shadow-lg border-2 border-gray-900",
+              "absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 p-1.5 sm:p-2.5 rounded-full text-white shadow-lg border-2 border-white dark:border-gray-900",
               isBirthday
                 ? "bg-gradient-to-br from-amber-500 to-orange-600"
                 : "bg-gradient-to-br from-pink-500 to-rose-600"
@@ -168,10 +168,10 @@ export default function WishCard({ memberName, profileImage, type, date, targetD
 
           {/* Name */}
           <h3 className={clsx(
-            "text-[15px] sm:text-2xl font-extrabold bg-clip-text text-transparent leading-tight line-clamp-2",
+            "text-[15px] sm:text-2xl font-extrabold leading-tight line-clamp-2",
             isBirthday
-              ? "bg-gradient-to-r from-amber-200 via-yellow-100 to-orange-200"
-              : "bg-gradient-to-r from-pink-200 via-rose-100 to-fuchsia-200"
+              ? "text-amber-950 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-amber-200 dark:via-yellow-100 dark:to-orange-200"
+              : "text-pink-950 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-pink-200 dark:via-rose-100 dark:to-fuchsia-200"
           )}>
             {memberName}
           </h3>
@@ -180,8 +180,8 @@ export default function WishCard({ memberName, profileImage, type, date, targetD
           <span className={clsx(
             "mt-1.5 sm:mt-2 px-2 sm:px-4 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-xs font-bold uppercase tracking-wider border truncate max-w-[95%]",
             isBirthday
-              ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-              : "bg-pink-500/15 text-pink-300 border-pink-500/30"
+              ? "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30"
+              : "bg-pink-100 text-pink-800 border-pink-300 dark:bg-pink-500/15 dark:text-pink-300 dark:border-pink-500/30"
           )}>
             {chapterName || "SIB Chapter"}
           </span>
@@ -190,8 +190,8 @@ export default function WishCard({ memberName, profileImage, type, date, targetD
           <div className={clsx(
             "mt-3 sm:mt-5 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-2.5 sm:px-5 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-sm font-bold border",
             isBirthday
-              ? "bg-amber-500/10 border-amber-500/20 text-amber-200"
-              : "bg-pink-500/10 border-pink-500/20 text-pink-200"
+              ? "bg-amber-100/90 border-amber-200/90 text-amber-900 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-200"
+              : "bg-pink-100/90 border-pink-200/90 text-pink-900 dark:bg-pink-500/10 dark:border-pink-500/20 dark:text-pink-200"
           )}>
             <div className="flex items-center gap-1">
               <Icon size={12} className="animate-bounce sm:w-4 sm:h-4" />
@@ -203,7 +203,7 @@ export default function WishCard({ memberName, profileImage, type, date, targetD
                 <span className="opacity-40 hidden sm:inline">•</span>
                 <div className="flex items-center gap-1.5 whitespace-nowrap">
                   {formattedCelebrationDate && (
-                    <span className="text-white font-extrabold flex items-center gap-1">
+                    <span className="text-gray-900 dark:text-white font-extrabold flex items-center gap-1">
                       <Calendar size={11} className="sm:w-3.5 sm:h-3.5 opacity-80" />
                       {formattedCelebrationDate}
                     </span>
@@ -214,7 +214,7 @@ export default function WishCard({ memberName, profileImage, type, date, targetD
                   {date && formattedCelebrationDate !== date && (
                     <span className={clsx(
                       "font-semibold",
-                      date === "Today" ? "text-amber-300 dark:text-amber-300 font-bold" : "text-white/80"
+                      date === "Today" ? "text-amber-600 dark:text-amber-300 font-bold" : "text-gray-600 dark:text-white/80"
                     )}>
                       {date}
                     </span>

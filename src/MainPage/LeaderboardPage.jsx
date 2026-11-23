@@ -105,25 +105,25 @@ function MonthResetCountdown() {
           <Calendar size={14} className="text-amber-500" /> Time Left to Claim the #1 Spot
         </span>
         <div className="flex gap-2 text-amber-500 font-black font-mono mt-1">
-          <div className="flex flex-col items-center bg-gray-900/80 border border-gray-700/50 rounded-xl px-4 py-3 min-w-[64px] shadow-inner relative overflow-hidden group">
+          <div className="flex flex-col items-center bg-white dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700/50 rounded-xl px-4 py-3 min-w-[64px] shadow-sm dark:shadow-inner relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent pointer-events-none" />
             <span className="text-3xl sm:text-4xl leading-none">{timeLeft.d}</span>
             <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-widest mt-1.5">Days</span>
           </div>
-          <span className="text-gray-700 text-2xl sm:text-3xl font-bold self-start mt-2 animate-pulse">:</span>
-          <div className="flex flex-col items-center bg-gray-900/80 border border-gray-700/50 rounded-xl px-4 py-3 min-w-[64px] shadow-inner relative overflow-hidden group">
+          <span className="text-gray-400 dark:text-gray-700 text-2xl sm:text-3xl font-bold self-start mt-2 animate-pulse">:</span>
+          <div className="flex flex-col items-center bg-white dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700/50 rounded-xl px-4 py-3 min-w-[64px] shadow-sm dark:shadow-inner relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent pointer-events-none" />
             <span className="text-3xl sm:text-4xl leading-none">{timeLeft.h.toString().padStart(2, '0')}</span>
             <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-widest mt-1.5">Hrs</span>
           </div>
-          <span className="text-gray-700 text-2xl sm:text-3xl font-bold self-start mt-2 animate-pulse">:</span>
-          <div className="flex flex-col items-center bg-gray-900/80 border border-gray-700/50 rounded-xl px-4 py-3 min-w-[64px] shadow-inner relative overflow-hidden group">
+          <span className="text-gray-400 dark:text-gray-700 text-2xl sm:text-3xl font-bold self-start mt-2 animate-pulse">:</span>
+          <div className="flex flex-col items-center bg-white dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700/50 rounded-xl px-4 py-3 min-w-[64px] shadow-sm dark:shadow-inner relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent pointer-events-none" />
             <span className="text-3xl sm:text-4xl leading-none">{timeLeft.m.toString().padStart(2, '0')}</span>
             <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-widest mt-1.5">Min</span>
           </div>
-          <span className="text-gray-700 text-2xl sm:text-3xl font-bold self-start mt-2 animate-pulse">:</span>
-          <div className="flex flex-col items-center bg-gray-900/80 border border-gray-700/50 rounded-xl px-4 py-3 min-w-[64px] shadow-inner relative overflow-hidden group">
+          <span className="text-gray-400 dark:text-gray-700 text-2xl sm:text-3xl font-bold self-start mt-2 animate-pulse">:</span>
+          <div className="flex flex-col items-center bg-white dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700/50 rounded-xl px-4 py-3 min-w-[64px] shadow-sm dark:shadow-inner relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent pointer-events-none" />
             <span className="text-3xl sm:text-4xl leading-none">{timeLeft.s.toString().padStart(2, '0')}</span>
             <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-widest mt-1.5">Sec</span>
@@ -303,18 +303,18 @@ function RulesModal({ isOpen, onClose }) {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md p-4" onClick={onClose}>
-      <div className="lb-modal bg-gray-900/95 border border-gray-700/50 rounded-3xl w-full max-w-md shadow-2xl shadow-amber-500/10 overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b border-gray-800/80 bg-gradient-to-r from-amber-950/30 to-transparent">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+      <div className="lb-modal bg-white dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700/50 rounded-3xl w-full max-w-md shadow-2xl shadow-amber-500/10 overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800/80 bg-gradient-to-r from-amber-500/10 dark:from-amber-950/30 to-transparent">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <div className="p-1.5 bg-amber-500/10 rounded-lg"><Info size={18} className="text-amber-500" /></div>
             Leaderboard Rules
           </h3>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-white transition-all hover:rotate-90 duration-300">
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-gray-700 dark:hover:text-white transition-all hover:rotate-90 duration-300">
             <X size={18} />
           </button>
         </div>
         <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto">
-          <div className="text-gray-300 text-sm space-y-2 bg-gray-800/30 p-4 rounded-xl border border-gray-700/30">
+          <div className="text-gray-600 dark:text-gray-300 text-sm space-y-2 bg-gray-50 dark:bg-gray-800/30 p-4 rounded-xl border border-gray-200 dark:border-gray-700/30">
             <p>
               Earn points by participating in chapter activities. The members with the highest points will be featured on the leaderboard! The leaderboard resets at the beginning of every month, giving everyone a fresh chance to win.
             </p>
@@ -329,11 +329,11 @@ function RulesModal({ isOpen, onClose }) {
               { label: 'Referral Given', pts: 20, icon: '🤝', desc: 'Per referral given' },
               { label: '1-to-1 Meeting (M2M)', pts: 10, icon: '👥', desc: 'Per M2M completed' },
             ].map((r, i) => (
-              <div key={i} className="flex justify-between items-center p-3 rounded-xl border border-gray-700/30 bg-gray-800/20 hover:bg-gray-800/40 transition-all duration-200 lb-modal-item" style={{ animationDelay: `${i * 80 + 200}ms` }}>
+              <div key={i} className="flex justify-between items-center p-3 rounded-xl border border-gray-100 dark:border-gray-700/30 bg-gray-50/60 dark:bg-gray-800/20 hover:bg-gray-100/60 dark:hover:bg-gray-800/40 transition-all duration-200 lb-modal-item" style={{ animationDelay: `${i * 80 + 200}ms` }}>
                 <div className="flex items-center gap-3">
                   <span className="text-lg">{r.icon}</span>
                   <div>
-                    <p className="text-white font-bold text-sm">{r.label}</p>
+                    <p className="text-gray-900 dark:text-white font-bold text-sm">{r.label}</p>
                     <p className="text-gray-500 text-[10px]">{r.desc}</p>
                   </div>
                 </div>
@@ -345,7 +345,7 @@ function RulesModal({ isOpen, onClose }) {
             ))}
           </div>
         </div>
-        <div className="p-4 border-t border-gray-800 bg-gray-900/80">
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-900/80">
           <button onClick={onClose} className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] duration-200">
             Got it / புரிந்தது ✨
           </button>
@@ -372,13 +372,13 @@ function BadgesModal({ isOpen, onClose }) {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md p-4" onClick={onClose}>
-      <div className="lb-modal bg-gray-900/95 border border-gray-700/50 rounded-3xl w-full max-w-md shadow-2xl shadow-amber-500/10 overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b border-gray-800/80 bg-gradient-to-r from-amber-950/30 to-transparent">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+      <div className="lb-modal bg-white dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700/50 rounded-3xl w-full max-w-md shadow-2xl shadow-amber-500/10 overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800/80 bg-gradient-to-r from-amber-500/10 dark:from-amber-950/30 to-transparent">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <div className="p-1.5 bg-amber-500/10 rounded-lg"><Award size={18} className="text-amber-500" /></div>
             Monthly Badges
           </h3>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-white transition-all hover:rotate-90 duration-300">
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-gray-700 dark:hover:text-white transition-all hover:rotate-90 duration-300">
             <X size={18} />
           </button>
         </div>
@@ -394,7 +394,7 @@ function BadgesModal({ isOpen, onClose }) {
             </div>
           ))}
         </div>
-        <div className="p-4 border-t border-gray-800 bg-gray-900/80">
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-900/80">
           <button onClick={onClose} className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] duration-200">
             Close
           </button>
@@ -417,13 +417,13 @@ function UserEarnedBadgesModal({ user, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md p-4" onClick={onClose}>
-      <div className="lb-modal bg-gray-900/95 border border-gray-700/50 rounded-3xl w-full max-w-md shadow-2xl shadow-amber-500/10 overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b border-gray-800/80 bg-gradient-to-r from-amber-950/30 to-transparent">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+      <div className="lb-modal bg-white dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700/50 rounded-3xl w-full max-w-md shadow-2xl shadow-amber-500/10 overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800/80 bg-gradient-to-r from-amber-500/10 dark:from-amber-950/30 to-transparent">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <div className="p-1.5 bg-amber-500/10 rounded-lg"><Award size={18} className="text-amber-500" /></div>
             {user.name}'s Badges
           </h3>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-white transition-all hover:rotate-90 duration-300">
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-gray-700 dark:hover:text-white transition-all hover:rotate-90 duration-300">
             <X size={18} />
           </button>
         </div>
@@ -452,7 +452,7 @@ function UserEarnedBadgesModal({ user, onClose }) {
             })
           )}
         </div>
-        <div className="p-4 border-t border-gray-800 bg-gray-900/80">
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-900/80">
           <button onClick={onClose} className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] duration-200">
             Close
           </button>
@@ -478,10 +478,10 @@ function BreakdownModal({ user, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md p-4" onClick={onClose}>
-      <div className="lb-modal bg-gray-900/95 border border-gray-700/50 rounded-3xl w-full max-w-md shadow-2xl shadow-amber-500/10 overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+      <div className="lb-modal bg-white dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700/50 rounded-3xl w-full max-w-md shadow-2xl shadow-amber-500/10 overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="relative p-6 pt-8 flex flex-col items-center border-b border-gray-800/80 bg-gradient-to-b from-gray-800/50 to-transparent">
-          <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-white transition-all hover:rotate-90 duration-300 z-10">
+          <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-gray-700 dark:hover:text-white transition-all hover:rotate-90 duration-300 z-10">
             <X size={18} />
           </button>
           <div className="relative">
@@ -510,7 +510,7 @@ function BreakdownModal({ user, onClose }) {
                   <div className="flex items-center gap-3">
                     <span className="text-lg">{item.emoji}</span>
                     <div>
-                      <p className="text-white font-bold text-sm">{item.label}</p>
+                      <p className="text-gray-900 dark:text-white font-bold text-sm">{item.label}</p>
                       <p className="text-gray-500 text-[10px]">{item.count} × {item.multi} pts</p>
                     </div>
                   </div>
@@ -597,26 +597,22 @@ export default function LeaderboardPage() {
 
   return (
     <div 
-      className="min-h-screen bg-[#030712] relative overflow-hidden flex flex-col"
-      style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="min-h-screen bg-slate-50 dark:bg-[#030712] text-gray-900 dark:text-white relative overflow-hidden flex flex-col transition-colors duration-300"
     >
       <AnimatedBackground />
 
       {/* HUGE FIXED BACKGROUND MONTH */}
       <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden select-none">
-        <span className="text-[28vw] font-black text-amber-500/[0.1] uppercase tracking-tighter whitespace-nowrap transform -rotate-6 scale-125">
+        <span className="text-[28vw] font-black text-amber-500/[0.05] dark:text-amber-500/[0.1] uppercase tracking-tighter whitespace-nowrap transform -rotate-6 scale-125">
           {currentMonth}
         </span>
       </div>
 
-      <div 
-        className="fixed left-0 w-full z-40 bg-transparent transition-all duration-300"
-        style={{ top: 'calc(10px + env(safe-area-inset-top, 0px))' }}
-      >
+      <div className="sticky top-0 left-0 w-full z-40 bg-white dark:bg-gray-900 shadow-sm">
         <Header />
       </div>
 
-      <main className="mt-[100px] flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 relative z-10 pb-24">
+      <main className="mt-4 flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 relative z-10 pb-24">
 
         {/* ═══ HERO HEADER ═══ */}
         <div className={clsx(
@@ -632,7 +628,7 @@ export default function LeaderboardPage() {
             </h1>
           </div>
 
-          <p className="mt-4 text-gray-400 font-medium text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+          <p className="mt-4 text-gray-600 dark:text-gray-400 font-medium text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
             Recognizing the most active members of the month
           </p>
 
@@ -711,7 +707,7 @@ export default function LeaderboardPage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1.2s] ease-in-out pointer-events-none" />
 
                   {/* Rank */}
-                  <div className="relative shrink-0 flex items-center justify-center w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-gray-800/60 border border-gray-600/30 group-hover:bg-amber-500/15 group-hover:border-amber-500/40 transition-all duration-300">
+                  <div className="relative shrink-0 flex items-center justify-center w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-gray-100 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-600/30 text-gray-600 dark:text-gray-500 group-hover:bg-amber-500/15 group-hover:border-amber-500/40 transition-all duration-300">
                     <span className="font-black text-gray-500 group-hover:text-amber-400 transition-colors duration-300 text-xs sm:text-base">
                       {user.rank}
                     </span>
@@ -723,17 +719,17 @@ export default function LeaderboardPage() {
                     <img
                       src={user.avatar}
                       alt={user.name}
-                      className="relative w-11 h-11 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-gray-700/80 group-hover:border-amber-400/80 transition-all duration-500"
+                      className="relative w-11 h-11 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700/80 group-hover:border-amber-400/80 transition-all duration-500"
                     />
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0 ml-2">
-                    <h4 className="text-gray-200 font-bold text-[15px] sm:text-lg truncate group-hover:text-amber-400 transition-colors duration-300">
+                    <h4 className="text-gray-900 dark:text-gray-200 font-bold text-[15px] sm:text-lg truncate group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors duration-300">
                       {user.name}
                     </h4>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1">
-                      <p className="text-gray-500 text-xs sm:text-sm truncate">{user.company}</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm truncate">{user.company}</p>
                       {user.badges && user.badges.length > 0 && (() => {
                         const grouped = Object.entries(user.badges.reduce((acc,curr) => { acc[curr] = (acc[curr] || 0)+1; return acc; }, {})).map(([type, count]) => ({ type, count }));
                         return (
@@ -837,13 +833,21 @@ export default function LeaderboardPage() {
         .lb-pill-btn {
           display: flex; align-items: center; gap: 8px;
           padding: 8px 18px; border-radius: 9999px; font-size: 12px; font-weight: 700;
+          background: #ffffff; border: 1px solid #e2e8f0;
+          color: #334155; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.3s;
+        }
+        .dark .lb-pill-btn {
           background: rgba(31,41,55,0.9); border: 1px solid rgba(75,85,99,0.6);
-          color: #d1d5db; transition: all 0.3s;
+          color: #d1d5db; box-shadow: none;
         }
         .lb-pill-btn:hover {
+          background: #f8fafc; color: #0f172a;
+          border-color: rgba(245,158,11,0.4);
+          box-shadow: 0 0 20px -5px rgba(245,158,11,0.2);
+        }
+        .dark .lb-pill-btn:hover {
           background: rgba(55,65,81,1); color: white;
           border-color: rgba(245,158,11,0.3);
-          box-shadow: 0 0 20px -5px rgba(245,158,11,0.2);
         }
 
         /* ── Pulse ring ── */
@@ -865,17 +869,28 @@ export default function LeaderboardPage() {
         .lb-row {
           position: relative; display: flex; align-items: center; gap: 8px;
           padding: 10px 12px; border-radius: 16px; overflow: hidden; cursor: pointer;
-          background: rgba(17,24,39,0.85); 
-          border: 1px solid rgba(255,255,255,0.04);
+          background: #ffffff; 
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
           transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s, border-color 0.4s, box-shadow 0.4s;
           opacity: 0; transform: translateY(16px);
           animation: lb-row-in 0.5s ease-out forwards;
         }
+        .dark .lb-row {
+          background: rgba(17,24,39,0.85); 
+          border: 1px solid rgba(255,255,255,0.04);
+          box-shadow: none;
+        }
         .lb-row:hover {
+          background: #f8fafc;
+          border-color: rgba(245,158,11,0.4);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          transform: translateX(4px);
+        }
+        .dark .lb-row:hover {
           background: rgba(31,41,55,0.9);
           border-color: rgba(245,158,11,0.25);
           box-shadow: 0 0 40px -10px rgba(245,158,11,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
-          transform: translateX(4px);
         }
         @keyframes lb-row-in { to { opacity: 1; transform: translateY(0); } }
 

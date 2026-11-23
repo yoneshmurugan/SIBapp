@@ -136,11 +136,11 @@ function Meetings() {
   }, [mappedData]);
 
   return (
-    <div className="flex flex-col items-center justify-start w-full min-h-screen transition-colors duration-300">
-      <div className="fixed top-[10px] left-0 w-full z-10 bg-transparent">
+    <div className="flex flex-col items-center justify-start w-full min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-950">
+      <div className="sticky top-0 left-0 w-full z-40 bg-white dark:bg-gray-900 shadow-sm">
         <Header />
       </div>
-      <main className="pt-[calc(120px+env(safe-area-inset-top,0px))] w-full max-w-7xl px-3 sm:px-6 md:px-10">
+      <main className="w-full max-w-7xl px-3 sm:px-6 md:px-10 py-6">
         <div className="mb-6 flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl shadow-lg shadow-amber-500/20">

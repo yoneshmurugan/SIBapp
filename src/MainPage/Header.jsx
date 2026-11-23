@@ -89,9 +89,9 @@ function Header() {
   return (
     <header
       style={{
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.35rem)',
-        paddingBottom: '0.35rem',
-        minHeight: 'calc(64px + env(safe-area-inset-top, 0px))',
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.15rem)',
+        paddingBottom: '0.15rem',
+        minHeight: 'calc(50px + env(safe-area-inset-top, 0px))',
       }}
       className="
         relative z-[100]
@@ -103,14 +103,14 @@ function Header() {
         shadow-sm
       "
     >
-      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
         <Sidebar />
 
         <div className="relative shrink-0">
            <img
              src="/assets/logo.webp"
              alt="logo"
-             className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] object-contain rounded-full"
+             className="w-[32px] h-[32px] sm:w-[36px] sm:h-[36px] object-contain rounded-full"
              onError={(e) => {
                if (e.currentTarget.src.includes("/assets/logo.webp")) {
                  e.currentTarget.src = "/logo.webp";
@@ -120,10 +120,10 @@ function Header() {
         </div>
 
         <NavLink to={'/dashboard'} className="flex flex-col min-w-0">
-          <h1 className="text-[13px] sm:text-[14px] font-black tracking-tight text-gray-900 dark:text-white leading-tight">
+          <h1 className="text-[12px] sm:text-[13px] font-black tracking-tight text-gray-900 dark:text-white leading-tight">
             SIB APP
           </h1>
-          <span className="text-[8.5px] sm:text-[9px] font-black text-amber-500 uppercase tracking-[0.18em] leading-none mt-0.5">
+          <span className="text-[8px] sm:text-[8.5px] font-black text-amber-500 uppercase tracking-[0.18em] leading-none mt-0.5">
             Official
           </span>
         </NavLink>
