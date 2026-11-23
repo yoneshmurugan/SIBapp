@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { 
   X, ChevronLeft, ChevronRight, ZoomIn, Image as ImageIcon, 
   ArrowLeft, Loader2, AlertCircle, Calendar, ArrowLeftIcon, 
-  Users, MapPin, MessageSquare, Info 
+  Users, MapPin, MessageSquare, Info, Folder, Layers 
 } from 'lucide-react';
 
 // CSS - We keep the import if needed for some global styles, but we'll use Tailwind for the UI
@@ -148,10 +148,25 @@ const Lightbox = ({ isOpen, image, onClose, onNext, onPrev, hasNext, hasPrev, m2
   );
 };
 
+// Helper: Check if album is an M2M album
+const isM2MAlbum = (album) => {
+  if (!album || !album.title) return false;
+  return /(?:m2m|m\s*to\s*m)\s*(?:gallery|slips)?/i.test(album.title);
+};
+
+// Helper: Format M2M title for display (e.g., "MCC M2M gallery" -> "MCC M to M")
+const formatM2MTitle = (title) => {
+  if (!title) return "";
+  return title
+    .replace(/\s*m2m\s*gallery/i, ' M to M')
+    .replace(/\s*m2m\b/i, ' M to M')
+    .trim();
+};
+
 const Album = () => {
   const navigate = useNavigate();
   const [albums, setAlbums] = useState([]);
-  const [currentView, setCurrentView] = useState("home"); // 'home' or 'album'
+  const [currentView, setCurrentView] = useState("home"); // 'home', 'm2m', or 'album'
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   
   // Lightbox state
@@ -223,6 +238,37 @@ const Album = () => {
     fetchAlbums();
   }, []);
 
+  // Partition albums into M2M albums and regular event albums
+  const { m2mAlbums, regularAlbums, totalM2mPhotos, m2mCoverImage } = useMemo(() => {
+    const m2m = [];
+    const regular = [];
+
+    (albums || []).forEach(album => {
+      if (isM2MAlbum(album)) {
+        m2m.push(album);
+      } else {
+        regular.push(album);
+      }
+    });
+
+    const totalPhotos = m2m.reduce((sum, a) => sum + (a.photos?.length || 0), 0);
+    const albumWithCover = m2m.find(a => a.coverImg || (a.photos && a.photos.length > 0));
+    const cover = albumWithCover?.coverImg || albumWithCover?.photos?.[0]?.src || "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=800";
+
+    return {
+      m2mAlbums: m2m,
+      regularAlbums: regular,
+      totalM2mPhotos: totalPhotos,
+      m2mCoverImage: cover
+    };
+  }, [albums]);
+
+  const handleOpenM2MFolder = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setSelectedAlbum(null);
+    setCurrentView("m2m");
+  };
+
   const handleFolderClick = (album) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setSelectedAlbum(album);
@@ -230,8 +276,19 @@ const Album = () => {
   };
 
   const handleBackClick = () => {
-    setSelectedAlbum(null);
-    setCurrentView("home");
+    if (currentView === "album") {
+      if (selectedAlbum && isM2MAlbum(selectedAlbum)) {
+        setSelectedAlbum(null);
+        setCurrentView("m2m");
+      } else {
+        setSelectedAlbum(null);
+        setCurrentView("home");
+      }
+    } else if (currentView === "m2m") {
+      setCurrentView("home");
+    } else {
+      navigate('/');
+    }
     setCurrentImageIndex(0);
     setLightboxOpen(false);
   };
@@ -269,10 +326,18 @@ const Album = () => {
   // Helper: Get Cover Image URL
   const getCoverImageUrl = (album) => {
     if (!album.coverImg) {
-        return "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800";
+      if (album.photos && album.photos.length > 0) {
+        return album.photos[0].src;
+      }
+      return "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800";
     }
     return album.coverImg;
   };
+
+  // Display title for current album
+  const displayAlbumTitle = selectedAlbum 
+    ? (isM2MAlbum(selectedAlbum) ? formatM2MTitle(selectedAlbum.title) : selectedAlbum.title) 
+    : "";
 
   // --- RENDER LOADING STATE ---
   if (loading) {
@@ -306,110 +371,268 @@ const Album = () => {
       {/* HEADER */}
       <header className="border-b border-gray-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md sticky top-0 z-40 pt-[env(safe-area-inset-top,0px)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3 overflow-hidden">
             {/* Back Button */}
             <button 
-                onClick={() => currentView === "album" ? handleBackClick() : navigate('/')}
-                className="mr-1 p-2 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                title="Back"
+              onClick={handleBackClick}
+              className="mr-1 p-2 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white transition-colors shrink-0"
+              title="Back"
             >
-                <ArrowLeftIcon size={18} />
+              <ArrowLeftIcon size={18} />
             </button>
 
-            {/* Title / Breadcrumb */}
+            {/* Title / Breadcrumb Root */}
             <div
-              className="flex items-center space-x-2.5 cursor-pointer"
-              onClick={() => handleBackClick()}
+              className="flex items-center space-x-2 cursor-pointer shrink-0"
+              onClick={() => {
+                setSelectedAlbum(null);
+                setCurrentView("home");
+              }}
             >
               <div className="p-2 bg-emerald-500/10 rounded-xl">
                 <ImageIcon className="text-emerald-600 dark:text-emerald-500" size={18} />
               </div>
-              <div className="hidden sm:block">
+              <div>
                 <h1 className="text-base font-bold tracking-tight text-gray-900 dark:text-white leading-tight">Gallery</h1>
-                {selectedAlbum && (
-                  <p className="text-[10px] font-bold text-gray-400 dark:text-neutral-500 uppercase tracking-widest -mt-0.5">
+                {currentView !== "home" && (
+                  <p className="text-[10px] font-bold text-gray-400 dark:text-neutral-500 uppercase tracking-widest -mt-0.5 hidden sm:block">
                     SIB Collections
                   </p>
                 )}
               </div>
             </div>
 
-            {selectedAlbum && (
+            {/* Breadcrumb level 1: M to M Slips folder */}
+            {currentView === "m2m" && (
               <>
                 <span className="text-gray-300 dark:text-neutral-700 font-light text-lg select-none">/</span>
-                <span className="text-sm font-semibold text-gray-700 dark:text-neutral-300 truncate max-w-[140px]">
-                  {selectedAlbum.title}
+                <span className="text-sm font-semibold text-gray-700 dark:text-neutral-300 truncate">
+                  M to M Slips
                 </span>
+              </>
+            )}
+
+            {/* Breadcrumb level 2: Specific Album */}
+            {currentView === "album" && selectedAlbum && (
+              <>
+                <span className="text-gray-300 dark:text-neutral-700 font-light text-lg select-none">/</span>
+                {isM2MAlbum(selectedAlbum) ? (
+                  <>
+                    <span 
+                      onClick={() => {
+                        setSelectedAlbum(null);
+                        setCurrentView("m2m");
+                      }}
+                      className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer truncate max-w-[80px] sm:max-w-none"
+                    >
+                      M to M Slips
+                    </span>
+                    <span className="text-gray-300 dark:text-neutral-700 font-light text-lg select-none">/</span>
+                    <span className="text-sm font-semibold text-gray-700 dark:text-neutral-300 truncate max-w-[120px] sm:max-w-none">
+                      {displayAlbumTitle}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm font-semibold text-gray-700 dark:text-neutral-300 truncate max-w-[140px] sm:max-w-none">
+                    {displayAlbumTitle}
+                  </span>
+                )}
               </>
             )}
           </div>
           
-          <div className="hidden xs:block">
-            <span className="text-[10px] font-black text-gray-400 dark:text-neutral-500 uppercase tracking-[0.2em]">Public View</span>
+          <div className="hidden xs:block shrink-0">
+            <span className="text-[11px] font-bold text-gray-400 dark:text-neutral-500 uppercase tracking-widest bg-gray-100 dark:bg-neutral-800 px-3 py-1.5 rounded-full border border-gray-200/50 dark:border-neutral-700/50">
+              {currentView === "m2m" 
+                ? `${m2mAlbums.length} Chapters` 
+                : currentView === "album" 
+                  ? `${currentPhotos.length} Photos`
+                  : `${(regularAlbums.length + (m2mAlbums.length > 0 ? 1 : 0))} Collections`}
+            </span>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* MAIN CONTAINER */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
-        {/* VIEW 1: ALBUM LIST */}
+        {/* VIEW 1: HOME (All Collections & M to M Common Folder) */}
         {currentView === "home" && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="animate-in fade-in duration-500">
             <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Albums & Collections</h2>
-                <p className="text-sm text-gray-500 dark:text-neutral-500">
-                    {albums.length} collections available to explore
-                </p>
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Collections</h2>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-neutral-400 mt-1">Explore moments, events, and chapter interactions</p>
             </div>
 
-            {albums.length === 0 ? (
-                <div className="text-center py-24 border-2 border-dashed border-gray-200 dark:border-neutral-800 rounded-2xl">
-                    <ImageIcon className="mx-auto h-10 w-10 text-gray-300 dark:text-neutral-700 mb-4" />
-                    <h3 className="text-base font-semibold text-gray-700 dark:text-white">No albums found</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {/* Special Parent Folder: M to M Slips */}
+              {m2mAlbums.length > 0 && (
+                <div 
+                  onClick={handleOpenM2MFolder}
+                  className="group bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/50 dark:from-neutral-800 dark:via-neutral-800/90 dark:to-neutral-800/70 rounded-3xl overflow-hidden border-2 border-emerald-500/40 dark:border-emerald-500/30 shadow-sm hover:shadow-xl hover:border-emerald-500 transition-all duration-300 flex flex-col cursor-pointer transform hover:-translate-y-1"
+                >
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-neutral-800">
+                    <img 
+                      src={m2mCoverImage} 
+                      alt="M to M Slips Folder" 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                    
+                    {/* Badge */}
+                    <div className="absolute top-3 left-3 bg-emerald-600 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow flex items-center gap-1.5 backdrop-blur-sm">
+                      <Folder size={13} />
+                      <span>Folder</span>
+                    </div>
+
+                    <div className="absolute bottom-3 left-3 right-3 text-white">
+                      <p className="text-xs font-semibold opacity-90 flex items-center gap-1.5">
+                        <Users size={13} />
+                        {m2mAlbums.length} Chapters
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/70 dark:bg-emerald-500/10 px-2 py-1 rounded uppercase tracking-wider inline-flex items-center gap-1">
+                        <Layers size={11} /> Chapter Collections
+                      </span>
+                      <h3 className="text-base font-bold text-gray-900 dark:text-white mt-3 group-hover:text-emerald-600 transition-colors">
+                        M to M Slips
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+                        {totalM2mPhotos} Moments across {m2mAlbums.length} chapters
+                      </p>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-neutral-700/50 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                      <span>Browse Chapters</span>
+                      <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
                 </div>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {albums.map((album) => (
-                        <div 
-                            key={album.id} 
-                            className="group bg-white dark:bg-neutral-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                            onClick={() => handleFolderClick(album)}
-                        >
-                            <div className="aspect-[4/3] relative overflow-hidden">
-                                <img 
-                                    src={getCoverImageUrl(album)} 
-                                    alt={album.title} 
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </div>
-                            <div className="p-5">
-                                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded uppercase tracking-wider">
-                                    {formatDate(album.date)}
-                                </span>
-                                <h3 className="text-base font-bold text-gray-900 dark:text-white mt-3 group-hover:text-emerald-600 transition-colors">{album.title}</h3>
-                                <p className="text-xs text-gray-500 dark:text-neutral-500 mt-1">
-                                    {album.photos?.length || 0} Moments captured
-                                </p>
-                            </div>
-                        </div>
-                    ))}
+              )}
+
+              {/* Regular Event Albums */}
+              {regularAlbums.map((album) => (
+                <div 
+                  key={album.id}
+                  onClick={() => handleFolderClick(album)}
+                  className="group bg-white dark:bg-neutral-800/80 rounded-3xl overflow-hidden border border-gray-100 dark:border-neutral-700/60 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer transform hover:-translate-y-1"
+                >
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-neutral-800">
+                    <img 
+                      src={getCoverImageUrl(album)} 
+                      alt={album.title} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded uppercase tracking-wider">
+                        {formatDate(album.date) || 'Event'}
+                      </span>
+                      <h3 className="text-base font-bold text-gray-900 dark:text-white mt-3 group-hover:text-emerald-600 transition-colors">
+                        {album.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-neutral-500 mt-1">
+                        {album.photos?.length || 0} Moments captured
+                      </p>
+                    </div>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            {regularAlbums.length === 0 && m2mAlbums.length === 0 && (
+              <div className="text-center py-24 bg-white dark:bg-neutral-800/40 rounded-3xl border border-dashed border-gray-200 dark:border-neutral-800">
+                <ImageIcon className="mx-auto text-gray-300 dark:text-neutral-600 mb-3" size={48} />
+                <p className="text-sm font-bold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">No collections found</p>
+              </div>
             )}
           </div>
         )}
 
-        {/* VIEW 2: ALBUM PHOTOS */}
+        {/* VIEW 2: M TO M SUB-FOLDERS (Chapters inside M to M folder) */}
+        {currentView === "m2m" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+                    <Folder size={12} /> Folder
+                  </span>
+                  <span className="text-xs text-gray-400 dark:text-neutral-500">·</span>
+                  <span className="text-xs text-gray-500 dark:text-neutral-400 font-medium">
+                    {m2mAlbums.length} Chapters
+                  </span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+                  M to M Slips
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-neutral-400 mt-1">
+                  Chapter-wise One-to-One meeting proof of work photos
+                </p>
+              </div>
+
+              <button 
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setCurrentView("home");
+                }}
+                className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl text-sm font-bold transition-all text-gray-700 dark:text-neutral-300"
+              >
+                <ArrowLeft size={16} /> All Collections
+              </button>
+            </div>
+
+            {/* Grid of Chapter Sub-Folders */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {m2mAlbums.map((album) => (
+                <div 
+                  key={album.id}
+                  onClick={() => handleFolderClick(album)}
+                  className="group bg-white dark:bg-neutral-800/80 rounded-3xl overflow-hidden border border-gray-100 dark:border-neutral-700/60 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer transform hover:-translate-y-1"
+                >
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-neutral-800">
+                    <img 
+                      src={getCoverImageUrl(album)} 
+                      alt={formatM2MTitle(album.title)} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded uppercase tracking-wider">
+                        {formatDate(album.date) || 'Chapter Folder'}
+                      </span>
+                      <h3 className="text-base font-bold text-gray-900 dark:text-white mt-3 group-hover:text-emerald-600 transition-colors">
+                        {formatM2MTitle(album.title)}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-neutral-500 mt-1">
+                        {album.photos?.length || 0} Moments captured
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 3: ALBUM PHOTOS */}
         {currentView === "album" && selectedAlbum && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             
             {/* Album Hero Banner */}
             {selectedAlbum.coverImg && (
               <div className="relative w-full h-44 rounded-3xl overflow-hidden mb-8 shadow-md">
-                <img src={selectedAlbum.coverImg} alt={selectedAlbum.title} className="w-full h-full object-cover" />
+                <img src={selectedAlbum.coverImg} alt={displayAlbumTitle} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 <div className="absolute bottom-6 left-7">
-                  <h2 className="text-2xl font-black text-white">{selectedAlbum.title}</h2>
+                  <h2 className="text-2xl font-black text-white">{displayAlbumTitle}</h2>
                   <p className="text-white/70 text-xs font-semibold mt-1 flex items-center gap-2">
                     <Calendar size={12} />
                     {formatDate(selectedAlbum.date)}
@@ -423,7 +646,7 @@ const Album = () => {
             <div className="flex items-center justify-between mb-6 px-1">
               {!selectedAlbum.coverImg && (
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{selectedAlbum.title}</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{displayAlbumTitle}</h2>
                   <p className="text-xs text-gray-500 mt-1">{formatDate(selectedAlbum.date)}</p>
                 </div>
               )}
@@ -432,33 +655,40 @@ const Album = () => {
                   onClick={handleBackClick}
                   className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl text-sm font-bold transition-all text-gray-700 dark:text-neutral-300"
                  >
-                    <ArrowLeft size={16} /> Back
+                    <ArrowLeft size={16} /> {isM2MAlbum(selectedAlbum) ? "M to M Slips" : "Back"}
                  </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {currentPhotos.map((photo, index) => (
-                <div 
-                  key={index} 
-                  className="group relative aspect-square bg-gray-200 dark:bg-neutral-800 rounded-2xl overflow-hidden cursor-zoom-in"
-                  onClick={() => {
-                    setCurrentImageIndex(index);
-                    setLightboxOpen(true);
-                  }}
-                >
-                  <img 
-                    src={photo.src} 
-                    alt={`Gallery item ${index}`} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy" 
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                    <ZoomIn className="text-white drop-shadow-lg" size={24} />
+            {currentPhotos.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {currentPhotos.map((photo, index) => (
+                  <div 
+                    key={index} 
+                    className="group relative aspect-square bg-gray-200 dark:bg-neutral-800 rounded-2xl overflow-hidden cursor-zoom-in"
+                    onClick={() => {
+                      setCurrentImageIndex(index);
+                      setLightboxOpen(true);
+                    }}
+                  >
+                    <img 
+                      src={photo.src} 
+                      alt={`Gallery item ${index}`} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy" 
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                      <ZoomIn className="text-white drop-shadow-lg" size={24} />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-24 bg-white dark:bg-neutral-800/40 rounded-3xl border border-dashed border-gray-200 dark:border-neutral-800">
+                <ImageIcon className="mx-auto text-gray-300 dark:text-neutral-600 mb-3" size={48} />
+                <p className="text-sm font-bold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">No photos in this album yet</p>
+              </div>
+            )}
           </div>
         )}
       </main>

@@ -39,6 +39,9 @@ Tracks changes across the 3 production workspaces:
 | S3-#13 | 2026-11-15 | Member Directory: 20-Card Doubling & Sliding Ellipsis Pagination (Public & Private) | [x] Synced | [x] Synced | [x] Synced |
 | S3-#14 | 2026-11-15 | Slips Desk: NaN Amount Fix, Remove Standards & Full Mobile Optimization | [x] Synced | [x] Synced | [x] Synced |
 | S3-#15 | 2026-11-15 | Slips Desk: Removed Recent Slip Submissions Component & Streamlined State | [x] Synced | [x] Synced | [x] Synced |
+| S4-#1 | 2026-11-23 | 2-Tier Hierarchical Folder Structure for M to M Slips Gallery | [x] Synced | [x] Synced | [x] Synced |
+| S4-#2 | 2026-11-23 | Light Mode Overhaul: Leaderboard & Wall of Wishes | [x] Synced | [x] Synced | [x] Synced |
+| S4-#3 | 2026-11-23 | Header Height Reduction & Safe-Area Collision Resolution | [x] Synced | [x] Synced | [x] Synced |
 
 ---
 
@@ -1126,3 +1129,84 @@ Tracks changes across the 3 production workspaces:
    - Omitted the `sound` parameter in `FirebaseMessaging.createChannel()`. On Android, creating a channel without a custom sound parameter automatically instructs the OS to bind the device's system default notification ringtone (`Settings.System.DEFAULT_NOTIFICATION_URI`).
    - Configured `vibrate: true` to ensure haptic feedback on incoming pushes.
    - Updated `default_notification_channel_id` in `AndroidManifest.xml` and `channelId: 'sib_notifications_v1'` in `fcmHelper.mjs`.
+
+---
+
+### S4-#1 [2026-11-23] - 2-Tier Hierarchical Folder Structure for M to M Slips Gallery
+- **Type:** Feature & UI Architecture
+- **Origin:** Web, iOS & Android (`SIBapp` & `SIB_app_android`)
+- **Files:**
+  - `src/src1/MainPage/Album/Album.jsx` (in `SIBapp` & `SIB_app_android`)
+  - `changes made.md` (in `SIBapp` & `SIB_app_android`)
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced & Built (`npm run build`)
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced & Built (`npx cap sync ios`)
+- [x] **Android (`SIB_app_android:main`):** Synced & Built (`npx cap sync android`)
+
+#### Summary:
+1. **Virtual 2-Tier Hierarchy (`M to M Slips` -> Chapter Sub-Folders -> Photos):**
+   - Replaced flat gallery listing with intelligent partitioned grouping: detecting albums with titles matching `/(?:m2m|m\s*to\s*m)\s*(?:gallery|slips)?/i` and consolidating them under a single virtual root folder card: **M to M Slips**.
+   - Displays aggregated metrics on the parent folder card: total moments captured and total active chapters with a dedicated `Folder` badge.
+2. **Dedicated Chapter Sub-Folder View (`currentView === 'm2m'`):**
+   - Clean sub-view rendering individual chapter folders formatted cleanly (e.g. `MCC M to M`, `TKC M to M`).
+   - Clicking a chapter sub-folder transitions to that chapter's photo grid with breadcrumb path: `Gallery / M to M Slips / [Chapter Name]`.
+3. **Full Breadcrumb & Back Navigation:**
+   - Multi-level back button and breadcrumb path: Navigating back from an M2M album photo grid returns to the chapter folders list, while navigating back from a general event returns to all collections.
+   - Preserves full Lightbox integration and M2M slip meeting details panel (members, chapter, meeting date, location, discussion points).
+
+---
+
+### S4-#2 [2026-11-23] - Light Mode Support: Leaderboard & Wall of Wishes
+- **Type:** UI / Theme Support
+- **Origin:** iOS, Android & Web (`SIBapp` & `SIB_app_android`)
+- **Files:**
+  - `src/MainPage/LeaderboardPage.jsx`
+  - `src/WallOfWishes/WallOfWishes.jsx`
+  - `src/WallOfWishes/WishCard.jsx`
+  - `changes made.md`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+
+#### Summary:
+1. **Leaderboard Page Light Mode (`LeaderboardPage.jsx`):**
+   - Replaced hardcoded `#030712` background with adaptive `bg-slate-50 dark:bg-[#030712]`.
+   - Added light theme variants for the countdown timer card, category filter pills (`.lb-pill-btn`), podium rank cards, runner-up list rows (`.lb-row`), and modals (Rules, Badges, Past Leaders).
+2. **Wall of Wishes & Wish Cards (`WallOfWishes.jsx`, `WishCard.jsx`):**
+   - Converted page container to adaptive light/dark theme.
+   - Designed celebratory pastel gradient backgrounds for light mode (`amber-50` for Birthdays; `pink-50` for Anniversaries) with high-contrast text and crisp borders, maintaining the rich dark mode glow styling.
+
+---
+
+### S4-#3 [2026-11-23] - Header Height Reduction & Safe-Area Collision Resolution
+- **Type:** Bug Fix & UI Polish
+- **Origin:** iOS, Android & Web (`SIBapp` & `SIB_app_android`)
+- **Files:**
+  - `src/MainPage/Header.jsx`
+  - `src/src1/MainPage/Header/HeaderStyle.css`
+  - `src/PresidentPortal/PresidentPortal.jsx`
+  - `src/ChapterPage/Mychapter.jsx`
+  - `src/Meetings/Meetings.jsx`
+  - `src/Members/Members.jsx`
+  - `src/MyActivity/Myactivity.jsx`
+  - `changes made.md`
+
+#### Sync Status:
+- [x] **Web (`SIBapp:main`):** Synced
+- [x] **iOS (`SIBapp:feat/ios-build`):** Synced
+- [x] **Android (`SIB_app_android:main`):** Synced
+
+#### Summary:
+1. **Eliminated Safe-Area Doubling & Leaderboard Top Gap:**
+   - Removed duplicate `calc(10px + env(safe-area-inset-top))` wrapper that caused an unsightly gap below the Dynamic Island / status bar.
+   - Standardized page headers to `sticky top-0 left-0 w-full z-40 bg-white dark:bg-gray-900 shadow-sm`.
+2. **Fixed Header Overlap in President Portal & Sub-Pages:**
+   - Switched President Portal from `fixed top-2` with `pt-20` to `sticky top-0` in natural document flow, preventing form header collisions.
+   - Standardized `Mychapter.jsx`, `Meetings.jsx`, `Members.jsx`, and `Myactivity.jsx` to prevent fixed header collisions.
+3. **Reduced Header Height:**
+   - Reduced authenticated app header height from `calc(64px + env(...))` down to `calc(50px + env(...))`, vertical padding to `0.15rem`, and logo to `32px`/`36px`.
+   - Compacted public floating header padding from `0.75rem 1.5rem` to `0.35rem 1.25rem` and logo to `36px`, reclaiming vital vertical screen real estate.
+
