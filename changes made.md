@@ -1212,27 +1212,32 @@ Tracks changes across the 3 production workspaces:
 
 ---
 
-### S4-#4 [2026-11-23] - Android V7.7 Release: R8 DEX Code Optimization & Obfuscation
-- **Type:** Build / Performance & Google Play Compliance
-- **Origin:** Android (`SIB_app_android`)
+### S4-#5 [2026-11-23] - Native SIB Contact Form (Replaced JotForm with Zero-Limit Backend Integration)
+- **Type:** Feature & Cost/Limit Optimization
+- **Origin:** Web (`SIBapp:main`) & Backend (`SIB_backend`)
 - **Files:**
-  - `android/app/build.gradle`
-  - `android/app/proguard-rules.pro`
+  - `src/src1/MainPage/Contacts/Contact.jsx` (in `SIBapp:main`)
+  - `src/pages/public/public.mjs` (in `SIB_backend`)
+  - `src/schemas.mjs` (in `SIB_backend`)
   - `changes made.md`
 
 #### Sync Status:
-- [x] **Android (`SIB_app_android:main`):** Built (`bundleRelease` & `assembleRelease`)
-- [x] **Artifacts:** `senguntharinbusinessV7.7.aab` & `senguntharinbusinessV7.7.apk` in `apk realeses`
+- [x] **Web (`SIBapp:main`):** Built & Verified (`npm run build`)
+- [x] **Backend (`SIB_backend:main`):** Synced & Committed
+- [x] **Mobile (`feat/ios-build` & `SIB_app_android`):** Synced across iOS and Android
 
 #### Summary:
-1. **Resolved Google Play DEX Code Optimization Deficit:**
-   - Enabled Android R8 compiler with `minifyEnabled true` in `build.gradle` (release buildType).
-   - Bumped `versionCode` to `40` and `versionName` to `"7.7"`.
-2. **Hardened ProGuard Keep Rules (`proguard-rules.pro`):**
-   - Added explicit protection for `@com.getcapacitor.PluginMethod`, `@com.getcapacitor.annotation.CapacitorPlugin`, and `JavascriptInterface` to prevent native bridge stripping.
-   - Configured keep rules for Firebase, Google Play Services, Biometric auth (`ee.forgr.biometric`), and Cordova plugins.
-   - Configured line number preservation (`-keepattributes SourceFile,LineNumberTable`) for accurate crash telemetry in Google Play Console.
-3. **Artifact Generation:**
-   - Successfully generated optimized production bundle: `senguntharinbusinessV7.7.aab` (33.00 MB).
-   - Successfully generated release APK: `senguntharinbusinessV7.7.apk` (32.47 MB).
+1. **Replaced JotForm Free-Tier Limit with Unlimited Native Form:**
+   - Removed external JotForm script and iframe (`https://form.jotform.com/jsform/263192106281048`), bypassing JotForm's 100 submissions/month cap and removing all third-party branding.
+   - Built a sleek, responsive native React form directly styled with SIB's Navy & Gold palette.
+2. **Backend Email Dispatch & Database Archival (`/public/contact-us`):**
+   - Created `POST /public/contact-us` in `SIB_backend` utilizing the existing Nodemailer Gmail transporter (`sibconnect2025@gmail.com`).
+   - Dispatches formatted HTML notification emails to `senguntharinbusinesserode@gmail.com` with sender details, date & time filled (IST), and direct email reply (`replyTo`).
+   - Added `await` to `transporter.sendMail()` to prevent premature execution freeze in Vercel Serverless Function runtime.
+   - Automatically stores all inquiries permanently in MongoDB (`Inquiry` model) to guarantee zero message loss.
+3. **Form Validation & Placeholder Refinement:**
+   - Added strict email format validation (RFC-compliant regex) and phone validation (supporting 10-digit mobile numbers with optional country code).
+   - Added interactive inline error states (`.form-input.has-error` and `.field-error-text`) with automatic error clearing on input.
+   - Removed all `e.g.` placeholder text across Name, Email, Phone, Business, and Message, replacing them with clean imperative labels.
+   - Synced the native contact form across Web (`main`), iOS (`feat/ios-build`), and Android (`SIB_app_android:main`).
 
