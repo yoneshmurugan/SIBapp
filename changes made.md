@@ -1224,7 +1224,7 @@ Tracks changes across the 3 production workspaces:
 #### Sync Status:
 - [x] **Web (`SIBapp:main`):** Built & Verified (`npm run build`)
 - [x] **Backend (`SIB_backend:main`):** Synced & Committed
-- [ ] **Mobile (`feat/ios-build` & `SIB_app_android`):** Pending manual verification before sync
+- [x] **Mobile (`feat/ios-build` & `SIB_app_android`):** Synced across iOS and Android
 
 #### Summary:
 1. **Replaced JotForm Free-Tier Limit with Unlimited Native Form:**
@@ -1235,4 +1235,9 @@ Tracks changes across the 3 production workspaces:
    - Dispatches formatted HTML notification emails to `senguntharinbusinesserode@gmail.com` with sender details, date & time filled (IST), and direct email reply (`replyTo`).
    - Added `await` to `transporter.sendMail()` to prevent premature execution freeze in Vercel Serverless Function runtime.
    - Automatically stores all inquiries permanently in MongoDB (`Inquiry` model) to guarantee zero message loss.
+3. **Form Validation & Placeholder Refinement:**
+   - Added strict email format validation (RFC-compliant regex) and phone validation (supporting 10-digit mobile numbers with optional country code).
+   - Added interactive inline error states (`.form-input.has-error` and `.field-error-text`) with automatic error clearing on input.
+   - Removed all `e.g.` placeholder text across Name, Email, Phone, Business, and Message, replacing them with clean imperative labels.
+   - Synced the native contact form across Web (`main`), iOS (`feat/ios-build`), and Android (`SIB_app_android:main`).
 

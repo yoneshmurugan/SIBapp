@@ -332,6 +332,24 @@ const styles = `
   box-shadow: 0 0 0 3px rgba(10, 35, 66, 0.12);
 }
 
+.form-input.has-error {
+  border-color: #ef4444 !important;
+  background-color: #fff8f8;
+}
+
+.form-input.has-error:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+.field-error-text {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin-top: 0.35rem;
+  font-weight: 500;
+  display: block;
+}
+
 textarea.form-input {
   resize: vertical;
   min-height: 120px;
@@ -517,12 +535,38 @@ function Contact() {
     message: ""
   });
 
+  const [fieldErrors, setFieldErrors] = useState({});
   const [status, setStatus] = useState("idle"); // 'idle' | 'loading' | 'success' | 'error'
   const [errorMessage, setErrorMessage] = useState("");
 
+  const validateEmail = (emailStr) => {
+    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailStr.trim());
+  };
+
+  const validatePhone = (phoneStr) => {
+    const clean = phoneStr.replace(/[\s\-()]/g, "");
+    // Indian 10-digit mobile number with optional +91 or 0 prefix
+    const indianRegex = /^(?:\+?91|0)?[6-9]\d{9}$/;
+    // International phone number with country code (10 to 15 digits)
+    const intlRegex = /^\+?[1-9]\d{9,14}$/;
+    return indianRegex.test(clean) || intlRegex.test(clean);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    let finalValue = value;
+
+    if (name === "phone") {
+      // Allow only digits, +, -, spaces, and parentheses
+      finalValue = value.replace(/[^0-9+\s\-()]/g, "");
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: finalValue }));
+
+    // Clear error for this field as user types
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+    }
     if (status === "error") {
       setStatus("idle");
       setErrorMessage("");
@@ -532,31 +576,41 @@ function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
+    const errors = {};
+
     if (!formData.name.trim()) {
-      setStatus("error");
-      setErrorMessage("Please enter your full name.");
-      return;
+      errors.name = "Please enter your full name.";
+    } else if (formData.name.trim().length < 2) {
+      errors.name = "Full name must be at least 2 characters.";
     }
 
-    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      setStatus("error");
-      setErrorMessage("Please enter a valid email address.");
-      return;
+    if (!formData.email.trim()) {
+      errors.email = "Please enter your email address.";
+    } else if (!validateEmail(formData.email)) {
+      errors.email = "Please enter a valid email address.";
     }
 
     if (!formData.phone.trim()) {
-      setStatus("error");
-      setErrorMessage("Please enter your phone number.");
-      return;
+      errors.phone = "Please enter your phone number.";
+    } else if (!validatePhone(formData.phone)) {
+      errors.phone = "Please enter a valid 10-digit mobile number.";
     }
 
     if (!formData.message.trim()) {
+      errors.message = "Please enter your message.";
+    } else if (formData.message.trim().length < 5) {
+      errors.message = "Message must be at least 5 characters.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       setStatus("error");
-      setErrorMessage("Please enter your message.");
+      const firstError = Object.values(errors)[0];
+      setErrorMessage(firstError);
       return;
     }
 
+    setFieldErrors({});
     setStatus("loading");
     setErrorMessage("");
 
@@ -775,10 +829,13 @@ function Contact() {
                         name="name" 
                         value={formData.name}
                         onChange={handleChange}
-                        className="form-input" 
-                        placeholder="e.g. Siva Kumar" 
+                        className={`form-input ${fieldErrors.name ? "has-error" : ""}`}
+                        placeholder="Enter your full name" 
                         required 
                       />
+                      {fieldErrors.name && (
+                        <span className="field-error-text">{fieldErrors.name}</span>
+                      )}
                     </div>
                     <div className="form-group">
                       <label htmlFor="email">
@@ -790,10 +847,13 @@ function Contact() {
                         name="email" 
                         value={formData.email}
                         onChange={handleChange}
-                        className="form-input" 
-                        placeholder="e.g. siva@example.com" 
+                        className={`form-input ${fieldErrors.email ? "has-error" : ""}`}
+                        placeholder="Enter your email address" 
                         required 
                       />
+                      {fieldErrors.email && (
+                        <span className="field-error-text">{fieldErrors.email}</span>
+                      )}
                     </div>
                   </div>
 
@@ -808,10 +868,13 @@ function Contact() {
                         name="phone" 
                         value={formData.phone}
                         onChange={handleChange}
-                        className="form-input" 
-                        placeholder="e.g. +91 98765 43210" 
+                        className={`form-input ${fieldErrors.phone ? "has-error" : ""}`}
+                        placeholder="Enter 10-digit mobile number" 
                         required 
                       />
+                      {fieldErrors.phone && (
+                        <span className="field-error-text">{fieldErrors.phone}</span>
+                      )}
                     </div>
                     <div className="form-group">
                       <label htmlFor="business">Business Name (Optional)</label>
@@ -822,7 +885,7 @@ function Contact() {
                         value={formData.business}
                         onChange={handleChange}
                         className="form-input" 
-                        placeholder="e.g. SIB Textiles" 
+                        placeholder="Enter your business name" 
                       />
                     </div>
                   </div>
@@ -836,11 +899,14 @@ function Contact() {
                       name="message" 
                       value={formData.message}
                       onChange={handleChange}
-                      className="form-input" 
+                      className={`form-input ${fieldErrors.message ? "has-error" : ""}`}
                       rows="4" 
-                      placeholder="How can we assist you or connect with your business?" 
+                      placeholder="Write your message here..." 
                       required 
                     />
+                    {fieldErrors.message && (
+                      <span className="field-error-text">{fieldErrors.message}</span>
+                    )}
                   </div>
 
                   <button 
