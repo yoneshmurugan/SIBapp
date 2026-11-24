@@ -1232,6 +1232,7 @@ Tracks changes across the 3 production workspaces:
    - Built a sleek, responsive native React form directly styled with SIB's Navy & Gold palette.
 2. **Backend Email Dispatch & Database Archival (`/public/contact-us`):**
    - Created `POST /public/contact-us` in `SIB_backend` utilizing the existing Nodemailer Gmail transporter (`sibconnect2025@gmail.com`).
-   - Dispatches formatted HTML notification emails to `senguntharinbusinesserode@gmail.com` with sender details and direct email reply (`replyTo`).
+   - Dispatches formatted HTML notification emails to `senguntharinbusinesserode@gmail.com` with sender details, date & time filled (IST), and direct email reply (`replyTo`).
+   - Added `await` to `transporter.sendMail()` to prevent premature execution freeze in Vercel Serverless Function runtime.
    - Automatically stores all inquiries permanently in MongoDB (`Inquiry` model) to guarantee zero message loss.
 
